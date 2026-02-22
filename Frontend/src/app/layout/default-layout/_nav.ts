@@ -11,6 +11,15 @@ export const navItems: INavData[] = [
     }
   },
   {
+    name: 'Buzón',
+    url: '/inbox',
+    iconComponent: { name: 'cil-envelope-open' },
+    badge: {
+      color: 'primary',
+      text: 'CRM'
+    }
+  },
+  {
     title: true,
     name: 'Theme'
   },

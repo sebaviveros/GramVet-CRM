@@ -1,0 +1,46 @@
+<c-card class="h-100">
+
+  <c-card-header>
+
+    Contacto
+
+  </c-card-header>
+
+  <c-card-body>
+
+    @if (state.selectedConversation()) {
+
+      <div class="contact-info">
+
+        <p>
+          <strong>Nombre:</strong><br>
+          {{ state.selectedConversation()?.clientName }}
+        </p>
+
+        <p>
+          <strong>Teléfono:</strong><br>
+          {{ state.selectedConversation()?.phone }}
+        </p>
+
+        <p>
+          <strong>Mascota:</strong><br>
+          {{ state.selectedConversation()?.petName }}
+        </p>
+
+        <p>
+          <strong>ID Cliente:</strong><br>
+          {{ state.selectedConversation()?.clientId }}
+        </p>
+
+      </div>
+
+    }
+    @else {
+
+      <p>Seleccione una conversación</p>
+
+    }
+
+  </c-card-body>
+
+</c-card>

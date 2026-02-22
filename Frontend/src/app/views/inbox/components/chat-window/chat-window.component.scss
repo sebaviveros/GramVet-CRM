@@ -1,0 +1,61 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+c-card {
+
+  height: 100%;
+
+  display: flex;
+
+  flex-direction: column;
+
+}
+
+.chat-body {
+
+  flex: 1;
+
+  overflow-y: auto;
+
+  padding: 16px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+
+}
+
+c-card-footer {
+
+  flex-shrink: 0;
+
+}
+
+.chat-body {
+  height: calc(100vh - 260px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.message {
+  padding: 8px;
+  border-radius: 8px;
+  max-width: 70%;
+}
+
+.message.sent {
+  background-color: #321fdb;
+  color: white;
+  align-self: flex-end;
+}
+
+.message.received {
+  background-color: #f1f1f1;
+  align-self: flex-start;
+}

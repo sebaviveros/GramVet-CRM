@@ -1,0 +1,72 @@
+<div class="container-fluid inbox-container">
+
+  <div class="row inbox-row">
+
+
+    <!-- Inbox Sidebar -->
+    <div class="col-2">
+
+      <app-inbox-sidebar></app-inbox-sidebar>
+
+    </div>
+
+
+    <!-- Conversations -->
+    <div class="col-3">
+
+      <app-conversations></app-conversations>
+
+    </div>
+
+
+    <!-- Chat -->
+    <div class="col">
+
+      <app-chat-window></app-chat-window>
+
+    </div>
+
+
+    <!-- Contact Panel (dinámico) -->
+    @if (state.isRightPanelOpen()) {
+
+      <div class="col-3">
+
+        @if (state.activeRightPanel() === 'contact') {
+
+          <app-contact-panel></app-contact-panel>
+
+        }
+
+        @if (state.activeRightPanel() === 'calls') {
+
+          <div class="p-3">
+            Historial llamadas
+          </div>
+
+        }
+
+        @if (state.activeRightPanel() === 'notes') {
+
+          <div class="p-3">
+            Notas
+          </div>
+
+        }
+
+      </div>
+
+    }
+
+
+    <!-- Toolbar (SIEMPRE último) -->
+    <div class="col-auto p-0">
+
+      <app-right-toolbar></app-right-toolbar>
+
+    </div>
+
+
+  </div>
+
+</div>

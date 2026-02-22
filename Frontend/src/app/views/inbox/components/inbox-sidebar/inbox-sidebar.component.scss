@@ -1,0 +1,12 @@
+.inbox-menu-item {
+  padding: 12px;
+  cursor: pointer;
+}
+
+.inbox-menu-item:hover {
+  background-color: #f5f5f5;
+}
+
+.inbox-menu-item.active {
+  background-color: #e7f1ff;
+}

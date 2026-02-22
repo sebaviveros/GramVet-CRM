@@ -1,0 +1,70 @@
+<c-card class="h-100">
+
+  <c-card-header>
+
+    @if (state.selectedConversation()) {
+
+      {{ state.selectedConversation()?.clientName }}
+
+    }
+    @else {
+
+      Seleccione una conversación
+
+    }
+
+  </c-card-header>
+
+
+  <c-card-body class="chat-body" #chatContainer>
+
+  @if (state.selectedConversation()) {
+
+    @for (message of state.selectedMessages(); track message.id) {
+
+      <div
+        class="message"
+        [class.sent]="message.sender === 'agent'"
+        [class.received]="message.sender === 'client'"
+      >
+
+        {{ message.text }}
+
+      </div>
+
+    }
+
+  }
+  @else {
+
+    <p>Seleccione una conversación</p>
+
+  }
+
+</c-card-body>
+
+
+  <c-card-footer>
+
+  <div class="d-flex gap-2">
+
+    <input
+      class="form-control"
+      placeholder="Escribir mensaje..."
+      [value]="messageInput()"
+      (input)="messageInput.set($any($event.target).value)"
+      (keyup.enter)="sendMessage()"
+    >
+
+    <button
+      class="btn btn-primary"
+      (click)="sendMessage()"
+    >
+      Enviar
+    </button>
+
+  </div>
+
+</c-card-footer>
+
+</c-card>

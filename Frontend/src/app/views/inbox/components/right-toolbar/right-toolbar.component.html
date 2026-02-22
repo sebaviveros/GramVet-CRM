@@ -1,0 +1,27 @@
+<div class="right-toolbar">
+
+  <button
+    class="toolbar-button"
+    [class.active]="state.activeRightPanel() === 'contact'"
+    (click)="state.setRightPanel('contact')"
+  >
+    👤
+  </button>
+
+  <button
+    class="toolbar-button"
+    [class.active]="state.activeRightPanel() === 'calls'"
+    (click)="state.setRightPanel('calls')"
+  >
+    📞
+  </button>
+
+  <button
+    class="toolbar-button"
+    [class.active]="state.activeRightPanel() === 'notes'"
+    (click)="state.setRightPanel('notes')"
+  >
+    📝
+  </button>
+
+</div>

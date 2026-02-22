@@ -1,0 +1,68 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+c-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+c-card-body {
+
+  flex: 1;
+
+  overflow-y: auto;
+
+}
+
+.conversations-container {
+  padding: 8px 0;
+}
+
+.conversation-item {
+
+  padding: 12px 16px;
+
+  cursor: pointer;
+
+  border-bottom: 1px solid #eee;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+
+  transition: background-color 0.15s ease;
+
+}
+
+.conversation-item:hover {
+
+  background-color: #f5f7ff;
+
+}
+
+.conversation-item.selected {
+
+  background-color: #e7ecff;
+
+  border-left: 4px solid #321fdb;
+
+}
+
+.conversation-name {
+
+  font-weight: 600;
+
+}
+
+.conversation-phone {
+
+  font-size: 12px;
+
+  color: #666;
+
+}
