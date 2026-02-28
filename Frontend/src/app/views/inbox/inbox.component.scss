@@ -73,3 +73,9 @@ c-card {
   height: 100%;
 
 }
+
+@media (max-width: 992px) {
+  .inbox-container {
+    padding-bottom: 70px;
+    }
+  }

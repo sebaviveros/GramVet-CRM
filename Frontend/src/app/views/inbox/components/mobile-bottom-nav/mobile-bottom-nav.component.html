@@ -1,0 +1,24 @@
+<div class="mobile-nav">
+
+  <button
+    [class.active]="state.mobileView() === 'inbox'"
+    (click)="state.setMobileView('inbox')">
+    📥
+    <span>Buzón</span>
+  </button>
+
+  <button
+    [class.active]="state.mobileView() === 'conversations'"
+    (click)="state.setMobileView('conversations')">
+    💬
+    <span>Convers.</span>
+  </button>
+
+  <button
+    [class.active]="state.mobileView() === 'chat'"
+    (click)="state.setMobileView('chat')">
+    🧑‍⚕️
+    <span>Chat</span>
+  </button>
+
+</div>

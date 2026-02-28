@@ -1,70 +1,93 @@
 <c-card class="h-100">
 
-  <c-card-header>
+  <!-- ================= HEADER ================= -->
+
+  <c-card-header
+  class="chat-header clickable"
+  (click)="openContactPanel()"
+>
+
+  @if (state.selectedConversation()) {
+
+    <div class="chat-user">
+
+      <button
+        class="back-button d-lg-none"
+        (click)="goBackToConversations($event)">
+        ←
+      </button>
+
+      <div class="avatar">
+        {{ state.selectedConversation()?.clientName?.charAt(0) }}
+      </div>
+
+      <div class="user-info">
+        <div class="name">
+          {{ state.selectedConversation()?.clientName }}
+        </div>
+        <div class="pet">
+          {{ state.selectedConversation()?.petName }}
+        </div>
+      </div>
+
+    </div>
+
+  }
+
+</c-card-header>
+
+
+  <!-- ================= BODY ================= -->
+
+  <c-card-body class="chat-body" #chatContainer>
 
     @if (state.selectedConversation()) {
 
-      {{ state.selectedConversation()?.clientName }}
+      @for (message of state.selectedMessages(); track message.id) {
+
+        <div
+          class="message"
+          [class.sent]="message.sender === 'agent'"
+          [class.received]="message.sender === 'client'"
+        >
+          {{ message.text }}
+        </div>
+
+      }
 
     }
     @else {
 
-      Seleccione una conversación
+      <p>Seleccione una conversación</p>
 
     }
 
-  </c-card-header>
+  </c-card-body>
 
 
-  <c-card-body class="chat-body" #chatContainer>
-
-  @if (state.selectedConversation()) {
-
-    @for (message of state.selectedMessages(); track message.id) {
-
-      <div
-        class="message"
-        [class.sent]="message.sender === 'agent'"
-        [class.received]="message.sender === 'client'"
-      >
-
-        {{ message.text }}
-
-      </div>
-
-    }
-
-  }
-  @else {
-
-    <p>Seleccione una conversación</p>
-
-  }
-
-</c-card-body>
-
+  <!-- ================= FOOTER ================= -->
 
   <c-card-footer>
 
-  <div class="d-flex gap-2">
+    <div class="d-flex gap-2">
 
-    <input
-      class="form-control"
-      placeholder="Escribir mensaje..."
-      [value]="messageInput()"
-      (input)="messageInput.set($any($event.target).value)"
-      (keyup.enter)="sendMessage()"
-    >
+      <input
+        class="form-control"
+        placeholder="Escribir mensaje..."
+        [value]="messageInput()"
+        (input)="messageInput.set($any($event.target).value)"
+        (keyup.enter)="sendMessage()"
+      >
 
-    <button
-      class="btn btn-primary"
-      (click)="sendMessage()"
-    >
-      Enviar
-    </button>
+      <button
+        class="btn btn-primary"
+        (click)="sendMessage()"
+      >
+        Enviar
+      </button>
 
-  </div>
+    </div>
 
-</c-card-footer>
+  </c-card-footer>
 
 </c-card>

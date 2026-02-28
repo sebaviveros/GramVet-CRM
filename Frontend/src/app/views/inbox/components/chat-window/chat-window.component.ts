@@ -31,7 +31,7 @@ export class ChatWindowComponent implements AfterViewInit {
 
   constructor() {
 
-    // Detecta cambios en mensajes
+    // auto scroll cuando cambian mensajes
     effect(() => {
 
       this.state.selectedMessages();
@@ -43,15 +43,15 @@ export class ChatWindowComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-
     this.scrollToBottom();
-
   }
+
+
+  // ================= SEND MESSAGE =================
 
   sendMessage() {
 
     const text = this.messageInput().trim();
-
     const conversation = this.state.selectedConversation();
 
     if (!text || !conversation) return;
@@ -59,7 +59,7 @@ export class ChatWindowComponent implements AfterViewInit {
     this.state.addMessage({
       id: Date.now(),
       conversationId: conversation.id,
-      text: text,
+      text,
       timestamp: new Date(),
       sender: 'agent'
     });
@@ -68,13 +68,37 @@ export class ChatWindowComponent implements AfterViewInit {
 
   }
 
+
+  // ================= MOBILE NAV =================
+
+  goBackToConversations(event: MouseEvent) {
+
+    // evita que el click abra contacto
+    event.stopPropagation();
+
+    this.state.setMobileView('conversations');
+
+  }
+
+
+  // ================= CONTACT PANEL =================
+
+  openContactPanel() {
+
+    this.state.openRightPanel('contact');
+
+  }
+
+
+  // ================= SCROLL =================
+
   private scrollToBottom() {
 
     if (!this.chatContainer) return;
 
-    const element = this.chatContainer.nativeElement;
+    const el = this.chatContainer.nativeElement;
 
-    element.scrollTop = element.scrollHeight;
+    el.scrollTop = el.scrollHeight;
 
   }
 

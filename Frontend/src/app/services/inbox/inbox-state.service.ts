@@ -1,9 +1,7 @@
 import { Injectable, signal, computed } from '@angular/core';
 
 
-// =========================
 // MODELOS
-// =========================
 
 export interface Conversation {
 
@@ -40,9 +38,7 @@ export interface Message {
 }
 
 
-// =========================
 // SERVICE
-// =========================
 
 @Injectable({
   providedIn: 'root'
@@ -50,9 +46,7 @@ export interface Message {
 export class InboxStateService {
 
 
-  // =========================
   // STATE PRINCIPAL
-  // =========================
 
   private _conversations = signal<Conversation[]>([]);
 
@@ -60,18 +54,18 @@ export class InboxStateService {
 
   private _messages = signal<Record<number, Message[]>>({});
 
+  private _mobileView =
+  signal<'inbox' | 'conversations' | 'chat'>('chat');
+  mobileView = computed(() => this._mobileView());
 
-  // =========================
-  // STATE PANEL DERECHO (NUEVO)
-  // =========================
+  // STATE PANEL DERECHO 
 
   private _activeRightPanel =
     signal<'contact' | 'calls' | 'notes' | null>('contact');
 
 
-  // =========================
   // COMPUTED
-  // =========================
+
 
   conversations = computed(() => this._conversations());
 
@@ -104,10 +98,13 @@ export class InboxStateService {
     this._activeRightPanel() !== null
   );
 
+  setMobileView(view: 'inbox' | 'conversations' | 'chat') {
 
-  // =========================
+  this._mobileView.set(view);
+
+}
+
   // ACTIONS CONVERSACIONES
-  // =========================
 
   setConversations(conversations: Conversation[]) {
 
@@ -154,9 +151,7 @@ export class InboxStateService {
   }
 
 
-  // =========================
   // ACTIONS PANEL DERECHO
-  // =========================
 
   setRightPanel(panel: 'contact' | 'calls' | 'notes') {
 
@@ -184,10 +179,8 @@ export class InboxStateService {
 
   }
 
-
-  // =========================
   // MOCK DATA
-  // =========================
+
 
   loadMockData() {
 

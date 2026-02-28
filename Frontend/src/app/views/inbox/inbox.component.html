@@ -4,54 +4,47 @@
 
 
     <!-- Inbox Sidebar -->
-    <div class="col-2">
-
+    <div
+      class="col-2 d-none d-lg-block"
+      [class.d-block]="state.mobileView() === 'inbox'"
+    >
       <app-inbox-sidebar></app-inbox-sidebar>
-
     </div>
 
 
     <!-- Conversations -->
-    <div class="col-3">
-
+    <div
+      class="col-12 col-lg-3"
+      [class.d-none]="state.mobileView() !== 'conversations'"
+    >
       <app-conversations></app-conversations>
-
     </div>
 
 
     <!-- Chat -->
-    <div class="col">
-
+    <div
+      class="col-12 col-lg"
+      [class.d-none]="state.mobileView() !== 'chat'"
+    >
       <app-chat-window></app-chat-window>
-
     </div>
 
 
-    <!-- Contact Panel (dinámico) -->
+    <!-- Contact Panel -->
     @if (state.isRightPanelOpen()) {
 
       <div class="col-3">
 
         @if (state.activeRightPanel() === 'contact') {
-
           <app-contact-panel></app-contact-panel>
-
         }
 
         @if (state.activeRightPanel() === 'calls') {
-
-          <div class="p-3">
-            Historial llamadas
-          </div>
-
+          <div class="p-3">Historial llamadas</div>
         }
 
         @if (state.activeRightPanel() === 'notes') {
-
-          <div class="p-3">
-            Notas
-          </div>
-
+          <div class="p-3">Notas</div>
         }
 
       </div>
@@ -59,14 +52,15 @@
     }
 
 
-    <!-- Toolbar (SIEMPRE último) -->
-    <div class="col-auto p-0">
-
+    <!-- Toolbar Desktop -->
+    <div class="col-auto p-0 d-none d-lg-block">
       <app-right-toolbar></app-right-toolbar>
-
     </div>
-
 
   </div>
 
 </div>
+
+
+<!-- MOBILE BOTTOM NAV -->
+<app-mobile-bottom-nav></app-mobile-bottom-nav>
