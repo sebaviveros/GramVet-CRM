@@ -1,0 +1,18 @@
+<svg width="685" height="116" viewBox="0 25 685 65" xmlns="http://www.w3.org/2000/svg">
+
+
+<!-- texto -->
+<text x="68" y="72" font-family="Segoe UI, Arial, sans-serif" font-size="70" font-weight="700">
+
+  <tspan fill="#38A169">GramVet</tspan>
+  <tspan fill="#1A1A1A">CRM</tspan>
+
+</text>
+
+<text x="535" y="75" font-family="Segoe UI, Arial, sans-serif" font-size="40" font-weight="500">
+
+  <tspan fill="#38A169">v0.1</tspan>
+
+</text>
+
+</svg>

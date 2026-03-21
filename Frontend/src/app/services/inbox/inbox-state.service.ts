@@ -55,16 +55,16 @@ export class InboxStateService {
   private _messages = signal<Record<number, Message[]>>({});
 
   private _mobileView =
-  signal<'inbox' | 'conversations' | 'chat'>('chat');
+    signal<'inbox' | 'conversations' | 'chat'>('chat');
   mobileView = computed(() => this._mobileView());
 
-  // STATE PANEL DERECHO 
+  // state panel derecho
 
   private _activeRightPanel =
     signal<'contact' | 'calls' | 'notes' | null>('contact');
 
 
-  // COMPUTED
+  // computed
 
 
   conversations = computed(() => this._conversations());
@@ -90,7 +90,7 @@ export class InboxStateService {
   });
 
 
-  // PANEL DERECHO COMPUTED
+  // panel derecho computed
 
   activeRightPanel = computed(() => this._activeRightPanel());
 
@@ -100,11 +100,11 @@ export class InboxStateService {
 
   setMobileView(view: 'inbox' | 'conversations' | 'chat') {
 
-  this._mobileView.set(view);
+    this._mobileView.set(view);
 
-}
+  }
 
-  // ACTIONS CONVERSACIONES
+  // actions conversations
 
   setConversations(conversations: Conversation[]) {
 
@@ -151,7 +151,7 @@ export class InboxStateService {
   }
 
 
-  // ACTIONS PANEL DERECHO
+  // actions panel derecho
 
   setRightPanel(panel: 'contact' | 'calls' | 'notes') {
 
@@ -179,7 +179,7 @@ export class InboxStateService {
 
   }
 
-  // MOCK DATA
+  // mock data
 
 
   loadMockData() {
@@ -191,10 +191,7 @@ export class InboxStateService {
         clientId: 1,
         clientName: 'Juan Pérez',
         phone: '+56912345678',
-        petName: 'Michi',
-        lastMessage: 'Hola',
-        lastMessageDate: new Date(),
-        unreadCount: 0
+        petName: 'Michi'
       },
 
       {
@@ -202,18 +199,161 @@ export class InboxStateService {
         clientId: 2,
         clientName: 'María González',
         phone: '+56987654321',
-        petName: 'Luna',
-        lastMessage: 'Gracias',
-        lastMessageDate: new Date(),
-        unreadCount: 2
+        petName: 'Luna'
+      },
+
+      {
+        id: 3,
+        clientId: 3,
+        clientName: 'Pedro Ramírez',
+        phone: '+56911112222',
+        petName: 'Rocky'
+      },
+
+      {
+        id: 4,
+        clientId: 4,
+        clientName: 'Camila Torres',
+        phone: '+56933334444',
+        petName: 'Simba'
+      },
+
+      {
+        id: 5,
+        clientId: 5,
+        clientName: 'Diego Soto',
+        phone: '+56955556666',
+        petName: 'Nala'
+      },
+
+      {
+        id: 6,
+        clientId: 6,
+        clientName: 'Valentina Cruz',
+        phone: '+56977778888',
+        petName: 'Toby'
+      },
+
+      {
+        id: 7,
+        clientId: 7,
+        clientName: 'Ricardo Fuentes',
+        phone: '+56922223333',
+        petName: 'Bobby'
+      },
+
+      {
+        id: 8,
+        clientId: 8,
+        clientName: 'Daniela Vega',
+        phone: '+56944445555',
+        petName: 'Lola'
+      },
+
+      {
+        id: 9,
+        clientId: 9,
+        clientName: 'Tomás Herrera',
+        phone: '+56966667777',
+        petName: 'Thor'
+      },
+
+      {
+        id: 10,
+        clientId: 10,
+        clientName: 'Paula Díaz',
+        phone: '+56999990000',
+        petName: 'Coco'
+      },
+
+      {
+        id: 11,
+        clientId: 11,
+        clientName: 'Luis Martínez',
+        phone: '+56912121212',
+        petName: 'Max'
+      },
+
+      {
+        id: 12,
+        clientId: 12,
+        clientName: 'Andrea Castillo',
+        phone: '+56934343434',
+        petName: 'Kira'
+      },
+
+      {
+        id: 13,
+        clientId: 13,
+        clientName: 'Felipe Soto',
+        phone: '+56945454545',
+        petName: 'Bruno'
+      },
+
+      {
+        id: 14,
+        clientId: 14,
+        clientName: 'Carolina Vega',
+        phone: '+56956565656',
+        petName: 'Luna'
+      },
+
+      {
+        id: 15,
+        clientId: 15,
+        clientName: 'Héctor Díaz',
+        phone: '+56967676767',
+        petName: 'Bobby'
+      },
+
+      {
+        id: 16,
+        clientId: 16,
+        clientName: 'Patricia López',
+        phone: '+56978787878',
+        petName: 'Nina'
+      },
+
+      {
+        id: 17,
+        clientId: 17,
+        clientName: 'Marco Silva',
+        phone: '+56989898989',
+        petName: 'Canelo'
+      },
+
+      {
+        id: 18,
+        clientId: 18,
+        clientName: 'Claudia Rojas',
+        phone: '+56923232323',
+        petName: 'Pelusa'
+      },
+
+      {
+        id: 19,
+        clientId: 19,
+        clientName: 'Javier Morales',
+        phone: '+56945454512',
+        petName: 'Zeus'
+      },
+
+      {
+        id: 20,
+        clientId: 20,
+        clientName: 'Natalia Paredes',
+        phone: '+56987871234',
+        petName: 'Maya'
       }
 
     ];
 
+
     this.setConversations(conversations);
 
-    this.setMessages(1, [
+    // ================= MENSAJES MOCK =================
 
+    this.setMessages(1, [
       {
         id: 1,
         conversationId: 1,
@@ -221,15 +361,42 @@ export class InboxStateService {
         timestamp: new Date(),
         sender: 'client'
       },
-
       {
         id: 2,
         conversationId: 1,
-        text: 'Hola, ¿en qué podemos ayudarte?',
+        text: 'Hola ¿en qué podemos ayudarte?',
         timestamp: new Date(),
         sender: 'agent'
+      },
+      {
+        id: 3,
+        conversationId: 1,
+        text: 'Quiero vacunar a mi gato',
+        timestamp: new Date(),
+        sender: 'client'
       }
+    ]);
 
+
+    this.setMessages(2, [
+      {
+        id: 1,
+        conversationId: 2,
+        text: 'Gracias por la atención',
+        timestamp: new Date(),
+        sender: 'client'
+      }
+    ]);
+
+
+    this.setMessages(3, [
+      {
+        id: 1,
+        conversationId: 3,
+        text: '¿Atienden hoy?',
+        timestamp: new Date(),
+        sender: 'client'
+      }
     ]);
 
   }

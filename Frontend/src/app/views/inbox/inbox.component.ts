@@ -29,18 +29,17 @@ export class InboxComponent implements OnInit {
 
   state = inject(InboxStateService);
 
+  isMobile = false;
+
   ngOnInit(): void {
 
-    // solo cargar mock si aún no existen conversaciones
     if (this.state.conversations().length === 0) {
       this.state.loadMockData();
     }
 
-    // vista inicial mobile correcta
-    const isMobile =
-      window.matchMedia('(max-width: 992px)').matches;
+    this.isMobile = window.matchMedia('(max-width: 992px)').matches;
 
-    if (isMobile) {
+    if (this.isMobile) {
       this.state.setMobileView('conversations');
     }
 

@@ -27,7 +27,7 @@ export class ChatWindowComponent implements AfterViewInit {
   messageInput = signal('');
 
   @ViewChild('chatContainer')
-  chatContainer!: ElementRef<HTMLDivElement>;
+chatContainer?: ElementRef<HTMLDivElement>;
 
   constructor() {
 
@@ -47,7 +47,7 @@ export class ChatWindowComponent implements AfterViewInit {
   }
 
 
-  // ================= SEND MESSAGE =================
+  // send message
 
   sendMessage() {
 
@@ -69,7 +69,7 @@ export class ChatWindowComponent implements AfterViewInit {
   }
 
 
-  // ================= MOBILE NAV =================
+  // mobile nav
 
   goBackToConversations(event: MouseEvent) {
 
@@ -81,7 +81,7 @@ export class ChatWindowComponent implements AfterViewInit {
   }
 
 
-  // ================= CONTACT PANEL =================
+  // contact panel
 
   openContactPanel() {
 
@@ -90,16 +90,16 @@ export class ChatWindowComponent implements AfterViewInit {
   }
 
 
-  // ================= SCROLL =================
+  // scroll
 
   private scrollToBottom() {
 
-    if (!this.chatContainer) return;
+  if (!this.chatContainer?.nativeElement) return;
 
-    const el = this.chatContainer.nativeElement;
+  const el = this.chatContainer.nativeElement;
 
-    el.scrollTop = el.scrollHeight;
+  el.scrollTop = el.scrollHeight;
 
-  }
+}
 
 }
