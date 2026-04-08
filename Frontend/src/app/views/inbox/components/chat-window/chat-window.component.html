@@ -3,38 +3,79 @@
   <!-- ================= HEADER ================= -->
 
   <c-card-header
-  class="chat-header clickable"
-  (click)="openContactPanel()"
->
+    class="chat-header clickable"
+    (click)="openContactPanel()"
+  >
 
-  @if (state.selectedConversation()) {
+    @if (state.selectedConversation()) {
 
-    <div class="chat-user">
+      <div class="chat-header-container">
 
-      <button
-        class="back-button d-lg-none"
-        (click)="goBackToConversations($event)">
-        ←
-      </button>
+        <!-- IZQUIERDA -->
+        <div class="chat-user">
 
-      <div class="avatar">
-        {{ state.selectedConversation()?.clientName?.charAt(0) }}
+          <button
+            class="back-button d-lg-none"
+            (click)="goBackToConversations($event)">
+            ←
+          </button>
+
+          <div class="avatar">
+            {{ state.selectedConversation()?.clientName?.charAt(0) }}
+          </div>
+
+          <div class="user-info">
+
+            <div class="name-row">
+
+              <span class="name">
+                {{ state.selectedConversation()?.clientName }}
+              </span>
+
+              <span
+                class="category-badge"
+                [ngClass]="state.selectedConversation()?.category"
+              >
+                {{
+                  state.selectedConversation()?.category === 'cliente' ? 'Cliente' :
+                  state.selectedConversation()?.category === 'nuevo' ? 'Nuevo Cliente' :
+                  state.selectedConversation()?.category === 'pendiente' ? 'Caso pendiente' :
+                  ''
+                }}
+              </span>
+
+            </div>
+
+            <div class="pet">
+              {{ state.selectedConversation()?.petName }}
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- DERECHA -->
+        <div class="chat-actions">
+
+          <select
+            [value]="state.selectedConversation()?.assignedVet"
+            (change)="state.setAssignedVet(state.selectedConversation()!.id, $any($event.target).value)"
+          >
+            <option value="">Asignar veterinario</option>
+
+            <option *ngFor="let vet of state.vets" [value]="vet">
+              {{ vet }}
+            </option>
+
+          </select>
+
+        </div>
+
       </div>
 
-      <div class="user-info">
-        <div class="name">
-          {{ state.selectedConversation()?.clientName }}
-        </div>
-        <div class="pet">
-          {{ state.selectedConversation()?.petName }}
-        </div>
-      </div>
+    }
 
-    </div>
-
-  }
-
-</c-card-header>
+  </c-card-header>
 
 
   <!-- ================= BODY ================= -->

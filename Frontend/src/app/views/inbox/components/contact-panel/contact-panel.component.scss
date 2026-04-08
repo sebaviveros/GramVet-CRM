@@ -1,3 +1,73 @@
-.contact-info p {
+.contact-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+
+  width: 100%;
+  height: 100%;
+
+  text-align: center;
+  padding-top: 20px;
+}
+
+/* AVATAR */
+
+.avatar {
+  width: 70px;
+  height: 70px;
+
+  border-radius: 50%;
+
+  background: #321fdb;
+  color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 28px;
+  font-weight: bold;
+
   margin-bottom: 12px;
+}
+
+/* TEXTO */
+
+.name {
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+.phone {
+  font-size: 14px;
+  color: #444;
+  margin-bottom: 6px;
+}
+
+.pet {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+/* ID pequeño abajo */
+
+.client-id {
+  font-size: 11px;
+  color: #999;
+}
+
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+c-card {
+  width: 100%;
+  height: 100%;
+  border-radius: 0; 
+  margin: 0;
 }

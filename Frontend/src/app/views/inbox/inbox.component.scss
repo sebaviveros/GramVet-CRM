@@ -1,9 +1,19 @@
 .inbox-container {
-  height: calc(100vh - 120px);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+   padding-top: 8px;
+    padding-bottom: 8px;
+    overflow: hidden;
 }
 
 .inbox-row {
-  height: 100%;
+    flex: 1;
+  display: flex;
+  overflow: hidden;
+  overflow-x: hidden;
 }
 
 .inbox-sidebar,
@@ -69,13 +79,108 @@ c-card {
 }
 
 .inbox-row > div {
-
   height: 100%;
-
+  display: flex;
+  flex-direction: column;
 }
+
+
 
 @media (max-width: 992px) {
   .inbox-container {
     padding-bottom: 70px;
+    width: 100vw;
+    margin-left: -12px;
+    
     }
   }
+
+  .mobile-views {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+
+.mobile-view {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+
+  top: 0;
+  left: 0;
+
+  transition: transform 0.3s ease;
+}
+
+.mobile-view.conversations {
+  transform: translateX(0);
+}
+
+.mobile-view.chat {
+  transform: translateX(100%);
+}
+
+.mobile-view.contact {
+  transform: translateX(200%);
+}
+
+
+.mobile-view.active {
+  transform: translateX(0);
+}
+
+
+.contact-panel-anim {
+  animation: slideInRight 0.25s ease;
+}
+
+.panel-opening {
+  animation: slideInRight 0.2s ease forwards;
+}
+
+.panel-closing {
+  animation: slideOutRight 0.2s ease forwards;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+}
+
+.inbox-container {
+  padding-right: 60px;
+}
+
+.inbox-layout {
+  display: flex;
+  align-items: stretch; 
+}
+
+/* TODAS LAS COLUMNAS */
+app-inbox-sidebar,
+app-conversations,
+app-chat-window,
+app-contact-panel,
+app-right-toolbar {
+  height: 100%;
+}
+

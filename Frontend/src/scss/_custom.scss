@@ -15,3 +15,109 @@
 .select-week .calendar-row.current {
   cursor: pointer;
 }
+
+body {
+  background: linear-gradient(
+    135deg,
+    #051F20 0%,
+    #0B2B26 40%,
+    #8EB69B 100%
+  ) !important;
+}
+
+.sidebar {
+  background: linear-gradient(
+    180deg,
+    #051F20,
+    #0B2B26
+  ) !important;
+}
+
+.sidebar .nav-link {
+  color: rgba(255,255,255,0.75);
+}
+
+.sidebar .nav-link:hover {
+  background-color: rgba(255,255,255,0.08);
+  color: #ffffff;
+}
+
+.sidebar .nav-link.active {
+  background-color: #235347;
+  color: white;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(8px);
+
+  border: none !important;
+  border-radius: 14px !important;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important;
+}
+
+
+@media (max-width: 992px) {
+
+  .body {
+    padding: 0 !important;
+  }
+
+  .body .container,
+  .body .container-fluid {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .wrapper {
+    padding: 0 !important;
+  }
+
+}
+
+:root {
+
+  /* HEADER */
+  --cui-header-bg: #0B2B26;
+  --cui-header-border-color: transparent;
+
+  /* BODY */
+  --cui-body-bg: transparent;
+
+  /* SIDEBAR (por si acaso) */
+  --cui-sidebar-bg: #0B2B26;
+
+}
+
+/* HEADER LIMPIO */
+.header {
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+/* A veces CoreUI mete esto */
+.header::after {
+  display: none !important;
+}
+
+/* TEXTO HEADER */
+.header,
+.header * {
+  color: rgba(255,255,255,0.85) !important;
+}
+
+/* HOVER */
+.header a:hover,
+.header svg:hover {
+  color: white !important;
+}
+
+.header {
+  background: linear-gradient(
+    90deg,
+    #051F20,
+    #0B2B26
+  ) !important;
+}

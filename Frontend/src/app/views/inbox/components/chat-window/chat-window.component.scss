@@ -9,52 +9,41 @@
 ========================= */
 
 c-card {
-
   height: 100%;
-
   display: flex;
   flex-direction: column;
-
 }
 
 
 /* =========================
-   HEADER (WhatsApp style)
+   HEADER (FIXED STRUCTURE)
 ========================= */
 
 .chat-header {
-
   display: flex;
   align-items: center;
   cursor: pointer;
-
 }
 
-.chat-user {
+/* 🔥 NUEVO CONTENEDOR PRINCIPAL */
+.chat-header-container {
+  display: flex;
+  justify-content: space-between; /* separa izquierda y derecha */
+  align-items: center;
+  width: 100%;
+}
 
+/* IZQUIERDA */
+.chat-user {
   display: flex;
   align-items: center;
   gap: 10px;
-  width: 100%;
-
 }
 
-.avatar {
-
-  width: 36px;
-  height: 36px;
-
-  border-radius: 50%;
-
-  background: #321fdb;
-  color: white;
-
+/* INFO TEXTO */
+.user-info {
   display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-weight: 600;
-
+  flex-direction: column;
 }
 
 .user-info .name {
@@ -66,24 +55,110 @@ c-card {
   color: #666;
 }
 
-.back-button {
+/* AVATAR */
+.avatar {
+  width: 36px;
+  height: 36px;
 
+  border-radius: 50%;
+
+  background: var(--cui-primary);
+  color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: 600;
+}
+
+/* BOTÓN BACK */
+.back-button {
   border: none;
   background: transparent;
 
   font-size: 18px;
   cursor: pointer;
+}
 
+/* NOMBRE + BADGE */
+.name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* BADGE BASE */
+.category-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+
+  border-radius: 10px;
+
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* COLORES */
+
+.category-badge.cliente {
+  background: rgba(35, 83, 71, 0.15);
+  color: #235347;
+}
+
+.category-badge.nuevo {
+  background: rgba(142, 182, 155, 0.3);
+  color: #163832;
+}
+
+.category-badge.pendiente {
+  background: rgba(255, 193, 7, 0.2);
+  color: #856404;
+}
+
+
+/* DERECHA (SELECT) */
+.chat-actions {
+  display: flex;
+  align-items: center;
+}
+
+.chat-actions select {
+
+  background: rgba(255,255,255,0.9);
+
+  border: none;
+  border-radius: 12px;
+
+  padding: 6px 10px;
+
+  font-size: 12px;
+
+  cursor: pointer;
+
+  outline: none;
+
+  transition: all 0.2s ease;
+}
+
+.chat-actions select:hover {
+  background: rgba(255,255,255,1);
+}
+
+/* DARK MODE HEADER */
+.header .chat-actions select {
+  background: rgba(255,255,255,0.2);
+  color: white;
 }
 
 
 /* =========================
-   CHAT BODY (SCROLL AREA)
+   CHAT BODY
 ========================= */
 
 .chat-body {
 
-  flex: 1;                /* ocupa espacio disponible */
+  flex: 1;
   overflow-y: auto;
 
   padding: 16px;
@@ -97,7 +172,7 @@ c-card {
 
 
 /* =========================
-   FOOTER INPUT
+   FOOTER
 ========================= */
 
 c-card-footer {
@@ -122,21 +197,29 @@ c-card-footer {
 }
 
 .message.sent {
+  background: linear-gradient(
+    135deg,
+    #235347,
+    #163832
+  ) !important;
 
-  background-color: #321fdb;
-  color: white;
+  color: white !important;
 
   align-self: flex-end;
-
 }
 
 .message.received {
 
-  background-color: #f1f1f1;
+  background-color: rgba(255,255,255,0.75);
 
   align-self: flex-start;
 
 }
+
+
+/* =========================
+   INTERACCIONES
+========================= */
 
 .clickable {
   cursor: pointer;
@@ -146,8 +229,24 @@ c-card-footer {
   background: rgba(0,0,0,0.03);
   border-radius: 6px;
 }
+
+.btn-primary {
+  background: linear-gradient(
+    135deg,
+    #235347,
+    #163832
+  ) !important;
+
+  border: none !important;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+
 /* =========================
-   MOBILE ADJUSTMENTS
+   MOBILE
 ========================= */
 
 @media (max-width: 992px) {

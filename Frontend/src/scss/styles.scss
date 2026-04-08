@@ -2,7 +2,18 @@
 
 // Import styles with default layout.
 @use "@coreui/coreui/scss/coreui" as * with (
-  $enable-deprecation-messages: false
+  $enable-deprecation-messages: false,
+  // 🎨 GramVet theme
+  $primary: #28c76f,
+  $secondary: #321fdb,
+
+  $success: #28c76f,
+  $info: #00cfe8,
+  $warning: #ff9f43,
+  $danger: #ea5455,
+
+  $body-bg: #f8f9fa,
+  $body-color: #212529
 );
 
 // Import Chart.js custom tooltips styles

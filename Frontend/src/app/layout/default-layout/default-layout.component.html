@@ -24,14 +24,12 @@
 <!--main-->
 <div class="wrapper d-flex flex-column min-vh-100">
   <!--app-header-->
-  <app-default-header [cShadowOnScroll]="'sm'" class="mb-4 d-print-none header header-sticky p-0 shadow-sm"
+  <app-default-header [cShadowOnScroll]="'sm'" class="d-print-none header header-sticky p-0 shadow-sm"
     position="sticky" sidebarId="sidebar1" />
   <!--app-body-->
-  <div class="body flex-grow-1">
-    <c-container breakpoint="lg" class="h-auto px-4">
-      <router-outlet />
-    </c-container>
-  </div>
-  <!--app footer-->
-  <app-default-footer />
+ <div class="body flex-grow-1 d-flex flex-column">
+  <div class="flex-grow-1 d-flex flex-column">
+    <router-outlet />
+  
+</div>
 </div>

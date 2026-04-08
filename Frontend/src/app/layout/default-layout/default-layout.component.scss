@@ -49,3 +49,18 @@
   object-fit: contain;
   display: block;
 }
+
+.right-toolbar {
+  height: 100%;
+}
+
+.wrapper {
+  height: 100vh; /* 🔥 CLAVE */
+  overflow: hidden; /* 🔥 evita scroll */
+}
+
+.body {
+  flex: 1; /* 🔥 ocupa todo lo que queda bajo header */
+  display: flex;
+  overflow: hidden;
+}

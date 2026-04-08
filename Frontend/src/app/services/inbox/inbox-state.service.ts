@@ -3,6 +3,9 @@ import { Injectable, signal, computed } from '@angular/core';
 
 // MODELOS
 
+
+
+
 export interface Conversation {
 
   id: number;
@@ -21,6 +24,11 @@ export interface Conversation {
 
   unreadCount?: number;
 
+  category?: 'cliente' | 'nuevo' | 'pendiente';
+
+  assignedVet?: string;
+
+  
 }
 
 export interface Message {
@@ -47,6 +55,7 @@ export class InboxStateService {
 
 
   // STATE PRINCIPAL
+  vets = ['Dr. Soto', 'Dra. Pérez', 'Dr. González'];
 
   private _conversations = signal<Conversation[]>([]);
 
@@ -55,7 +64,7 @@ export class InboxStateService {
   private _messages = signal<Record<number, Message[]>>({});
 
   private _mobileView =
-    signal<'inbox' | 'conversations' | 'chat'>('chat');
+  signal<'conversations' | 'chat' | 'contact'>('conversations');
   mobileView = computed(() => this._mobileView());
 
   // state panel derecho
@@ -98,11 +107,9 @@ export class InboxStateService {
     this._activeRightPanel() !== null
   );
 
-  setMobileView(view: 'inbox' | 'conversations' | 'chat') {
-
-    this._mobileView.set(view);
-
-  }
+  setMobileView(view: 'conversations' | 'chat' | 'contact') {
+  this._mobileView.set(view);
+}
 
   // actions conversations
 
@@ -150,6 +157,18 @@ export class InboxStateService {
 
   }
 
+  setAssignedVet(conversationId: number, vet: string) {
+
+  this._conversations.update(convs =>
+    convs.map(c =>
+      c.id === conversationId
+        ? { ...c, assignedVet: vet }
+        : c
+    )
+  );
+
+}
+
 
   // actions panel derecho
 
@@ -191,7 +210,9 @@ export class InboxStateService {
         clientId: 1,
         clientName: 'Juan Pérez',
         phone: '+56912345678',
-        petName: 'Michi'
+        petName: 'Michi',
+        category: 'cliente'
+        
       },
 
       {
@@ -199,7 +220,8 @@ export class InboxStateService {
         clientId: 2,
         clientName: 'María González',
         phone: '+56987654321',
-        petName: 'Luna'
+        petName: 'Luna',
+        category: 'nuevo'
       },
 
       {
@@ -207,7 +229,8 @@ export class InboxStateService {
         clientId: 3,
         clientName: 'Pedro Ramírez',
         phone: '+56911112222',
-        petName: 'Rocky'
+        petName: 'Rocky',
+        category: 'pendiente'
       },
 
       {

@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CardModule } from '@coreui/angular';
-import { InboxStateService } from 'src/app/services/inbox/inbox-state.service';
+import { InboxStateService } from '../../../../services/inbox/inbox-state.service';
 
 @Component({
   selector: 'app-conversations',
@@ -13,4 +13,9 @@ import { InboxStateService } from 'src/app/services/inbox/inbox-state.service';
 export class ConversationsComponent {
   
   state = inject(InboxStateService);
+
+  onSelectConversation(id: number) {
+  this.state.selectConversation(id);
+  this.state.setMobileView('chat'); // 🔥 clave
+}
 }

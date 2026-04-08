@@ -1,37 +1,32 @@
-<c-card class="h-100">
+<c-card class="h-100 contact-card">
+  <button
+  class="back-button d-lg-none"
+  (click)="goBackToChat()">
+  ← Volver
+</button>
 
-  <c-card-header>
-
-    Contacto
-
-  </c-card-header>
-
-  <c-card-body>
+  <c-card-body class="contact-body">
 
     @if (state.selectedConversation()) {
 
-      <div class="contact-info">
+      <div class="avatar">
+        {{ state.selectedConversation()?.clientName?.charAt(0) }}
+      </div>
 
-        <p>
-          <strong>Nombre:</strong><br>
-          {{ state.selectedConversation()?.clientName }}
-        </p>
+      <div class="name">
+        {{ state.selectedConversation()?.clientName }}
+      </div>
 
-        <p>
-          <strong>Teléfono:</strong><br>
-          {{ state.selectedConversation()?.phone }}
-        </p>
+      <div class="phone">
+        {{ state.selectedConversation()?.phone }}
+      </div>
 
-        <p>
-          <strong>Mascota:</strong><br>
-          {{ state.selectedConversation()?.petName }}
-        </p>
+      <div class="pet">
+        {{ state.selectedConversation()?.petName }}
+      </div>
 
-        <p>
-          <strong>ID Cliente:</strong><br>
-          {{ state.selectedConversation()?.clientId }}
-        </p>
-
+      <div class="client-id">
+        ID: {{ state.selectedConversation()?.clientId }}
       </div>
 
     }

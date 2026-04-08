@@ -31,6 +31,8 @@ export class InboxComponent implements OnInit {
 
   isMobile = false;
 
+  isClosingPanel = false;
+
   ngOnInit(): void {
 
     if (this.state.conversations().length === 0) {
@@ -44,5 +46,8 @@ export class InboxComponent implements OnInit {
     }
 
   }
+
+
+ 
 
 }

@@ -1,41 +1,29 @@
 <div class="container-fluid inbox-container">
 
-  <div class="row inbox-row">
+  <!-- ================= DESKTOP ================= -->
+  <div class="row inbox-row d-none d-lg-flex">
 
     <!-- sidebar -->
-
-    <div
-      class="col-2 d-none d-lg-block"
-    >
+    <div class="col-2">
       <app-inbox-sidebar></app-inbox-sidebar>
     </div>
 
-
     <!-- conversations -->
-
-    <div
-      class="col-12 col-lg-3"
-      [class.d-none]="state.mobileView() !== 'conversations' && isMobile"
-    >
+    <div class="col-3">
       <app-conversations></app-conversations>
     </div>
 
-
     <!-- chat -->
-
-    <div
-      class="col-12 col-lg"
-      [class.d-none]="state.mobileView() !== 'chat' && isMobile"
-    >
+    <div class="col">
       <app-chat-window></app-chat-window>
     </div>
 
-
     <!-- contact panel -->
+    @if (state.isRightPanelOpen() || isClosingPanel) {
 
-    @if (state.isRightPanelOpen()) {
-
-      <div class="col-3">
+      <div class="col-3 contact-panel-anim"
+      [class.panel-closing]="isClosingPanel"
+       [class.panel-opening]="!isClosingPanel">
 
         @if (state.activeRightPanel() === 'contact') {
           <app-contact-panel></app-contact-panel>
@@ -53,18 +41,32 @@
 
     }
 
-
     <!-- right toolbar -->
-
-    <div class="col-auto p-0 d-none d-lg-block">
+    <div class="col-auto p-0">
       <app-right-toolbar></app-right-toolbar>
     </div>
 
   </div>
 
+  <!-- ================= MOBILE ================= -->
+  <div class="mobile-views d-lg-none">
+
+  <div class="mobile-view conversations"
+       [class.active]="state.mobileView() === 'conversations'">
+    <app-conversations></app-conversations>
+  </div>
+
+  <div class="mobile-view chat"
+       [class.active]="state.mobileView() === 'chat'">
+    <app-chat-window></app-chat-window>
+  </div>
+
+  <div class="mobile-view contact"
+       [class.active]="state.mobileView() === 'contact'">
+    <app-contact-panel></app-contact-panel>
+  </div>
+
 </div>
 
-
-<!-- mobile -->
-
+<!-- MOBILE NAV -->
 <app-mobile-bottom-nav></app-mobile-bottom-nav>

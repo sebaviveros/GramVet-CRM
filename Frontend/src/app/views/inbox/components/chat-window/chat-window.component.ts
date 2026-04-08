@@ -87,6 +87,10 @@ chatContainer?: ElementRef<HTMLDivElement>;
 
     this.state.openRightPanel('contact');
 
+    if (window.innerWidth <= 992) {
+    this.state.setMobileView('contact'); // 🔥 clave
+  }
+
   }
 
 
@@ -101,5 +105,7 @@ chatContainer?: ElementRef<HTMLDivElement>;
   el.scrollTop = el.scrollHeight;
 
 }
+
+
 
 }

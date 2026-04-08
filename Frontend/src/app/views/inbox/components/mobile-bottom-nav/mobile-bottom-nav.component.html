@@ -1,11 +1,11 @@
 <div class="mobile-nav">
 
   <button
-    [class.active]="state.mobileView() === 'inbox'"
-    (click)="state.setMobileView('inbox')">
-    📥
-    <span>Buzón</span>
-  </button>
+  [class.active]="state.mobileView() === 'conversations'"
+  (click)="state.setMobileView('conversations')">
+  📥
+  <span>Buzón</span>
+</button>
 
   <button
     [class.active]="state.mobileView() === 'conversations'"

@@ -8,5 +8,6 @@
 }
 
 .inbox-menu-item.active {
-  background-color: #e7f1ff;
+  background-color: rgba(var(--cui-primary-rgb), 0.1);
+  color: var(--cui-primary);
 }

@@ -1,41 +1,57 @@
 .right-toolbar {
 
-  width: 50px;
+  width: 60px;
 
-  background: #f8f9fa;
-
-  border-left: 1px solid #ddd;
+  background: linear-gradient(
+    180deg,
+    #051F20,
+    #0B2B26
+  );
 
   display: flex;
-
   flex-direction: column;
 
   align-items: center;
+  justify-content: flex-start;
 
   padding-top: 10px;
 
+  height: 100%; /* 🔥 clave */
 }
+
+/* BOTONES */
 
 .toolbar-button {
 
-  width: 40px;
-
-  height: 40px;
+  width: 42px;
+  height: 42px;
 
   border: none;
-
   background: transparent;
 
   cursor: pointer;
 
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 
+  color: rgba(255,255,255,0.7);
+
+  transition: all 0.2s ease;
 }
 
+/* HOVER */
+.toolbar-button:hover {
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border-radius: 8px;
+}
+
+/* ACTIVO */
 .toolbar-button.active {
+  background: #235347;
+  color: white;
+  border-radius: 8px;
+}
 
-  background: #e7ecff;
-
-  border-radius: 6px;
-
+.body {
+  height: calc(100vh - 60px);
 }

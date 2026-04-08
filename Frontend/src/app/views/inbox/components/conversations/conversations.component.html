@@ -9,20 +9,34 @@
     @for (conversation of state.conversations(); track conversation.id) {
 
       <div
-        class="conversation-item"
-        [class.selected]="state.selectedConversation()?.id === conversation.id"
-        (click)="state.selectConversation(conversation.id)"
-      >
+  class="conversation-item"
+  [class.selected]="state.selectedConversation()?.id === conversation.id"
+  (click)="state.selectConversation(conversation.id)"
+>
 
-        <div class="conversation-name">
-          {{ conversation.clientName }}
-        </div>
+  <div class="conversation-row">
 
-        <div class="conversation-phone">
-          {{ conversation.phone }}
-        </div>
+    <!-- AVATAR -->
+    <div class="avatar">
+      {{ conversation.clientName.charAt(0) }}
+    </div>
 
+    <!-- INFO -->
+    <div class="conversation-content">
+
+      <div class="conversation-name">
+        {{ conversation.clientName }}
       </div>
+
+      <div class="conversation-phone">
+        {{ conversation.phone }}
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
 
     }
 

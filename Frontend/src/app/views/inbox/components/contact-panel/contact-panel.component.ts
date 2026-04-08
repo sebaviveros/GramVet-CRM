@@ -15,4 +15,9 @@ export class ContactPanelComponent {
 
   state = inject(InboxStateService);
 
+
+  goBackToChat() {
+  this.state.setMobileView('chat');
+}
+
 }

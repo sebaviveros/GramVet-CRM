@@ -1,0 +1,27 @@
+.header {
+  background: linear-gradient(
+    90deg,
+    #051F20,
+    #0B2B26
+  ) !important;
+
+  border-bottom: none !important;
+}
+
+/* LINKS */
+.header .nav-link {
+  color: rgba(255,255,255,0.8);
+}
+
+.header .nav-link:hover {
+  color: white;
+}
+
+/* ICONOS */
+.header svg {
+  color: rgba(255,255,255,0.8);
+}
+
+.header svg:hover {
+  color: white;
+}
