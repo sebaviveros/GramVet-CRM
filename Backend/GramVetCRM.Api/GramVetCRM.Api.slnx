@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="GramVetCRM.Api/GramVetCRM.Api.csproj" />
+  <Project Path="GramVetCRM.Model/GramVetCRM.Model.csproj" />
+  <Project Path="GramVetCRM.Repository/GramVetCRM.Repository.csproj" />
+  <Project Path="GramVetCRM.Service/GramVetCRM.Service.csproj" />
+</Solution>
