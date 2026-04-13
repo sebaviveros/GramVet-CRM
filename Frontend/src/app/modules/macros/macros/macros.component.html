@@ -1,0 +1,88 @@
+<c-card class="h-100">
+
+  <c-card-header>
+    <strong>Respuestas rápidas</strong>
+  </c-card-header>
+
+  <c-card-body>
+
+    <!-- ================= FORM ================= -->
+
+    <div class="macro-form">
+
+      <div class="form-row">
+
+        <!-- MACRO -->
+        <div class="macro-input">
+
+          <span class="prefix">/</span>
+
+          <input
+            class="form-control"
+            placeholder="macro"
+          />
+
+        </div>
+
+        <!-- TEXTO -->
+        <input
+          class="form-control"
+          placeholder="Texto de respuesta"
+        />
+
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary">
+          Crear macro
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ================= LISTADO ================= -->
+
+    <div class="macro-list">
+
+      <h6>Respuestas rápidas existentes</h6>
+
+      <div class="table-container">
+
+        <table class="table table-borderless">
+
+          <thead>
+            <tr>
+              <th>Macro</th>
+              <th>Respuesta</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <!-- MOCK -->
+            <tr>
+              <td><span class="macro-tag">/hola</span></td>
+              <td>Hola! ¿En qué podemos ayudarte?</td>
+            </tr>
+
+            <tr>
+              <td><span class="macro-tag">/horario</span></td>
+              <td>Nuestro horario es de 9 a 18 hrs</td>
+            </tr>
+
+            <tr>
+              <td><span class="macro-tag">/direccion</span></td>
+              <td>Estamos ubicados en Av. Principal 123</td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </c-card-body>
+
+</c-card>

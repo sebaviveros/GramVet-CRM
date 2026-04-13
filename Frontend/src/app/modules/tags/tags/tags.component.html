@@ -1,0 +1,99 @@
+<c-card class="h-100">
+
+  <c-card-header>
+    <strong>Gestión de Etiquetas</strong>
+  </c-card-header>
+
+  <c-card-body>
+
+    <!-- ================= FORM ================= -->
+
+    <div class="tag-form">
+
+      <div class="form-row">
+
+        <input
+          class="form-control"
+          placeholder="Nombre de etiqueta"
+        />
+
+        <input
+          class="form-control"
+          placeholder="Descripción"
+        />
+
+      </div>
+
+      <div class="form-row">
+
+        <input
+          type="color"
+          class="color-picker"
+        />
+
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary">
+          Crear etiqueta
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ================= LISTADO ================= -->
+
+    <div class="tag-list">
+
+      <h6>Etiquetas existentes</h6>
+
+      <div class="table-container">
+
+        <table class="table table-borderless">
+
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th>Color</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <!-- MOCK -->
+            <tr>
+              <td>Cliente</td>
+              <td>Cliente habitual</td>
+              <td>
+                <span class="color-badge" style="background:#235347"></span>
+              </td>
+            </tr>
+
+            <tr>
+              <td>Nuevo Cliente</td>
+              <td>Primera atención</td>
+              <td>
+                <span class="color-badge" style="background:#8EB69B"></span>
+              </td>
+            </tr>
+
+            <tr>
+              <td>Caso Pendiente</td>
+              <td>Requiere seguimiento</td>
+              <td>
+                <span class="color-badge" style="background:#FFC107"></span>
+              </td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </c-card-body>
+
+</c-card>

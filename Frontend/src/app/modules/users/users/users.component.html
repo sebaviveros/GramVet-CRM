@@ -1,0 +1,104 @@
+<c-card class="h-100">
+
+  <c-card-header>
+    <strong>Gestión de Usuarios</strong>
+  </c-card-header>
+
+  <c-card-body>
+
+    <!-- ================= FORM ================= -->
+
+    <div class="user-form">
+
+      <div class="form-row">
+
+        <input
+          class="form-control"
+          placeholder="Nombre"
+        />
+
+        <input
+          class="form-control"
+          placeholder="Username"
+        />
+
+      </div>
+
+      <div class="form-row">
+
+        <input
+          class="form-control"
+          placeholder="Correo"
+        />
+
+        <select class="form-control">
+          <option value="">Seleccionar rol</option>
+          <option>Administrador</option>
+          <option>Secretario</option>
+          <option>Veterinario</option>
+        </select>
+
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary">
+          Crear usuario
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ================= LISTADO ================= -->
+
+    <div class="user-list">
+
+      <h6>Usuarios existentes</h6>
+
+      <div class="table-container">
+
+        <table class="table table-borderless">
+
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Username</th>
+              <th>Correo</th>
+              <th>Rol</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <!-- MOCK -->
+            <tr>
+              <td>Juan Pérez</td>
+              <td>jperez</td>
+              <td>juan@email.com</td>
+              <td>Administrador</td>
+            </tr>
+
+            <tr>
+              <td>María López</td>
+              <td>mlopez</td>
+              <td>maria@email.com</td>
+              <td>Veterinario</td>
+            </tr>
+
+            <tr>
+              <td>Carlos Soto</td>
+              <td>csoto</td>
+              <td>carlos@email.com</td>
+              <td>Secretario</td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </c-card-body>
+
+</c-card>

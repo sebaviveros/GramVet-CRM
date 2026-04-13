@@ -1,11 +1,7 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
-  {
-    path: '',
-    redirectTo: 'dashboard',
-    pathMatch: 'full'
-  },
+  
   {
     path: '',
     loadComponent: () => import('./layout').then(m => m.DefaultLayoutComponent),
@@ -13,6 +9,23 @@ export const routes: Routes = [
       title: 'Home'
     },
     children: [
+      {
+      path: '',
+      redirectTo: 'inbox',
+      pathMatch: 'full'
+    },
+      {
+        path: 'users',
+        loadComponent: () => import('./modules/users/users/users.component').then(m => m.UsersComponent)
+      },
+      {
+        path: 'tags',
+        loadComponent: () => import('./modules/tags/tags/tags.component').then(m => m.TagsComponent)
+      },
+      {
+        path: 'macros',
+        loadComponent: () => import('./modules/macros/macros/macros.component').then(m => m.MacrosComponent)
+      },
       {
         path: 'dashboard',
         loadChildren: () => import('./views/dashboard/routes').then((m) => m.routes)
