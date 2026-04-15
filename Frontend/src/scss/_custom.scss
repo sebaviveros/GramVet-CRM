@@ -5,7 +5,7 @@
 
 // custom tweaks for scrollbar styling (wip)
 @use "scrollbar";
-
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
  // custom calendar today cell color
 .calendar-cell.today {
   --cui-calendar-cell-today-color: var(--cui-info) !important;
@@ -17,12 +17,7 @@
 }
 
 body {
-  background: linear-gradient(
-    135deg,
-    #051F20 0%,
-    #0B2B26 40%,
-    #8EB69B 100%
-  ) !important;
+  background: #0B2B26 !important;
 }
 
 .sidebar {
@@ -121,3 +116,4 @@ body {
     #0B2B26
   ) !important;
 }
+

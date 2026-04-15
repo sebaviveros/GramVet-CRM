@@ -1,102 +1,214 @@
 <c-card class="h-100">
 
-  <c-card-header>
-    <strong>Gestión de Usuarios</strong>
+  <!-- ================= HEADER ================= -->
+
+  <c-card-header class="card-header-custom">
+    <div class="header-left">
+      <div class="header-icon">
+        <!-- Users icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <div class="header-text">
+        <span class="header-title">Gestión de usuarios</span>
+        <span class="header-subtitle">GramVet CRM</span>
+      </div>
+    </div>
+    <span class="badge-count">{{ users.length }} usuarios</span>
   </c-card-header>
 
-  <c-card-body>
+  <c-card-body class="card-body-custom">
 
     <!-- ================= FORM ================= -->
 
+    <p class="section-label">Nuevo usuario</p>
+
     <div class="user-form">
 
-      <div class="form-row">
+      <div class="form-grid">
 
-        <input
-          class="form-control"
-          placeholder="Nombre"
-        />
+        <div class="field-wrap">
+          <label class="field-label">Nombre completo</label>
+          <input
+            class="field-input"
+            type="text"
+            placeholder="Ej. Ana González"
+          />
+        </div>
 
-        <input
-          class="form-control"
-          placeholder="Username"
-        />
+        <div class="field-wrap">
+          <label class="field-label">Nombre de usuario</label>
+          <input
+            class="field-input"
+            type="text"
+            placeholder="Ej. agonzalez"
+          />
+        </div>
 
-      </div>
+        <div class="field-wrap">
+          <label class="field-label">Correo electrónico</label>
+          <input
+            class="field-input"
+            type="email"
+            placeholder="correo@clinica.com"
+          />
+        </div>
 
-      <div class="form-row">
-
-        <input
-          class="form-control"
-          placeholder="Correo"
-        />
-
-        <select class="form-control">
-          <option value="">Seleccionar rol</option>
-          <option>Administrador</option>
-          <option>Secretario</option>
-          <option>Veterinario</option>
-        </select>
+        <div class="field-wrap">
+          <label class="field-label">Rol</label>
+          <select class="field-input field-select">
+            <option value="" disabled selected>Seleccionar rol</option>
+            <option value="admin">Administrador</option>
+            <option value="secretary">Secretario</option>
+            <option value="vet">Veterinario</option>
+          </select>
+        </div>
 
       </div>
 
       <div class="form-actions">
-        <button class="btn btn-primary">
+        <button class="btn-cancel">Cancelar</button>
+        <button class="btn-create">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
           Crear usuario
         </button>
       </div>
 
     </div>
 
+    <!-- ================= DIVIDER ================= -->
+
+    <div class="section-divider"></div>
+
     <!-- ================= LISTADO ================= -->
 
-    <div class="user-list">
-
-      <h6>Usuarios existentes</h6>
-
-      <div class="table-container">
-
-        <table class="table table-borderless">
-
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Username</th>
-              <th>Correo</th>
-              <th>Rol</th>
-            </tr>
-          </thead>
-
-          <tbody>
-
-            <!-- MOCK -->
-            <tr>
-              <td>Juan Pérez</td>
-              <td>jperez</td>
-              <td>juan@email.com</td>
-              <td>Administrador</td>
-            </tr>
-
-            <tr>
-              <td>María López</td>
-              <td>mlopez</td>
-              <td>maria@email.com</td>
-              <td>Veterinario</td>
-            </tr>
-
-            <tr>
-              <td>Carlos Soto</td>
-              <td>csoto</td>
-              <td>carlos@email.com</td>
-              <td>Secretario</td>
-            </tr>
-
-          </tbody>
-
-        </table>
-
+    <div class="list-header">
+      <p class="section-label" style="margin-bottom: 0">Usuarios existentes</p>
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input class="search-input" placeholder="Buscar..." />
       </div>
+    </div>
 
+    <div class="table-container">
+      <table class="user-table">
+
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Username</th>
+            <th>Correo</th>
+            <th>Rol</th>
+            <th class="th-actions">Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <!-- Reemplazar con *ngFor="let user of users" -->
+
+          <tr>
+            <td>
+              <div class="name-cell">
+                <div class="avatar av-green">JP</div>
+                <span class="name-text">Juan Pérez</span>
+              </div>
+            </td>
+            <td><span class="mono-text">jperez</span></td>
+            <td><span class="mono-text">juan&#64;email.com</span></td>
+            <td><span class="role-pill role-admin">Administrador</span></td>
+            <td>
+              <div class="actions-cell">
+                <button class="action-btn" title="Editar">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </button>
+                <button class="action-btn" title="Eliminar">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                    <path d="M10 11v6"/><path d="M14 11v6"/>
+                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <div class="name-cell">
+                <div class="avatar av-blue">ML</div>
+                <span class="name-text">María López</span>
+              </div>
+            </td>
+            <td><span class="mono-text">mlopez</span></td>
+            <td><span class="mono-text">maria&#64;email.com</span></td>
+            <td><span class="role-pill role-vet">Veterinario</span></td>
+            <td>
+              <div class="actions-cell">
+                <button class="action-btn" title="Editar">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </button>
+                <button class="action-btn" title="Eliminar">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                    <path d="M10 11v6"/><path d="M14 11v6"/>
+                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <div class="name-cell">
+                <div class="avatar av-teal">CS</div>
+                <span class="name-text">Carlos Soto</span>
+              </div>
+            </td>
+            <td><span class="mono-text">csoto</span></td>
+            <td><span class="mono-text">carlos&#64;email.com</span></td>
+            <td><span class="role-pill role-sec">Secretario</span></td>
+            <td>
+              <div class="actions-cell">
+                <button class="action-btn" title="Editar">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </button>
+                <button class="action-btn" title="Eliminar">
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                    <path d="M10 11v6"/><path d="M14 11v6"/>
+                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
     </div>
 
   </c-card-body>

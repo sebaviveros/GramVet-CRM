@@ -1,41 +1,61 @@
 <c-card class="h-100">
 
-  <c-card-header>
-    <strong>Gestión de Etiquetas</strong>
+  <c-card-header class="component-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+          <line x1="7" y1="7" x2="7.01" y2="7"/>
+        </svg>
+      </div>
+      <div class="header-text">
+        <strong>Gestión de Etiquetas</strong>
+        <span class="header-sub">GramVet CRM</span>
+      </div>
+    </div>
+    <span class="tag-count-badge">{{ tags.length }} etiquetas</span>
   </c-card-header>
 
   <c-card-body>
 
     <!-- ================= FORM ================= -->
 
+    <p class="section-label">Nueva etiqueta</p>
+
     <div class="tag-form">
 
       <div class="form-row">
-
         <input
           class="form-control"
           placeholder="Nombre de etiqueta"
+          [(ngModel)]="newTag.name"
         />
-
         <input
           class="form-control"
-          placeholder="Descripción"
+          placeholder="Descripción (opcional)"
+          [(ngModel)]="newTag.desc"
         />
-
       </div>
 
-      <div class="form-row">
-
-        <input
-          type="color"
-          class="color-picker"
-        />
-
+      <div class="form-row color-row">
+        <span class="color-label">Color</span>
+        <div class="color-picker-wrap">
+          <div class="color-preview" [style.background]="newTag.color">
+            <input
+              type="color"
+              [(ngModel)]="newTag.color"
+            />
+          </div>
+          <span class="color-hex">{{ newTag.color }}</span>
+        </div>
       </div>
 
       <div class="form-actions">
-        <button class="btn btn-primary">
-          Crear etiqueta
+        <button class="btn btn-cancel" (click)="clearForm()">
+          Cancelar
+        </button>
+        <button class="btn btn-primary" (click)="createTag()">
+          + Crear etiqueta
         </button>
       </div>
 
@@ -45,51 +65,64 @@
 
     <div class="tag-list">
 
-      <h6>Etiquetas existentes</h6>
+      <div class="list-header">
+        <p class="section-label">Etiquetas existentes</p>
+        <div class="search-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input
+            class="form-control search-input"
+            placeholder="Buscar..."
+            [(ngModel)]="searchTerm"
+          />
+        </div>
+      </div>
 
       <div class="table-container">
-
         <table class="table table-borderless">
-
           <thead>
             <tr>
-              <th>Nombre</th>
+              <th>Etiqueta</th>
               <th>Descripción</th>
               <th>Color</th>
+              <th class="th-actions">Acciones</th>
             </tr>
           </thead>
-
           <tbody>
-
-            <!-- MOCK -->
-            <tr>
-              <td>Cliente</td>
-              <td>Cliente habitual</td>
+            <tr *ngFor="let tag of filteredTags">
               <td>
-                <span class="color-badge" style="background:#235347"></span>
+                <span class="tag-chip" [style.background]="tag.color + '22'" [style.color]="tag.color">
+                  <span class="tag-dot" [style.background]="tag.color"></span>
+                  {{ tag.name }}
+                </span>
+              </td>
+              <td class="td-desc">{{ tag.desc || '—' }}</td>
+              <td>
+                <span class="color-badge" [style.background]="tag.color"></span>
+              </td>
+              <td class="td-actions">
+                <button class="icon-btn" title="Editar" (click)="editTag(tag)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </button>
+                <button class="icon-btn icon-btn--danger" title="Eliminar" (click)="deleteTag(tag.id)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                    <path d="M10 11v6M14 11v6"/>
+                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                  </svg>
+                </button>
               </td>
             </tr>
-
-            <tr>
-              <td>Nuevo Cliente</td>
-              <td>Primera atención</td>
-              <td>
-                <span class="color-badge" style="background:#8EB69B"></span>
-              </td>
+            <tr *ngIf="filteredTags.length === 0">
+              <td colspan="4" class="empty-state">Sin resultados</td>
             </tr>
-
-            <tr>
-              <td>Caso Pendiente</td>
-              <td>Requiere seguimiento</td>
-              <td>
-                <span class="color-badge" style="background:#FFC107"></span>
-              </td>
-            </tr>
-
           </tbody>
-
         </table>
-
       </div>
 
     </div>
