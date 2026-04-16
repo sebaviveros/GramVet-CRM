@@ -1,13 +1,47 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.sidebar-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #ffffff;
+  border-radius: 14px;
+  margin-left: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.07);
+}
+
+.sidebar-header {
+  padding: 20px 16px 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.sidebar-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a2e25;
+}
+
 .inbox-menu-item {
-  padding: 12px;
+  padding: 11px 16px;
   cursor: pointer;
+  font-size: 14px;
+  color: #3a5045;
+  border-left: 3px solid transparent;
+  transition: all 0.15s ease;
 }
 
 .inbox-menu-item:hover {
-  background-color: #f5f5f5;
+  background-color: rgba(35, 83, 71, 0.07);
+  color: #235347;
 }
 
 .inbox-menu-item.active {
-  background-color: rgba(var(--cui-primary-rgb), 0.1);
-  color: var(--cui-primary);
+  background-color: rgba(35, 83, 71, 0.10);
+  color: #235347;
+  font-weight: 600;
+  border-left: 3px solid #235347;
 }

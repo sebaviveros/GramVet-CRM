@@ -20,4 +20,28 @@ import {
   templateUrl: './users.component.html',
   styleUrl: './users.component.scss'
 })
-export class UsersComponent {}
+
+
+export class UsersComponent {
+
+  users = [
+  {
+    nombre: 'Juan Pérez',
+    username: 'jperez',
+    correo: 'juan@email.com',
+    rol: 'admin'
+  },
+  {
+    nombre: 'María López',
+    username: 'mlopez',
+    correo: 'maria@email.com',
+    rol: 'vet'
+  },
+  {
+    nombre: 'Carlos Soto',
+    username: 'csoto',
+    correo: 'carlos@email.com',
+    rol: 'secretary'
+  }
+];
+}

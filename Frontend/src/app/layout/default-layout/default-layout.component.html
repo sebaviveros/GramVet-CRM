@@ -1,11 +1,10 @@
 <!--sidebar-->
-<c-sidebar #sidebar1="cSidebar" class="d-print-none sidebar sidebar-fixed border-end" colorScheme="dark" id="sidebar1"
+<c-sidebar #sidebar1="cSidebar" class="d-print-none sidebar sidebar-fixed" colorScheme="dark" id="sidebar1"
   visible>
-  <c-sidebar-header class="border-bottom p-0">
+
+  <c-sidebar-header class="p-0">
     <c-sidebar-brand [routerLink]="[]">
-
       <img src="assets/logos/logoNavBarGVCRM.svg" class="sidebar-logo" alt="GramVet CRM" />
-
     </c-sidebar-brand>
   </c-sidebar-header>
 
@@ -14,22 +13,30 @@
   </ng-scrollbar>
 
   @if (!sidebar1.narrow) {
-  <c-sidebar-footer cSidebarToggle="sidebar1" class="border-top d-none d-lg-flex" toggle="unfoldable"
-    style="cursor: pointer;">
+  <c-sidebar-footer cSidebarToggle="sidebar1" class="d-none d-lg-flex"
+    toggle="unfoldable" style="cursor: pointer;">
     <button cSidebarToggler aria-label="Toggle sidebar fold"></button>
   </c-sidebar-footer>
   }
+
 </c-sidebar>
 
 <!--main-->
 <div class="wrapper d-flex flex-column min-vh-100">
+
   <!--app-header-->
-  <app-default-header [cShadowOnScroll]="'sm'" class="d-print-none header header-sticky p-0 shadow-sm"
-    position="sticky" sidebarId="sidebar1" />
+  <app-default-header
+    [cShadowOnScroll]="'sm'"
+    class="d-print-none header header-sticky p-0 shadow-sm"
+    position="sticky"
+    sidebarId="sidebar1"
+  />
+
   <!--app-body-->
- <div class="body flex-grow-1 d-flex flex-column">
-  <div class="flex-grow-1 d-flex flex-column">
-    <router-outlet />
-  
-</div>
+  <div class="body flex-grow-1 d-flex flex-column">
+    <div class="flex-grow-1 d-flex flex-column">
+      <router-outlet />
+    </div>
+  </div>
+
 </div>

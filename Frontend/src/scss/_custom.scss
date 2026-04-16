@@ -1,28 +1,19 @@
 // Here you can add other styles
 
-// custom .chartjs-tooltip-body-item padding
 @use "charts";
-
-// custom tweaks for scrollbar styling (wip)
 @use "scrollbar";
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
 
- // custom calendar today cell color
 .calendar-cell.today {
   --cui-calendar-cell-today-color: var(--cui-info) !important;
 }
 
-// custom select week cursor pointer
 .select-week .calendar-row.current {
   cursor: pointer;
 }
 
 body {
-  background: linear-gradient(
-    135deg,
-    #051F20 0%,
-    #0B2B26 40%,
-    #8EB69B 100%
-  ) !important;
+  background: #0B2B26 !important;
 }
 
 .sidebar {
@@ -47,19 +38,26 @@ body {
   color: white;
 }
 
+/* CARD GLOBAL — para vistas fuera del inbox */
 .card {
   background: rgba(255, 255, 255, 0.85) !important;
   backdrop-filter: blur(8px);
-
   border: none !important;
   border-radius: 14px !important;
-
   box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important;
 }
 
+/* CARD dentro del inbox — fondo blanco sólido, sin blur */
+.inbox-container .card {
+  background: #ffffff !important;
+  backdrop-filter: none !important;
+  border: 1px solid rgba(0,0,0,0.07) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
+  overflow: hidden !important;
+}
 
 @media (max-width: 992px) {
-
   .body {
     padding: 0 !important;
   }
@@ -74,50 +72,32 @@ body {
   .wrapper {
     padding: 0 !important;
   }
-
 }
 
 :root {
-
-  /* HEADER */
   --cui-header-bg: #0B2B26;
   --cui-header-border-color: transparent;
-
-  /* BODY */
   --cui-body-bg: transparent;
-
-  /* SIDEBAR (por si acaso) */
   --cui-sidebar-bg: #0B2B26;
-
 }
 
-/* HEADER LIMPIO */
 .header {
   border-bottom: none !important;
   box-shadow: none !important;
+  background: linear-gradient(90deg, #051F20, #0B2B26) !important;
 }
 
-/* A veces CoreUI mete esto */
 .header::after {
   display: none !important;
 }
 
-/* TEXTO HEADER */
 .header,
 .header * {
   color: rgba(255,255,255,0.85) !important;
 }
 
-/* HOVER */
 .header a:hover,
 .header svg:hover {
   color: white !important;
 }
 
-.header {
-  background: linear-gradient(
-    90deg,
-    #051F20,
-    #0B2B26
-  ) !important;
-}
