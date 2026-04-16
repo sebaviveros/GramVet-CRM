@@ -1,22 +1,24 @@
 import { Component } from '@angular/core';
-import { IconDirective } from '@coreui/icons-angular';
+import { RouterLink } from '@angular/router';
 import {
   ButtonDirective,
-  CardBodyComponent,
-  CardComponent,
-  CardGroupComponent,
-  ColComponent,
-  ContainerComponent,
   FormControlDirective,
   FormDirective,
-  InputGroupComponent,
-  InputGroupTextDirective,
-  RowComponent
 } from '@coreui/angular';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  imports: [ContainerComponent, RowComponent, ColComponent, CardGroupComponent, CardComponent, CardBodyComponent, FormDirective, InputGroupComponent, InputGroupTextDirective, IconDirective, FormControlDirective, ButtonDirective]
+  styleUrl: './login.component.scss',
+  imports: [
+    FormDirective,
+    FormControlDirective,
+    ButtonDirective,
+    RouterLink,
+  ],
 })
-export class LoginComponent {}
+export class LoginComponent {
+  onSubmit() {
+    // Tu lógica de backend sigue igual aquí
+  }
+}
