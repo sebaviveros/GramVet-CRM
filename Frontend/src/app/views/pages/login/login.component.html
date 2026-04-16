@@ -7,9 +7,11 @@
       <div class="field-group">
         <label class="field-label">EMAIL</label>
         <input
+          [(ngModel)]="username"
+          name="username"
           autoComplete="username"
           cFormControl
-          placeholder="tu@email.com"
+          placeholder="Usuario"
           class="dark-input"
         />
       </div>
@@ -17,10 +19,12 @@
       <div class="field-group">
         <label class="field-label">CONTRASEÑA</label>
         <input
+          [(ngModel)]="password"
+          name="password"
           autoComplete="current-password"
+          type="password"
           cFormControl
           placeholder="••••••••"
-          type="password"
           class="dark-input"
         />
       </div>

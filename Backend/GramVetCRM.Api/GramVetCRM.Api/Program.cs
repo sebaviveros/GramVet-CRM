@@ -12,6 +12,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngular",
+        policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:4200")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -59,6 +71,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -69,11 +82,12 @@ if (app.Environment.IsDevelopment())
 
 }
 
-app.UseAuthentication();
-
-app.UseAuthorization();
-
 app.UseHttpsRedirection();
+
+app.UseCors("AllowAngular"); 
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 
