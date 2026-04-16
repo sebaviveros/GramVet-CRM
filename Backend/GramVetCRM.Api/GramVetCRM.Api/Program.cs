@@ -3,6 +3,10 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using GramVetCRM.Repository.Context;
 using Microsoft.EntityFrameworkCore;
+using GramVetCRM.Repository.Repositories;
+using GramVetCRM.Service;
+using GramVetCRM.Service.Helpers;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +41,14 @@ builder.Services.AddAuthentication(options =>
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+//Repositories
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+
+//Services
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<JwtHelper>();
 
 builder.Services.AddDbContext<GramVetDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
