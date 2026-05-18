@@ -21,7 +21,7 @@
           </button>
 
           <div class="avatar">
-            {{ state.selectedConversation()?.clientName?.charAt(0) }}
+            {{ state.selectedConversation()?.nombreContacto?.charAt(0) }}
           </div>
 
           <div class="user-info">
@@ -29,25 +29,26 @@
             <div class="name-row">
 
               <span class="name">
-                {{ state.selectedConversation()?.clientName }}
+                {{ state.selectedConversation()?.nombreContacto }}
+                {{ state.selectedConversation()?.apellidoContacto }}
               </span>
 
               <span
                 class="category-badge"
-                [ngClass]="state.selectedConversation()?.category"
+                [ngClass]="state.selectedConversation()?.estado?.toLowerCase()"
               >
                 {{
-                  state.selectedConversation()?.category === 'cliente' ? 'Cliente' :
-                  state.selectedConversation()?.category === 'nuevo' ? 'Nuevo Cliente' :
-                  state.selectedConversation()?.category === 'pendiente' ? 'Caso pendiente' :
+                  state.selectedConversation()?.estado === 'Abierta' ? 'Abierta' :
+                  state.selectedConversation()?.estado === 'Cerrada' ? 'Cerrada' :
+                  state.selectedConversation()?.estado === 'Pendiente' ? 'Pendiente' :
                   ''
                 }}
               </span>
 
             </div>
 
-            <div class="pet">
-              {{ state.selectedConversation()?.petName }}
+            <div class="canal">
+              {{ state.selectedConversation()?.canal }}
             </div>
 
           </div>
@@ -58,7 +59,7 @@
         <div class="chat-actions">
 
           <select
-            [value]="state.selectedConversation()?.assignedVet"
+            [value]="state.selectedConversation()?.usuarioAsignado"
             (change)="state.setAssignedVet(state.selectedConversation()!.id, $any($event.target).value)"
           >
             <option value="">Asignar veterinario</option>
@@ -82,16 +83,20 @@
 
   <c-card-body class="chat-body" #chatContainer>
 
+    @if (state.loadingMessages()) {
+      <div class="p-3 text-center">Cargando mensajes...</div>
+    }
+
     @if (state.selectedConversation()) {
 
       @for (message of state.selectedMessages(); track message.id) {
 
         <div
           class="message"
-          [class.sent]="message.sender === 'agent'"
-          [class.received]="message.sender === 'client'"
+          [class.sent]="message.direccion === 'outbound'"
+          [class.received]="message.direccion === 'inbound'"
         >
-          {{ message.text }}
+          {{ message.contenido }}
         </div>
 
       }

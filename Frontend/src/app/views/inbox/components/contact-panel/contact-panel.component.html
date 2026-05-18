@@ -1,32 +1,38 @@
 <c-card class="h-100 contact-card">
+
   <button
-  class="back-button d-lg-none"
-  (click)="goBackToChat()">
-  ← Volver
-</button>
+    class="back-button d-lg-none"
+    (click)="goBackToChat()">
+    ← Volver
+  </button>
 
   <c-card-body class="contact-body">
 
     @if (state.selectedConversation()) {
 
       <div class="avatar">
-        {{ state.selectedConversation()?.clientName?.charAt(0) }}
+        {{ state.selectedConversation()?.nombreContacto?.charAt(0) }}
       </div>
 
       <div class="name">
-        {{ state.selectedConversation()?.clientName }}
+        {{ state.selectedConversation()?.nombreContacto }}
+        {{ state.selectedConversation()?.apellidoContacto }}
       </div>
 
       <div class="phone">
-        {{ state.selectedConversation()?.phone }}
+        {{ state.selectedConversation()?.telefono }}
       </div>
 
-      <div class="pet">
-        {{ state.selectedConversation()?.petName }}
+      <div class="canal">
+        Canal: {{ state.selectedConversation()?.canal }}
       </div>
 
       <div class="client-id">
-        ID: {{ state.selectedConversation()?.clientId }}
+        ID Contacto: {{ state.selectedConversation()?.contactoId }}
+      </div>
+
+      <div class="estado">
+        Estado: {{ state.selectedConversation()?.estado }}
       </div>
 
     }

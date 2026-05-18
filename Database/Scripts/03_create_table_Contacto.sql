@@ -1,9 +1,10 @@
 CREATE TABLE Contacto (
     Id INT IDENTITY PRIMARY KEY,
     Nombre NVARCHAR(150),
+	Apellido NVARCHAR(150) NULL,
     Telefono NVARCHAR(50) NOT NULL,
     Email NVARCHAR(150),
-
+	EsNuevo BIT DEFAULT 0 NOT NULL,
     usercr NVARCHAR(100),
     userup NVARCHAR(100),
     fechacr DATETIME DEFAULT GETDATE(),

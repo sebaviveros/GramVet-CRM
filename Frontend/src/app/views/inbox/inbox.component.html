@@ -22,8 +22,8 @@
     @if (state.isRightPanelOpen() || isClosingPanel) {
 
       <div class="col-3 contact-panel-anim"
-      [class.panel-closing]="isClosingPanel"
-       [class.panel-opening]="!isClosingPanel">
+        [class.panel-closing]="isClosingPanel"
+        [class.panel-opening]="!isClosingPanel">
 
         @if (state.activeRightPanel() === 'contact') {
           <app-contact-panel></app-contact-panel>
@@ -51,22 +51,24 @@
   <!-- ================= MOBILE ================= -->
   <div class="mobile-views d-lg-none">
 
-  <div class="mobile-view conversations"
-       [class.active]="state.mobileView() === 'conversations'">
-    <app-conversations></app-conversations>
+    <div class="mobile-view conversations"
+         [class.active]="state.mobileView() === 'conversations'">
+      <app-conversations></app-conversations>
+    </div>
+
+    <div class="mobile-view chat"
+         [class.active]="state.mobileView() === 'chat'">
+      <app-chat-window></app-chat-window>
+    </div>
+
+    <div class="mobile-view contact"
+         [class.active]="state.mobileView() === 'contact'">
+      <app-contact-panel></app-contact-panel>
+    </div>
+
   </div>
 
-  <div class="mobile-view chat"
-       [class.active]="state.mobileView() === 'chat'">
-    <app-chat-window></app-chat-window>
-  </div>
-
-  <div class="mobile-view contact"
-       [class.active]="state.mobileView() === 'contact'">
-    <app-contact-panel></app-contact-panel>
-  </div>
+  <!-- MOBILE NAV -->
+  <app-mobile-bottom-nav></app-mobile-bottom-nav>
 
 </div>
-
-<!-- MOBILE NAV -->
-<app-mobile-bottom-nav></app-mobile-bottom-nav>

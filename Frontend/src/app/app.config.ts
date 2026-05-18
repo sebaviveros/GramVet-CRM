@@ -9,16 +9,15 @@ import {
   withViewTransitions
 } from '@angular/router';
 import { IconSetService } from '@coreui/icons-angular';
-import { provideHttpClient } from '@angular/common/http'; 
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { routes } from './app.routes';
+import { authInterceptor } from './core/interceptors/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(
       routes,
-      withRouterConfig({
-        onSameUrlNavigation: 'reload'
-      }),
+      withRouterConfig({ onSameUrlNavigation: 'reload' }),
       withInMemoryScrolling({
         scrollPositionRestoration: 'top',
         anchorScrolling: 'enabled'
@@ -28,7 +27,9 @@ export const appConfig: ApplicationConfig = {
       withHashLocation()
     ),
 
-    provideHttpClient(), 
+    provideHttpClient(
+      withInterceptors([authInterceptor])  
+    ),
 
     IconSetService,
     provideAnimationsAsync()

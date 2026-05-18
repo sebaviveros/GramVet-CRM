@@ -1,11 +1,12 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using GramVetCRM.Service.Hubs;
 using GramVetCRM.Repository.Context;
-using Microsoft.EntityFrameworkCore;
 using GramVetCRM.Repository.Repositories;
 using GramVetCRM.Service;
 using GramVetCRM.Service.Helpers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,7 +21,8 @@ builder.Services.AddCors(options =>
             policy
                 .WithOrigins("http://localhost:4200")
                 .AllowAnyHeader()
-                .AllowAnyMethod();
+                .AllowAnyMethod()
+                .AllowCredentials();
         });
 });
 
@@ -53,13 +55,22 @@ builder.Services.AddAuthentication(options =>
 // Add services to the container.
 
 builder.Services.AddControllers();
+//signalR
+builder.Services.AddSignalR();
 
 //Repositories
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<IConversacionRepository, ConversacionRepository>();
+builder.Services.AddScoped<IMensajeRepository, MensajeRepository>();
+builder.Services.AddScoped<IContactoRepository, ContactoRepository>();
 
 //Services
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IConversacionService, ConversacionService>();
+builder.Services.AddScoped<IWhatsAppService, WhatsAppService>();
+
+
 builder.Services.AddScoped<JwtHelper>();
 
 builder.Services.AddDbContext<GramVetDbContext>(options =>
@@ -90,5 +101,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.MapHub<ChatHub>("/hubs/chat");
 app.Run();
