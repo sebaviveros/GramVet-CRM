@@ -63,4 +63,5 @@
   flex: 1; /* 🔥 ocupa todo lo que queda bajo header */
   display: flex;
   overflow: hidden;
+  min-height: 0;
 }

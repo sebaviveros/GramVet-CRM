@@ -7,6 +7,7 @@
         public string? Contenido { get; set; }
         public string? TipoMensaje { get; set; }
         public string Direccion { get; set; }
+        public string? MediaUrl { get; set; }
         public DateTime FechaEnvio { get; set; }
         public int? UsuarioId { get; set; }
     }

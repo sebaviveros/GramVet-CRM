@@ -20,6 +20,7 @@ export interface MensajeDto {
   id: number;
   conversacionId: number;
   contenido?: string;
+  mediaUrl?: string; 
   tipoMensaje?: string;
   direccion: string; // inbound / outbound
   fechaEnvio: Date;
@@ -28,8 +29,10 @@ export interface MensajeDto {
 
 export interface EnviarMensajeDto {
   conversacionId: number;
-  contenido: string;
-  tipoMensaje?: string;
+  contenido?: string;
+  tipoMensaje: string;
+  mediaId?: string;      
+  caption?: string;      
 }
 
 @Injectable({
@@ -54,4 +57,10 @@ export class ConversacionService {
   enviarMensaje(dto: EnviarMensajeDto): Observable<MensajeDto> {
     return this.http.post<MensajeDto>(`${this.apiUrl}/mensaje`, dto);
   }
+
+  subirImagen(file: File): Observable<{ mediaId: string }> {
+  const formData = new FormData();
+  formData.append('file', file);
+  return this.http.post<{ mediaId: string }>(`${this.apiUrl}/upload-imagen`, formData);
+}
 }

@@ -18,6 +18,7 @@ export interface Message {
   id: number;
   conversacionId: number;
   contenido?: string;
+  mediaUrl?: string;
   tipoMensaje?: string;
   direccion: string; // 'inbound' | 'outbound'
   fechaEnvio: Date;

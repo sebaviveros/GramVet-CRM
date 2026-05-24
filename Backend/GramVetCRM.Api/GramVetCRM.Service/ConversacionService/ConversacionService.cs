@@ -9,13 +9,16 @@ namespace GramVetCRM.Service
     {
         private readonly IConversacionRepository _conversacionRepo;
         private readonly IMensajeRepository _mensajeRepo;
+        private readonly IWhatsAppService _whatsAppService;
 
         public ConversacionService(
             IConversacionRepository conversacionRepo,
-            IMensajeRepository mensajeRepo)
+            IMensajeRepository mensajeRepo,
+            IWhatsAppService whatsAppService)
         {
             _conversacionRepo = conversacionRepo;
             _mensajeRepo = mensajeRepo;
+            _whatsAppService = whatsAppService;
         }
 
         public async Task<List<ConversacionDto>> GetAll()
@@ -47,6 +50,7 @@ namespace GramVetCRM.Service
                 Id = m.Id,
                 ConversacionId = m.ConversacionId,
                 Contenido = m.Contenido,
+                MediaUrl = m.MediaUrl,
                 TipoMensaje = m.TipoMensaje,
                 Direccion = m.Direccion,
                 FechaEnvio = m.FechaEnvio,
@@ -56,6 +60,12 @@ namespace GramVetCRM.Service
 
         public async Task<MensajeDto> EnviarMensaje(EnviarMensajeDto dto, int usuarioId)
         {
+            // Obtener conversación para saber el teléfono
+            var conversacion = await _conversacionRepo.GetById(dto.ConversacionId);
+            if (conversacion == null)
+                throw new Exception($"Conversación {dto.ConversacionId} no encontrada");
+
+            // Guardar en DB
             var mensaje = new Mensaje
             {
                 ConversacionId = dto.ConversacionId,
@@ -72,11 +82,24 @@ namespace GramVetCRM.Service
             await _mensajeRepo.Add(mensaje);
             await _mensajeRepo.Save();
 
+            // Enviar via WhatsApp
+            var telefono = conversacion.Contacto.Telefono;
+
+            if (dto.TipoMensaje == "text" && dto.Contenido != null)
+            {
+                await _whatsAppService.EnviarMensajeTexto(telefono, dto.Contenido);
+            }
+            else if (dto.TipoMensaje == "image" && dto.MediaId != null)
+            {
+                await _whatsAppService.EnviarImagen(telefono, dto.MediaId, dto.Caption);
+            }
+
             return new MensajeDto
             {
                 Id = mensaje.Id,
                 ConversacionId = mensaje.ConversacionId,
                 Contenido = mensaje.Contenido,
+                MediaUrl = mensaje.MediaUrl,
                 TipoMensaje = mensaje.TipoMensaje,
                 Direccion = mensaje.Direccion,
                 FechaEnvio = mensaje.FechaEnvio,

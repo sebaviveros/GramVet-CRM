@@ -9,6 +9,7 @@ CREATE TABLE Mensaje (
 
     ExternalId NVARCHAR(100), -- ID de WhatsApp (CRÍTICO)
 	UsuarioId INT NULL, -- quien envia el msj (solo outbound)
+	MediaUrl NVARCHAR(500) NULL,
     FechaEnvio DATETIME NOT NULL,
 	
     usercr NVARCHAR(100),

@@ -12,10 +12,14 @@ namespace GramVetCRM.Api.Controllers
     public class ConversacionController : ControllerBase
     {
         private readonly IConversacionService _service;
+        private readonly IWhatsAppService _whatsAppService;
 
-        public ConversacionController(IConversacionService service)
+        public ConversacionController(
+            IConversacionService service,
+            IWhatsAppService whatsAppService)
         {
             _service = service;
+            _whatsAppService = whatsAppService;
         }
 
         // GET api/Conversacion
@@ -38,16 +42,29 @@ namespace GramVetCRM.Api.Controllers
         [HttpPost("mensaje")]
         public async Task<IActionResult> EnviarMensaje([FromBody] EnviarMensajeDto dto)
         {
-            // obtener el id del usuario desde el JWT
             var usuarioIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (usuarioIdClaim == null)
-                return Unauthorized();
+            if (usuarioIdClaim == null) return Unauthorized();
 
             var usuarioId = int.Parse(usuarioIdClaim);
             var result = await _service.EnviarMensaje(dto, usuarioId);
-
             return Ok(result);
+        }
+
+        // POST api/Conversacion/upload-imagen
+        [HttpPost("upload-imagen")]
+        public async Task<IActionResult> SubirImagen(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("Archivo inválido");
+
+            // Subir a WhatsApp Media API para obtener mediaId
+            using var stream = file.OpenReadStream();
+            var mediaId = await _whatsAppService.SubirMedia(stream, file.FileName, file.ContentType);
+
+            if (mediaId == null)
+                return StatusCode(500, "Error subiendo imagen a WhatsApp");
+
+            return Ok(new { mediaId });
         }
     }
 }

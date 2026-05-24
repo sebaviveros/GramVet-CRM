@@ -55,6 +55,10 @@ builder.Services.AddAuthentication(options =>
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+//HttpClient
+builder.Services.AddHttpClient("WhatsApp");
+
 //signalR
 builder.Services.AddSignalR();
 
@@ -69,7 +73,7 @@ builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IConversacionService, ConversacionService>();
 builder.Services.AddScoped<IWhatsAppService, WhatsAppService>();
-
+builder.Services.AddSingleton<IR2StorageService, R2StorageService>();
 
 builder.Services.AddScoped<JwtHelper>();
 

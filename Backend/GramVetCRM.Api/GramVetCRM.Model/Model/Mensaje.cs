@@ -9,6 +9,7 @@
         public string Direccion { get; set; }    // inbound / outbound
         public string? ExternalId { get; set; }
         public int? UsuarioId { get; set; }
+        public string? MediaUrl { get; set; }
         public DateTime FechaEnvio { get; set; }
         public string Usercr { get; set; }
         public string? Userup { get; set; }
