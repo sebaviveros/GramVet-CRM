@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
-import { InboxStateService, Message } from '../inbox/inbox-state.service';
+import { InboxStateService, Message, Conversation } from '../inbox/inbox-state.service';
 
 @Injectable({
   providedIn: 'root'
@@ -33,9 +33,16 @@ export class SignalRService {
   private registrarEventos(): void {
     if (!this.hubConnection) return;
 
+    // Mensaje nuevo en conversación abierta
     this.hubConnection.on('NuevoMensaje', (mensaje: Message) => {
       console.log('Mensaje recibido via SignalR:', mensaje);
       this.state.addMessage(mensaje);
+    });
+
+    // Conversación actualizada o nueva
+    this.hubConnection.on('ConversacionActualizada', (conversacion: Conversation) => {
+      console.log('Conversación actualizada via SignalR:', conversacion);
+      this.state.upsertConversacion(conversacion);
     });
   }
 

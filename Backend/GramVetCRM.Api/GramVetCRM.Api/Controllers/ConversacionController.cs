@@ -13,13 +13,16 @@ namespace GramVetCRM.Api.Controllers
     {
         private readonly IConversacionService _service;
         private readonly IWhatsAppService _whatsAppService;
+        private readonly IR2StorageService _r2Storage;
 
         public ConversacionController(
             IConversacionService service,
-            IWhatsAppService whatsAppService)
+            IWhatsAppService whatsAppService,
+            IR2StorageService r2Storage)
         {
             _service = service;
             _whatsAppService = whatsAppService;
+            _r2Storage = r2Storage;
         }
 
         // GET api/Conversacion
@@ -51,20 +54,45 @@ namespace GramVetCRM.Api.Controllers
         }
 
         // POST api/Conversacion/upload-imagen
+        // Sube a WhatsApp Media API (para enviar) y a Cloudflare R2 (para mostrar en el CRM)
         [HttpPost("upload-imagen")]
         public async Task<IActionResult> SubirImagen(IFormFile file)
         {
             if (file == null || file.Length == 0)
                 return BadRequest("Archivo inválido");
 
-            // Subir a WhatsApp Media API para obtener mediaId
-            using var stream = file.OpenReadStream();
-            var mediaId = await _whatsAppService.SubirMedia(stream, file.FileName, file.ContentType);
+            // Leer a bytes una sola vez para poder usar dos streams independientes
+            byte[] fileBytes;
+            using (var ms = new MemoryStream())
+            {
+                await file.CopyToAsync(ms);
+                fileBytes = ms.ToArray();
+            }
+
+            var fileName = $"image/{Guid.NewGuid()}.jpg";
+
+            var waTask = _whatsAppService.SubirMedia(
+                new MemoryStream(fileBytes), file.FileName, file.ContentType);
+            var r2Task = _r2Storage.SubirArchivo(
+                new MemoryStream(fileBytes), fileName, file.ContentType);
+
+            await Task.WhenAll(waTask, r2Task);
+
+            var mediaId = waTask.Result;
+            var mediaUrl = r2Task.Result;
 
             if (mediaId == null)
                 return StatusCode(500, "Error subiendo imagen a WhatsApp");
 
-            return Ok(new { mediaId });
+            return Ok(new { mediaId, mediaUrl });
+        }
+
+        // PUT api/Conversacion/5/leer
+        [HttpPut("{id}/leer")]
+        public async Task<IActionResult> MarcarLeida(int id)
+        {
+            await _service.MarcarComoLeida(id);
+            return Ok();
         }
     }
 }

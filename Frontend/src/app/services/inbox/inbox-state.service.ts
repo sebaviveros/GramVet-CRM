@@ -38,8 +38,13 @@ export class InboxStateService {
   private _activeRightPanel = signal<'contact' | 'calls' | 'notes' | null>('contact');
   private _loadingConversations = signal<boolean>(false);
   private _loadingMessages = signal<boolean>(false);
+  private _loadingMoreMessages = signal<boolean>(false);
 
-  // justo después de los signals, antes de los computed
+  // Página actual por conversación — para saber qué página pedir en el scroll
+  private _messagePage = signal<Record<number, number>>({});
+  // Si ya no hay más páginas para una conversación
+  private _noMoreMessages = signal<Record<number, boolean>>({});
+
   vets = ['Dr. Soto', 'Dra. Pérez', 'Dr. González'];
 
   // COMPUTED
@@ -48,6 +53,7 @@ export class InboxStateService {
   activeRightPanel = computed(() => this._activeRightPanel());
   loadingConversations = computed(() => this._loadingConversations());
   loadingMessages = computed(() => this._loadingMessages());
+  loadingMoreMessages = computed(() => this._loadingMoreMessages());
 
   isRightPanelOpen = computed(() => this._activeRightPanel() !== null);
 
@@ -63,15 +69,17 @@ export class InboxStateService {
     return this._messages()[id] ?? [];
   });
 
-  setAssignedVet(conversacionId: number, vet: string) {
-    this._conversations.update(convs =>
-      convs.map(c =>
-        c.id === conversacionId
-          ? { ...c, usuarioAsignado: vet }
-          : c
-      )
-    );
-}
+  selectedConversationPage = computed(() => {
+    const id = this._selectedConversationId();
+    if (!id) return 1;
+    return this._messagePage()[id] ?? 1;
+  });
+
+  selectedConversationHasMore = computed(() => {
+    const id = this._selectedConversationId();
+    if (!id) return false;
+    return !this._noMoreMessages()[id];
+  });
 
   // ACTIONS
   setConversations(conversations: Conversation[]) {
@@ -86,6 +94,10 @@ export class InboxStateService {
     this._loadingMessages.set(value);
   }
 
+  setLoadingMoreMessages(value: boolean) {
+    this._loadingMoreMessages.set(value);
+  }
+
   selectConversation(conversationId: number) {
     this._selectedConversationId.set(conversationId);
   }
@@ -95,6 +107,27 @@ export class InboxStateService {
       ...current,
       [conversacionId]: messages
     }));
+    // Resetear página y flag de más mensajes al cargar la primera página
+    this._messagePage.update(p => ({ ...p, [conversacionId]: 1 }));
+    this._noMoreMessages.update(n => ({ ...n, [conversacionId]: false }));
+  }
+
+  // Agrega mensajes al INICIO (scroll infinito hacia arriba)
+  prependMessages(conversacionId: number, messages: Message[], hasMore: boolean) {
+    this._messages.update(current => {
+      const existing = current[conversacionId] ?? [];
+      return {
+        ...current,
+        [conversacionId]: [...messages, ...existing]
+      };
+    });
+
+    const currentPage = this._messagePage()[conversacionId] ?? 1;
+    this._messagePage.update(p => ({ ...p, [conversacionId]: currentPage + 1 }));
+
+    if (!hasMore) {
+      this._noMoreMessages.update(n => ({ ...n, [conversacionId]: true }));
+    }
   }
 
   addMessage(message: Message) {
@@ -125,5 +158,42 @@ export class InboxStateService {
 
   closeRightPanel() {
     this._activeRightPanel.set(null);
+  }
+
+  upsertConversacion(conversacion: Conversation) {
+    this._conversations.update(convs => {
+      const index = convs.findIndex(c => c.id === conversacion.id);
+      if (index >= 0) {
+        const updated = [...convs];
+        updated[index] = conversacion;
+        return updated.sort((a, b) => {
+          const dateA = a.fechaUltimoMensaje ? new Date(a.fechaUltimoMensaje).getTime() : 0;
+          const dateB = b.fechaUltimoMensaje ? new Date(b.fechaUltimoMensaje).getTime() : 0;
+          return dateB - dateA;
+        });
+      } else {
+        return [conversacion, ...convs];
+      }
+    });
+  }
+
+  resetearNoLeidos(conversacionId: number) {
+    this._conversations.update(convs =>
+      convs.map(c =>
+        c.id === conversacionId
+          ? { ...c, cantidadNoLeidos: 0 }
+          : c
+      )
+    );
+  }
+
+  setAssignedVet(conversacionId: number, vet: string) {
+    this._conversations.update(convs =>
+      convs.map(c =>
+        c.id === conversacionId
+          ? { ...c, usuarioAsignado: vet }
+          : c
+      )
+    );
   }
 }

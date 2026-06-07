@@ -5,180 +5,135 @@
   <c-card-header class="chat-header clickable" (click)="openContactPanel()">
 
     @if (state.selectedConversation()) {
-
     <div class="chat-header-container">
 
-      <!-- IZQUIERDA -->
       <div class="chat-user">
-
-        <button class="back-button d-lg-none" (click)="goBackToConversations($event)">
-          ←
-        </button>
-
-        <div class="avatar">
-          {{ state.selectedConversation()?.nombreContacto?.charAt(0) }}
-        </div>
-
+        <button class="back-button d-lg-none" (click)="goBackToConversations($event)">←</button>
+        <div class="avatar">{{ state.selectedConversation()?.nombreContacto?.charAt(0) }}</div>
         <div class="user-info">
-
           <div class="name-row">
-
             <span class="name">
               {{ state.selectedConversation()?.nombreContacto }}
               {{ state.selectedConversation()?.apellidoContacto }}
             </span>
-
             <span class="category-badge" [ngClass]="state.selectedConversation()?.estado?.toLowerCase()">
-              {{
-              state.selectedConversation()?.estado === 'Abierta' ? 'Abierta' :
-              state.selectedConversation()?.estado === 'Cerrada' ? 'Cerrada' :
-              state.selectedConversation()?.estado === 'Pendiente' ? 'Pendiente' :
-              ''
-              }}
+              {{ state.selectedConversation()?.estado === 'Abierta' ? 'Abierta' :
+                 state.selectedConversation()?.estado === 'Cerrada' ? 'Cerrada' :
+                 state.selectedConversation()?.estado === 'Pendiente' ? 'Pendiente' : '' }}
             </span>
-
           </div>
-
-          <div class="canal">
-            {{ state.selectedConversation()?.canal }}
-          </div>
-
+          <div class="canal">{{ state.selectedConversation()?.canal }}</div>
         </div>
-
       </div>
 
-      <!-- DERECHA -->
       <div class="chat-actions">
-
         <select [value]="state.selectedConversation()?.usuarioAsignado"
           (change)="state.setAssignedVet(state.selectedConversation()!.id, $any($event.target).value)">
           <option value="">Asignar veterinario</option>
-
-          <option *ngFor="let vet of state.vets" [value]="vet">
-            {{ vet }}
-          </option>
-
+          <option *ngFor="let vet of state.vets" [value]="vet">{{ vet }}</option>
         </select>
-
       </div>
 
     </div>
-
     }
 
   </c-card-header>
 
-
   <!-- ================= BODY ================= -->
+  <!-- div nativo con #scrollContainer — controlamos 100% el scroll aquí -->
+  <c-card-body class="chat-body-wrapper">
+    <div #scrollContainer class="scroll-container" (scroll)="onScroll()">
 
-  <c-card-body class="chat-body">
-    <div #chatContainer class="messages-container">
-    @if (state.loadingMessages()) {
-    <div class="p-3 text-center">Cargando mensajes...</div>
-    }
-
-    @if (state.selectedConversation()) {
-
-    @for (message of state.selectedMessages(); track message.id) {
-
-    <div class="message" [class.sent]="message.direccion === 'outbound'"
-      [class.received]="message.direccion === 'inbound'">
-
-      @if (message.tipoMensaje === 'text' || !message.tipoMensaje) {
-      <span>{{ message.contenido }}</span>
-      <span class="message-time">
-        {{ message.fechaEnvio | date:'h:mm a' }}
-      </span>
+      @if (state.loadingMoreMessages()) {
+        <div class="loading-more">
+          <span>Cargando mensajes anteriores...</span>
+        </div>
       }
 
-      @if (message.tipoMensaje === 'image' && message.mediaUrl) {
-      <div class="image-wrapper">
-        <img class="message-image" [src]="message.mediaUrl" alt="imagen" (click)="abrirImagen(message.mediaUrl)" />
-        <span class="image-time">
-          {{ message.fechaEnvio | date:'h:mm a' }}
-        </span>
-      </div>
-      @if (message.contenido) {
-      <span style="margin-top: 4px; font-size: 14px;">{{ message.contenido }}</span>
-      }
+      @if (state.loadingMessages()) {
+        <div class="p-3 text-center">Cargando mensajes...</div>
       }
 
-      @if (message.tipoMensaje === 'audio' && message.mediaUrl) {
-      <div class="audio-wrapper">
-        <audio
-          controls
-          preload="metadata"
-          [src]="message.mediaUrl"
-          style="width: 250px; height: 40px;"
-        >
-          Tu browser no soporta audio.
-        </audio>
-        <span class="message-time">
-          {{ message.fechaEnvio | date:'h:mm a' }}
-        </span>
-      </div>
-    }
+      @if (state.selectedConversation()) {
+        @for (message of state.selectedMessages(); track message.id) {
+          <div class="message" [class.sent]="message.direccion === 'outbound'"
+               [class.received]="message.direccion === 'inbound'">
 
-      @if (message.tipoMensaje === 'video' && message.mediaUrl) {
-      <div class="image-wrapper">
-        <video controls class="message-image">
-          <source [src]="message.mediaUrl">
-        </video>
-        <span class="image-time">
-          {{ message.fechaEnvio | date:'h:mm a' }}
-        </span>
-      </div>
+            @if (message.tipoMensaje === 'text' || !message.tipoMensaje) {
+              <span>{{ message.contenido }}</span>
+              <span class="message-time">{{ message.fechaEnvio | date:'h:mm a' }}</span>
+            }
+
+            @if (message.tipoMensaje === 'image' && message.mediaUrl) {
+              <div class="image-wrapper">
+                <img class="message-image" [src]="message.mediaUrl" alt="imagen"
+                     (click)="abrirImagen(message.mediaUrl)" />
+                <span class="image-time">{{ message.fechaEnvio | date:'h:mm a' }}</span>
+              </div>
+              @if (message.contenido) {
+                <span style="margin-top: 4px; font-size: 14px;">{{ message.contenido }}</span>
+              }
+            }
+
+            @if (message.tipoMensaje === 'audio' && message.mediaUrl) {
+              <div class="audio-wrapper">
+                <audio controls preload="metadata" [src]="message.mediaUrl" style="width: 250px; height: 40px;">
+                  Tu browser no soporta audio.
+                </audio>
+                <span class="message-time">{{ message.fechaEnvio | date:'h:mm a' }}</span>
+              </div>
+            }
+
+            @if (message.tipoMensaje === 'video' && message.mediaUrl) {
+              <div class="image-wrapper">
+                <video controls class="message-image">
+                  <source [src]="message.mediaUrl">
+                </video>
+                <span class="image-time">{{ message.fechaEnvio | date:'h:mm a' }}</span>
+              </div>
+            }
+
+          </div>
+        }
+      } @else {
+        <p>Seleccione una conversación</p>
       }
 
-    </div>
-
-    }
-    }
-    @else {
-    <p>Seleccione una conversación</p>
-    }
     </div>
   </c-card-body>
 
-
   <!-- ================= FOOTER ================= -->
-
   <c-card-footer>
-
     <div class="d-flex gap-2 align-items-center">
 
-      <!-- Botón subir imagen -->
       <label class="btn btn-outline-secondary mb-0" style="cursor: pointer;">
         📎
         <input type="file" accept="image/*" style="display: none;" (change)="seleccionarImagen($event)" />
       </label>
 
-      <!-- Preview imagen seleccionada -->
       @if (imagenSeleccionada()) {
-      <div class="d-flex align-items-center gap-1">
-        <img [src]="imagenPreview()" style="height: 36px; width: 36px; object-fit: cover; border-radius: 4px;" />
-        <button class="btn btn-sm btn-outline-danger" (click)="cancelarImagen()">✕</button>
-      </div>
+        <div class="d-flex align-items-center gap-1">
+          <img [src]="imagenPreview()" style="height: 36px; width: 36px; object-fit: cover; border-radius: 4px;" />
+          <button class="btn btn-sm btn-outline-danger" (click)="cancelarImagen()">✕</button>
+        </div>
       }
 
       <input class="form-control" placeholder="Escribir mensaje..." [value]="messageInput()"
         (input)="messageInput.set($any($event.target).value)" (keyup.enter)="sendMessage()"
         [disabled]="!!imagenSeleccionada()">
 
-      <button class="btn btn-primary" (click)="sendMessage()">
-        Enviar
-      </button>
+      <button class="btn btn-primary" (click)="sendMessage()">Enviar</button>
 
     </div>
-
   </c-card-footer>
-  <!-- LIGHTBOX -->
+
   @if (lightboxUrl()) {
-  <div class="lightbox-overlay" (click)="cerrarLightbox()">
-    <div class="lightbox-container" (click)="$event.stopPropagation()">
-      <button class="lightbox-close" (click)="cerrarLightbox()">✕</button>
-      <img [src]="lightboxUrl()" class="lightbox-img" />
+    <div class="lightbox-overlay" (click)="cerrarLightbox()">
+      <div class="lightbox-container" (click)="$event.stopPropagation()">
+        <button class="lightbox-close" (click)="cerrarLightbox()">✕</button>
+        <img [src]="lightboxUrl()" class="lightbox-img" />
+      </div>
     </div>
-  </div>
   }
+
 </c-card>

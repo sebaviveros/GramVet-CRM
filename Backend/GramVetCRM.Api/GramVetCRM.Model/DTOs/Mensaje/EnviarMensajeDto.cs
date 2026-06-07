@@ -6,6 +6,7 @@
         public string? Contenido { get; set; }
         public string TipoMensaje { get; set; } = "text";
         public string? MediaId { get; set; }
+        public string? MediaUrl { get; set; }
         public string? Caption { get; set; }
     }
 }

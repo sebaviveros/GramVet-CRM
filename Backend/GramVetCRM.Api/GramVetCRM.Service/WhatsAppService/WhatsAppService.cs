@@ -1,7 +1,8 @@
-﻿using GramVetCRM.Service.Hubs;
-using GramVetCRM.Model;
+﻿using GramVetCRM.Model;
+using GramVetCRM.Model.DTOs.Conversacion;
 using GramVetCRM.Model.DTOs.Mensaje;
 using GramVetCRM.Repository.Repositories;
+using GramVetCRM.Service.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -186,8 +187,31 @@ namespace GramVetCRM.Service
                     UsuarioId = mensaje.UsuarioId
                 };
 
+                // Notificar mensaje nuevo
                 await _hubContext.Clients.All.SendAsync("NuevoMensaje", mensajeDto);
-                _logger.LogInformation("Notificación SignalR enviada para conversación {Id}", conversacion.Id);
+
+                // Recargar conversación con includes para el DTO
+                conversacion = await _conversacionRepo.GetById(conversacion.Id) ?? conversacion;
+
+                // Notificar conversación actualizada (para actualizar lista)
+                var conversacionDto = new ConversacionDto
+                {
+                    Id = conversacion.Id,
+                    ContactoId = conversacion.ContactoId,
+                    NombreContacto = conversacion.Contacto?.Nombre ?? "",
+                    ApellidoContacto = conversacion.Contacto?.Apellido,
+                    Telefono = conversacion.Contacto?.Telefono ?? "",
+                    Estado = conversacion.Estado,
+                    UltimoMensaje = conversacion.UltimoMensaje,
+                    FechaUltimoMensaje = conversacion.FechaUltimoMensaje,
+                    CantidadNoLeidos = conversacion.CantidadNoLeidos,
+                    Canal = conversacion.Canal?.Nombre ?? "WhatsApp",
+                    EsNuevo = conversacion.Contacto?.EsNuevo ?? true
+                };
+
+                await _hubContext.Clients.All.SendAsync("ConversacionActualizada", conversacionDto);
+
+                _logger.LogInformation("Notificaciones SignalR enviadas para conversación {Id}", conversacion.Id);
             }
             catch (Exception ex)
             {

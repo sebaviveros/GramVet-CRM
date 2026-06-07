@@ -7,49 +7,46 @@
   <c-card-body class="p-0 conversations-container">
 
     @if (state.loadingConversations()) {
-      <div class="p-3 text-center">Cargando conversaciones...</div>
+    <div class="p-3 text-center">Cargando conversaciones...</div>
     }
 
     @for (conversation of state.conversations(); track conversation.id) {
 
-      <div
-        class="conversation-item"
-        [class.selected]="state.selectedConversation()?.id === conversation.id"
-        (click)="onSelectConversation(conversation.id)"
-      >
+    <div class="conversation-item" [class.selected]="state.selectedConversation()?.id === conversation.id"
+      [class.unread]="conversation.cantidadNoLeidos > 0" (click)="onSelectConversation(conversation.id)">
 
-        <div class="conversation-row">
+      <div class="conversation-row">
 
-          <!-- AVATAR -->
-          <div class="avatar">
-            {{ conversation.nombreContacto.charAt(0) }}
+        <!-- AVATAR -->
+        <div class="avatar">
+          {{ conversation.nombreContacto.charAt(0) }}
+        </div>
+
+        <!-- INFO -->
+        <div class="conversation-content">
+
+          <div class="conversation-name">
+            {{ conversation.nombreContacto }} {{ conversation.apellidoContacto }}
           </div>
 
-          <!-- INFO -->
-          <div class="conversation-content">
-
-            <div class="conversation-name">
-              {{ conversation.nombreContacto }} {{ conversation.apellidoContacto }}
-            </div>
-
-            <div class="conversation-phone">
-              {{ conversation.telefono }}
-            </div>
-
-            @if (conversation.ultimoMensaje) {
-              <div class="last-message">{{ conversation.ultimoMensaje }}</div>
-            }
-
+          <div class="conversation-phone">
+            {{ conversation.telefono }}
           </div>
 
-          <!-- BADGE NO LEIDOS -->
-          @if (conversation.cantidadNoLeidos > 0) {
-            <span class="badge-unread">{{ conversation.cantidadNoLeidos }}</span>
+          @if (conversation.ultimoMensaje) {
+          <div class="last-message">{{ conversation.ultimoMensaje }}</div>
           }
 
         </div>
 
+        <!-- BADGE NO LEIDOS -->
+        @if (conversation.cantidadNoLeidos > 0) {
+        <span class="badge-unread">{{ conversation.cantidadNoLeidos }}</span>
+        }
+
       </div>
+
+    </div>
 
     }
 

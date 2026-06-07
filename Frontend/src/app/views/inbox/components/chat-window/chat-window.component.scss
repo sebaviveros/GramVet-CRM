@@ -45,18 +45,12 @@ c-card {
   color: #1a2e25;
 }
 
-.user-info .pet {
-  font-size: 12px;
-  color: #6c8a7a;
-}
-
 .name-row {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-/* AVATAR */
 .avatar {
   width: 38px;
   height: 38px;
@@ -78,7 +72,6 @@ c-card {
   color: #235347;
 }
 
-/* BADGE */
 .category-badge {
   font-size: 11px;
   padding: 2px 9px;
@@ -87,14 +80,14 @@ c-card {
   white-space: nowrap;
 }
 
-.category-badge.cliente {
+.category-badge.abierta {
   background: rgba(35, 83, 71, 0.12);
   color: #235347;
 }
 
-.category-badge.nuevo {
-  background: rgba(142, 182, 155, 0.25);
-  color: #163832;
+.category-badge.cerrada {
+  background: rgba(150, 150, 150, 0.15);
+  color: #555;
 }
 
 .category-badge.pendiente {
@@ -102,7 +95,6 @@ c-card {
   color: #856404;
 }
 
-/* SELECT VETERINARIO */
 .chat-actions select {
   background: #f4f7f5;
   border: 1px solid rgba(35, 83, 71, 0.2);
@@ -112,7 +104,6 @@ c-card {
   color: #235347;
   cursor: pointer;
   outline: none;
-  transition: all 0.2s ease;
 }
 
 .chat-actions select:hover {
@@ -120,14 +111,26 @@ c-card {
 }
 
 /* ===== BODY ===== */
-.chat-body {
+
+// c-card-body wrapper — solo ocupa el espacio disponible, sin scroll propio
+.chat-body-wrapper {
   flex: 1 !important;
-  overflow-y: auto !important;
-  padding: 20px 16px !important;
-  background: #f4f7f5;
   min-height: 0 !important;
-  display: block !important;
-  height: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+// El div nativo que REALMENTE hace el scroll
+.scroll-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 16px;
+  background: #f4f7f5;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 /* ===== FOOTER ===== */
@@ -170,9 +173,7 @@ c-card-footer {
     align-self: flex-end;
     border-bottom-right-radius: 4px;
 
-    .message-time {
-      color: rgba(255, 255, 255, 0.65);
-    }
+    .message-time { color: rgba(255,255,255,0.65); }
   }
 
   &.received {
@@ -182,19 +183,10 @@ c-card-footer {
     border-bottom-left-radius: 4px;
     border: 1px solid rgba(0,0,0,0.06);
 
-    .message-time {
-      color: #999;
-    }
+    .message-time { color: #999; }
   }
 }
-.messages-container {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-height: 100%;
-}
 
-/* Hora del mensaje */
 .message-time {
   font-size: 11px;
   text-align: right;
@@ -202,7 +194,6 @@ c-card-footer {
   display: block;
 }
 
-/* Imagen */
 .message-image {
   max-width: 250px;
   min-width: 150px;
@@ -212,12 +203,9 @@ c-card-footer {
   display: block;
   transition: opacity 0.2s;
 
-  &:hover {
-    opacity: 0.85;
-  }
+  &:hover { opacity: 0.85; }
 }
 
-/* Contenedor imagen con hora encima */
 .image-wrapper {
   position: relative;
   display: inline-block;
@@ -228,13 +216,12 @@ c-card-footer {
     right: 8px;
     font-size: 11px;
     color: #fff;
-    background: rgba(0, 0, 0, 0.45);
+    background: rgba(0,0,0,0.45);
     padding: 1px 6px;
     border-radius: 4px;
   }
 }
 
-/* Audio */
 .audio-wrapper {
   display: flex;
   flex-direction: column;
@@ -245,14 +232,9 @@ c-card-footer {
     border-radius: 20px;
     outline: none;
     display: block;
-
-    &::-webkit-media-controls-panel {
-      background-color: #e8f0ec;
-    }
   }
 }
 
-/* Video */
 video {
   max-width: 250px;
   width: 100%;
@@ -270,19 +252,15 @@ video {
   font-weight: 500;
 }
 
-.btn-primary:hover {
-  opacity: 0.88;
-}
+.btn-primary:hover { opacity: 0.88; }
 
-.clickable:hover {
-  background: rgba(0,0,0,0.02);
-}
+.clickable:hover { background: rgba(0,0,0,0.02); }
 
-//Lightbox
+/* ===== LIGHTBOX ===== */
 .lightbox-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0,0,0,0.85);
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -322,24 +300,31 @@ video {
   z-index: 10000;
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 
-  &:hover {
-    background: #f0f0f0;
+  &:hover { background: #f0f0f0; }
+}
+
+/* ===== SCROLL INFINITO ===== */
+.loading-more {
+  text-align: center;
+  padding: 8px 0 4px;
+  font-size: 12px;
+  color: #6c8a7a;
+
+  span {
+    background: rgba(35,83,71,0.08);
+    padding: 4px 14px;
+    border-radius: 20px;
   }
 }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 992px) {
-  .message {
-    max-width: 85%;
-  }
+  .message { max-width: 85%; }
 }
 
 @media (max-width: 768px) {
   .message {
     max-width: 85%;
-
-    .message-image {
-      max-width: 200px;
-    }
+    .message-image { max-width: 200px; }
   }
 }

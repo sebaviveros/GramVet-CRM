@@ -20,7 +20,7 @@ export interface MensajeDto {
   id: number;
   conversacionId: number;
   contenido?: string;
-  mediaUrl?: string; 
+  mediaUrl?: string;
   tipoMensaje?: string;
   direccion: string; // inbound / outbound
   fechaEnvio: Date;
@@ -31,8 +31,14 @@ export interface EnviarMensajeDto {
   conversacionId: number;
   contenido?: string;
   tipoMensaje: string;
-  mediaId?: string;      
-  caption?: string;      
+  mediaId?: string;
+  mediaUrl?: string;
+  caption?: string;
+}
+
+export interface SubirImagenResponse {
+  mediaId: string;
+  mediaUrl: string | null;
 }
 
 @Injectable({
@@ -42,7 +48,7 @@ export class ConversacionService {
 
   private apiUrl = 'https://localhost:7101/api/Conversacion';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getAll(): Observable<ConversacionDto[]> {
     return this.http.get<ConversacionDto[]>(this.apiUrl);
@@ -58,9 +64,13 @@ export class ConversacionService {
     return this.http.post<MensajeDto>(`${this.apiUrl}/mensaje`, dto);
   }
 
-  subirImagen(file: File): Observable<{ mediaId: string }> {
-  const formData = new FormData();
-  formData.append('file', file);
-  return this.http.post<{ mediaId: string }>(`${this.apiUrl}/upload-imagen`, formData);
-}
+  subirImagen(file: File): Observable<SubirImagenResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<SubirImagenResponse>(`${this.apiUrl}/upload-imagen`, formData);
+  }
+
+  marcarLeida(conversacionId: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${conversacionId}/leer`, {});
+  }
 }
