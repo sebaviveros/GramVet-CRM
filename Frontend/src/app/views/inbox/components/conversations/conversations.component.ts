@@ -38,6 +38,8 @@ export class ConversationsComponent {
       next: (data) => {
         this.state.setMessages(conversacionId, data);
         this.state.setLoadingMessages(false);
+        // Disparar scroll al fondo DESPUÉS de que los mensajes están en el state
+        this.state.triggerScrollToBottom();
       },
       error: (err) => {
         console.error('Error cargando mensajes', err);

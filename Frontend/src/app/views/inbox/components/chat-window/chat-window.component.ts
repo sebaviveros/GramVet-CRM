@@ -7,12 +7,14 @@ import {
   effect,
   AfterViewChecked,
   OnDestroy,
-  NgZone
+  afterNextRender,
+  Injector
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CardModule } from '@coreui/angular';
 import { InboxStateService } from '../../../../services/inbox/inbox-state.service';
 import { ConversacionService } from '../../../../services/conversacion/conversacion.service';
+import { EtiquetaService, EtiquetaDto } from '../../../../services/etiqueta/etiqueta.service';
 
 const PAGE_SIZE = 15;
 
@@ -27,36 +29,47 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
 
   state = inject(InboxStateService);
   conversacionService = inject(ConversacionService);
-  #zone = inject(NgZone);
+  etiquetaService = inject(EtiquetaService);
+  #injector = inject(Injector);
 
   messageInput = signal('');
   imagenSeleccionada = signal<File | null>(null);
   imagenPreview = signal<string | null>(null);
   lightboxUrl = signal<string | null>(null);
+  etiquetasContacto = signal<EtiquetaDto[]>([]);
 
   @ViewChild('scrollContainer')
   scrollContainer?: ElementRef<HTMLDivElement>;
-
-  // ID de conversación para la cual hay que scrollear al fondo.
-  // Se setea cuando cambia la conversación seleccionada o llega un mensaje nuevo.
-  // Se limpia SOLO cuando el DOM ya muestra mensajes de ESA conversación.
-  #pendingScrollConvId: number | null = null;
 
   #scrollHeightBeforePrepend = 0;
   #isPrepending = false;
 
   constructor() {
-    // Observar cambios en los mensajes seleccionados
+    // Cargar etiquetas del contacto cuando cambia la conversación seleccionada
     effect(() => {
-      const msgs = this.state.selectedMessages();
       const conv = this.state.selectedConversation();
-
-      if (!conv || this.#isPrepending) return;
-
-      // Hay mensajes de la conversación actual → pedir scroll al fondo
-      if (msgs.length > 0) {
-        this.#pendingScrollConvId = conv.id;
+      if (conv) {
+        this.etiquetaService.getByContacto(conv.contactoId).subscribe(e => this.etiquetasContacto.set(e));
+      } else {
+        this.etiquetasContacto.set([]);
       }
+    });
+
+    // Scroll al fondo
+    // Usamos afterNextRender para garantizar que el DOM ya tiene los mensajes
+    // nuevos renderizados antes de ejecutar el scroll — elimina la race condition
+    // que había con ngAfterViewChecked.
+    effect(() => {
+      // Leer el counter para que el effect se re-ejecute cada vez que cambia
+      const counter = this.state.scrollToBottomCounter();
+      if (counter === 0) return; // valor inicial, ignorar
+
+      afterNextRender(() => {
+        const el = this.scrollContainer?.nativeElement;
+        if (el) {
+          el.scrollTop = el.scrollHeight;
+        }
+      }, { injector: this.#injector });
     });
   }
 
@@ -64,28 +77,13 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
     const el = this.scrollContainer?.nativeElement;
     if (!el) return;
 
-    // Restaurar posición después de un prepend
+    // Restaurar posición después de un prepend (scroll infinito hacia arriba)
     if (this.#isPrepending && this.#scrollHeightBeforePrepend > 0) {
       const added = el.scrollHeight - this.#scrollHeightBeforePrepend;
       if (added > 0) {
         el.scrollTop = added;
         this.#isPrepending = false;
         this.#scrollHeightBeforePrepend = 0;
-      }
-      return;
-    }
-
-    // Scroll al fondo: solo si los mensajes del DOM corresponden
-    // a la conversación pendiente (evita scrollear con mensajes viejos)
-    if (this.#pendingScrollConvId !== null) {
-      const conv = this.state.selectedConversation();
-      const msgs = this.state.selectedMessages();
-
-      // Verificar que el DOM ya tiene los mensajes de ESTA conversación
-      // (msgs.length > 0 y la conversación activa coincide con la pendiente)
-      if (conv?.id === this.#pendingScrollConvId && msgs.length > 0 && el.scrollHeight > 100) {
-        el.scrollTop = el.scrollHeight;
-        this.#pendingScrollConvId = null;
       }
     }
   }

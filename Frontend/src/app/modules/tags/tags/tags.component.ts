@@ -1,71 +1,101 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-import {
-  CardModule,
-  ButtonModule,
-  FormModule
-} from '@coreui/angular';
-
-interface Tag {
-  id: number;
-  name: string;
-  desc: string;
-  color: string;
-}
+import { CardModule, ButtonModule, FormModule } from '@coreui/angular';
+import { EtiquetaService, EtiquetaDto } from '../../../services/etiqueta/etiqueta.service';
 
 @Component({
   selector: 'app-tags',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    CardModule,
-    ButtonModule,
-    FormModule
-  ],
+  imports: [CommonModule, FormsModule, CardModule, ButtonModule, FormModule],
   templateUrl: './tags.component.html',
   styleUrl: './tags.component.scss'
 })
-export class TagsComponent {
+export class TagsComponent implements OnInit {
 
-  tags: Tag[] = [
-    { id: 1, name: 'Cliente',        desc: 'Cliente habitual',    color: '#235347' },
-    { id: 2, name: 'Nuevo cliente',  desc: 'Primera atención',    color: '#8EB69B' },
-    { id: 3, name: 'Caso pendiente', desc: 'Requiere seguimiento', color: '#FFC107' },
-  ];
+  etiquetaService = inject(EtiquetaService);
 
-  newTag: Omit<Tag, 'id'> = { name: '', desc: '', color: '#235347' };
-  searchTerm = '';
-  private nextId = 4;
+  etiquetas = signal<EtiquetaDto[]>([]);
+  searchTerm = signal('');
+  cargando = signal(false);
 
-  get filteredTags(): Tag[] {
-    const term = this.searchTerm.toLowerCase();
-    if (!term) return this.tags;
-    return this.tags.filter(
-      t =>
-        t.name.toLowerCase().includes(term) ||
-        t.desc.toLowerCase().includes(term)
+  // Formulario crear
+  nuevoNombre = signal('');
+  nuevoColor = signal('#235347');
+  nuevoDesc = signal('');
+
+  // Edición inline
+  editandoId = signal<number | null>(null);
+  editNombre = signal('');
+  editColor = signal('');
+  editDesc = signal('');
+
+  filtradas = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    if (!term) return this.etiquetas();
+    return this.etiquetas().filter(e =>
+      e.nombre.toLowerCase().includes(term) ||
+      (e.descripcion ?? '').toLowerCase().includes(term)
     );
+  });
+
+  ngOnInit() {
+    this.cargar();
   }
 
-  createTag(): void {
-    if (!this.newTag.name.trim()) return;
-    this.tags = [...this.tags, { id: this.nextId++, ...this.newTag }];
-    this.clearForm();
+  cargar() {
+    this.cargando.set(true);
+    this.etiquetaService.getAll().subscribe({
+      next: (data) => { this.etiquetas.set(data); this.cargando.set(false); },
+      error: () => this.cargando.set(false)
+    });
   }
 
-  editTag(tag: Tag): void {
-    this.newTag = { name: tag.name, desc: tag.desc, color: tag.color };
-    this.deleteTag(tag.id);
+  crear() {
+    const nombre = this.nuevoNombre().trim();
+    if (!nombre) return;
+
+    this.etiquetaService.crear({
+      nombre,
+      color: this.nuevoColor(),
+      descripcion: this.nuevoDesc().trim() || undefined
+    }).subscribe(nueva => {
+      this.etiquetas.update(list => [...list, nueva]);
+      this.nuevoNombre.set('');
+      this.nuevoColor.set('#235347');
+      this.nuevoDesc.set('');
+    });
   }
 
-  deleteTag(id: number): void {
-    this.tags = this.tags.filter(t => t.id !== id);
+  iniciarEdicion(e: EtiquetaDto) {
+    this.editandoId.set(e.id);
+    this.editNombre.set(e.nombre);
+    this.editColor.set(e.color ?? '#235347');
+    this.editDesc.set(e.descripcion ?? '');
   }
 
-  clearForm(): void {
-    this.newTag = { name: '', desc: '', color: '#235347' };
+  cancelarEdicion() {
+    this.editandoId.set(null);
+  }
+
+  guardarEdicion(id: number) {
+    const nombre = this.editNombre().trim();
+    if (!nombre) return;
+
+    this.etiquetaService.editar(id, {
+      nombre,
+      color: this.editColor(),
+      descripcion: this.editDesc().trim() || undefined
+    }).subscribe(actualizada => {
+      this.etiquetas.update(list => list.map(e => e.id === id ? actualizada : e));
+      this.editandoId.set(null);
+    });
+  }
+
+  eliminar(id: number) {
+    if (!confirm('¿Eliminar esta etiqueta?')) return;
+    this.etiquetaService.eliminar(id).subscribe(() => {
+      this.etiquetas.update(list => list.filter(e => e.id !== id));
+    });
   }
 }

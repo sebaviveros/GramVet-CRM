@@ -351,6 +351,40 @@ tbody td {
 }
 
 // ========================
+// EDITING ROW
+// ========================
+
+.editing-row {
+  background: rgba(35, 83, 71, 0.03);
+}
+
+.edit-input {
+  border-radius: 8px !important;
+  border: 1px solid rgba(35, 83, 71, 0.3) !important;
+  background: #fff !important;
+  font-size: 12px;
+  padding: 5px 10px;
+
+  &:focus {
+    box-shadow: 0 0 0 2px rgba(35, 83, 71, 0.15) !important;
+    border-color: #235347 !important;
+  }
+}
+
+.color-preview--sm {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+}
+
+.icon-btn--save {
+  &:hover {
+    background: rgba(35, 83, 71, 0.1);
+    color: #235347;
+  }
+}
+
+// ========================
 // EMPTY STATE
 // ========================
 

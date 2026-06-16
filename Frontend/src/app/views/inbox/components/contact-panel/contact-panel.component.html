@@ -1,10 +1,6 @@
 <c-card class="h-100 contact-card">
 
-  <button
-    class="back-button d-lg-none"
-    (click)="goBackToChat()">
-    ← Volver
-  </button>
+  <button class="back-button d-lg-none" (click)="goBackToChat()">← Volver</button>
 
   <c-card-body class="contact-body">
 
@@ -19,27 +15,79 @@
         {{ state.selectedConversation()?.apellidoContacto }}
       </div>
 
-      <div class="phone">
-        {{ state.selectedConversation()?.telefono }}
+      <div class="phone">{{ state.selectedConversation()?.telefono }}</div>
+      <div class="canal">Canal: {{ state.selectedConversation()?.canal }}</div>
+      <div class="client-id">ID Contacto: {{ state.selectedConversation()?.contactoId }}</div>
+      <div class="estado">Estado: {{ state.selectedConversation()?.estado }}</div>
+
+      <!-- ===== ASIGNAR VETERINARIO ===== -->
+      <div class="asignar-section">
+        <div class="section-title">Veterinario asignado</div>
+        <select class="vet-select"
+                [value]="state.selectedConversation()?.usuarioAsignado ?? ''"
+                (change)="state.setAssignedVet(state.selectedConversation()!.id, $any($event.target).value)">
+          <option value="">Sin asignar</option>
+          @for (vet of state.vets; track vet) {
+            <option [value]="vet">{{ vet }}</option>
+          }
+        </select>
       </div>
 
-      <div class="canal">
-        Canal: {{ state.selectedConversation()?.canal }}
+      <!-- ===== ETIQUETAS ===== -->
+      <div class="etiquetas-section">
+
+        <div class="section-title">Etiquetas</div>
+
+        <!-- Chips asignadas -->
+        <div class="etiquetas-list">
+          @for (etiqueta of etiquetasContacto(); track etiqueta.id) {
+            <span class="etiqueta-chip"
+                  [style.background]="(etiqueta.color ?? '#235347') + '22'"
+                  [style.color]="etiqueta.color ?? '#235347'"
+                  [style.border-color]="(etiqueta.color ?? '#235347') + '55'">
+              {{ etiqueta.nombre }}
+              <button class="etiqueta-remove" (click)="quitar(etiqueta.id)"
+                      [style.color]="etiqueta.color ?? '#235347'">✕</button>
+            </span>
+          }
+          @if (etiquetasContacto().length === 0) {
+            <span class="sin-etiquetas">Sin etiquetas</span>
+          }
+        </div>
+
+        <!-- Botón mostrar selector -->
+        @if (!mostrarSelector()) {
+          <button class="btn-agregar-etiqueta" (click)="mostrarSelector.set(true)">
+            + Agregar etiqueta
+          </button>
+        }
+
+        <!-- Selector de etiquetas disponibles -->
+        @if (mostrarSelector()) {
+          <div class="etiqueta-selector">
+            @if (etiquetasDisponibles().length > 0) {
+              <div class="etiquetas-disponibles">
+                @for (etiqueta of etiquetasDisponibles(); track etiqueta.id) {
+                  <button class="etiqueta-option" (click)="asignar(etiqueta.id)"
+                          [style.border-color]="(etiqueta.color ?? '#235347') + '88'">
+                    <span class="etiqueta-dot" [style.background]="etiqueta.color ?? '#235347'"></span>
+                    {{ etiqueta.nombre }}
+                  </button>
+                }
+              </div>
+            } @else {
+              <p class="sin-disponibles">
+                Todas las etiquetas ya están asignadas
+              </p>
+            }
+            <button class="btn-cancelar" (click)="mostrarSelector.set(false)">Cancelar</button>
+          </div>
+        }
+
       </div>
 
-      <div class="client-id">
-        ID Contacto: {{ state.selectedConversation()?.contactoId }}
-      </div>
-
-      <div class="estado">
-        Estado: {{ state.selectedConversation()?.estado }}
-      </div>
-
-    }
-    @else {
-
+    } @else {
       <p>Seleccione una conversación</p>
-
     }
 
   </c-card-body>

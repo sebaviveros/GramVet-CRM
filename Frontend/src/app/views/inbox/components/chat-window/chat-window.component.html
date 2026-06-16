@@ -11,27 +11,41 @@
         <button class="back-button d-lg-none" (click)="goBackToConversations($event)">←</button>
         <div class="avatar">{{ state.selectedConversation()?.nombreContacto?.charAt(0) }}</div>
         <div class="user-info">
-          <div class="name-row">
+          <!-- Columna izquierda: nombre + canal -->
+          <div class="user-info-left">
             <span class="name">
               {{ state.selectedConversation()?.nombreContacto }}
               {{ state.selectedConversation()?.apellidoContacto }}
             </span>
-            <span class="category-badge" [ngClass]="state.selectedConversation()?.estado?.toLowerCase()">
-              {{ state.selectedConversation()?.estado === 'Abierta' ? 'Abierta' :
-                 state.selectedConversation()?.estado === 'Cerrada' ? 'Cerrada' :
-                 state.selectedConversation()?.estado === 'Pendiente' ? 'Pendiente' : '' }}
-            </span>
+            <span class="canal">{{ state.selectedConversation()?.canal }}</span>
           </div>
-          <div class="canal">{{ state.selectedConversation()?.canal }}</div>
+          <!-- Columna derecha: etiqueta fila 1 / etiqueta fila 2 + contador -->
+          @if (etiquetasContacto().length > 0) {
+            <div class="user-info-tags">
+              <span class="header-etiqueta"
+                    [style.background]="(etiquetasContacto()[0].color ?? '#235347') + '22'"
+                    [style.color]="etiquetasContacto()[0].color ?? '#235347'"
+                    [style.border-color]="(etiquetasContacto()[0].color ?? '#235347') + '66'"
+                    [title]="etiquetasContacto()[0].nombre">
+                {{ etiquetasContacto()[0].nombre }}
+              </span>
+              @if (etiquetasContacto().length > 1) {
+                <div class="tags-second-row">
+                  <span class="header-etiqueta"
+                        [style.background]="(etiquetasContacto()[1].color ?? '#235347') + '22'"
+                        [style.color]="etiquetasContacto()[1].color ?? '#235347'"
+                        [style.border-color]="(etiquetasContacto()[1].color ?? '#235347') + '66'"
+                        [title]="etiquetasContacto()[1].nombre">
+                    {{ etiquetasContacto()[1].nombre }}
+                  </span>
+                  @if (etiquetasContacto().length > 2) {
+                    <span class="header-etiqueta-mas">+{{ etiquetasContacto().length - 2 }}</span>
+                  }
+                </div>
+              }
+            </div>
+          }
         </div>
-      </div>
-
-      <div class="chat-actions">
-        <select [value]="state.selectedConversation()?.usuarioAsignado"
-          (change)="state.setAssignedVet(state.selectedConversation()!.id, $any($event.target).value)">
-          <option value="">Asignar veterinario</option>
-          <option *ngFor="let vet of state.vets" [value]="vet">{{ vet }}</option>
-        </select>
       </div>
 
     </div>

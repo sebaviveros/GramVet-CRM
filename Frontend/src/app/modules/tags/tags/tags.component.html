@@ -13,56 +13,48 @@
         <span class="header-sub">GramVet CRM</span>
       </div>
     </div>
-    <span class="tag-count-badge">{{ tags.length }} etiquetas</span>
+    <span class="tag-count-badge">{{ etiquetas().length }} etiquetas</span>
   </c-card-header>
 
   <c-card-body>
 
-    <!-- ================= FORM ================= -->
-
+    <!-- ================= FORM CREAR ================= -->
     <p class="section-label">Nueva etiqueta</p>
 
     <div class="tag-form">
-
       <div class="form-row">
-        <input
-          class="form-control"
-          placeholder="Nombre de etiqueta"
-          [(ngModel)]="newTag.name"
-        />
-        <input
-          class="form-control"
-          placeholder="Descripción (opcional)"
-          [(ngModel)]="newTag.desc"
-        />
+        <input class="form-control" placeholder="Nombre de etiqueta"
+               [value]="nuevoNombre()"
+               (input)="nuevoNombre.set($any($event.target).value)"
+               (keyup.enter)="crear()" />
+        <input class="form-control" placeholder="Descripción (opcional)"
+               [value]="nuevoDesc()"
+               (input)="nuevoDesc.set($any($event.target).value)" />
       </div>
 
       <div class="form-row color-row">
         <span class="color-label">Color</span>
         <div class="color-picker-wrap">
-          <div class="color-preview" [style.background]="newTag.color">
-            <input
-              type="color"
-              [(ngModel)]="newTag.color"
-            />
+          <div class="color-preview" [style.background]="nuevoColor()">
+            <input type="color" [value]="nuevoColor()"
+                   (input)="nuevoColor.set($any($event.target).value)" />
           </div>
-          <span class="color-hex">{{ newTag.color }}</span>
+          <span class="color-hex">{{ nuevoColor() }}</span>
         </div>
       </div>
 
       <div class="form-actions">
-        <button class="btn btn-cancel" (click)="clearForm()">
+        <button class="btn btn-cancel"
+                (click)="nuevoNombre.set(''); nuevoDesc.set(''); nuevoColor.set('#235347')">
           Cancelar
         </button>
-        <button class="btn btn-primary" (click)="createTag()">
+        <button class="btn btn-primary" (click)="crear()">
           + Crear etiqueta
         </button>
       </div>
-
     </div>
 
     <!-- ================= LISTADO ================= -->
-
     <div class="tag-list">
 
       <div class="list-header">
@@ -71,59 +63,114 @@
           <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
-          <input
-            class="form-control search-input"
-            placeholder="Buscar..."
-            [(ngModel)]="searchTerm"
-          />
+          <input class="form-control search-input" placeholder="Buscar..."
+                 [value]="searchTerm()"
+                 (input)="searchTerm.set($any($event.target).value)" />
         </div>
       </div>
 
-      <div class="table-container">
-        <table class="table table-borderless">
-          <thead>
-            <tr>
-              <th>Etiqueta</th>
-              <th>Descripción</th>
-              <th>Color</th>
-              <th class="th-actions">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let tag of filteredTags">
-              <td>
-                <span class="tag-chip" [style.background]="tag.color + '22'" [style.color]="tag.color">
-                  <span class="tag-dot" [style.background]="tag.color"></span>
-                  {{ tag.name }}
-                </span>
-              </td>
-              <td class="td-desc">{{ tag.desc || '—' }}</td>
-              <td>
-                <span class="color-badge" [style.background]="tag.color"></span>
-              </td>
-              <td class="td-actions">
-                <button class="icon-btn" title="Editar" (click)="editTag(tag)">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                  </svg>
-                </button>
-                <button class="icon-btn icon-btn--danger" title="Eliminar" (click)="deleteTag(tag.id)">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="3 6 5 6 21 6"/>
-                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                    <path d="M10 11v6M14 11v6"/>
-                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-                  </svg>
-                </button>
-              </td>
-            </tr>
-            <tr *ngIf="filteredTags.length === 0">
-              <td colspan="4" class="empty-state">Sin resultados</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      @if (cargando()) {
+        <div class="text-center py-4" style="color: #9ab5aa; font-size: 13px;">Cargando etiquetas...</div>
+      } @else {
+        <div class="table-container">
+          <table class="table table-borderless">
+            <thead>
+              <tr>
+                <th>Etiqueta</th>
+                <th>Descripción</th>
+                <th>Color</th>
+                <th class="th-actions">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (tag of filtradas(); track tag.id) {
+                <!-- FILA NORMAL -->
+                @if (editandoId() !== tag.id) {
+                  <tr>
+                    <td>
+                      <span class="tag-chip"
+                            [style.background]="(tag.color ?? '#235347') + '22'"
+                            [style.color]="tag.color ?? '#235347'">
+                        <span class="tag-dot" [style.background]="tag.color ?? '#235347'"></span>
+                        {{ tag.nombre }}
+                      </span>
+                    </td>
+                    <td class="td-desc">{{ tag.descripcion || '—' }}</td>
+                    <td>
+                      <span class="color-badge" [style.background]="tag.color ?? '#235347'"></span>
+                    </td>
+                    <td class="td-actions">
+                      <button class="icon-btn" title="Editar" (click)="iniciarEdicion(tag)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                      </button>
+                      <button class="icon-btn icon-btn--danger" title="Eliminar" (click)="eliminar(tag.id)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="3 6 5 6 21 6"/>
+                          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                          <path d="M10 11v6M14 11v6"/>
+                          <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                }
+
+                <!-- FILA EN EDICIÓN -->
+                @if (editandoId() === tag.id) {
+                  <tr class="editing-row">
+                    <td>
+                      <input class="form-control form-control-sm edit-input"
+                             [value]="editNombre()"
+                             (input)="editNombre.set($any($event.target).value)"
+                             (keyup.enter)="guardarEdicion(tag.id)"
+                             (keyup.escape)="cancelarEdicion()" />
+                    </td>
+                    <td>
+                      <input class="form-control form-control-sm edit-input"
+                             placeholder="Descripción"
+                             [value]="editDesc()"
+                             (input)="editDesc.set($any($event.target).value)"
+                             (keyup.enter)="guardarEdicion(tag.id)"
+                             (keyup.escape)="cancelarEdicion()" />
+                    </td>
+                    <td>
+                      <div class="color-picker-wrap">
+                        <div class="color-preview color-preview--sm" [style.background]="editColor()">
+                          <input type="color" [value]="editColor()"
+                                 (input)="editColor.set($any($event.target).value)" />
+                        </div>
+                      </div>
+                    </td>
+                    <td class="td-actions">
+                      <button class="icon-btn icon-btn--save" title="Guardar" (click)="guardarEdicion(tag.id)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                      </button>
+                      <button class="icon-btn" title="Cancelar" (click)="cancelarEdicion()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              }
+
+              @if (filtradas().length === 0 && !cargando()) {
+                <tr>
+                  <td colspan="4" class="empty-state">
+                    {{ searchTerm() ? 'Sin resultados para "' + searchTerm() + '"' : 'No hay etiquetas creadas' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
 
     </div>
 

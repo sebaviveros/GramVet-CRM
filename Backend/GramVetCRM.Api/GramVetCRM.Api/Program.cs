@@ -67,6 +67,7 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IConversacionRepository, ConversacionRepository>();
 builder.Services.AddScoped<IMensajeRepository, MensajeRepository>();
 builder.Services.AddScoped<IContactoRepository, ContactoRepository>();
+builder.Services.AddScoped<IEtiquetaRepository, EtiquetaRepository>();
 
 //Services
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
@@ -74,6 +75,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IConversacionService, ConversacionService>();
 builder.Services.AddScoped<IWhatsAppService, WhatsAppService>();
 builder.Services.AddSingleton<IR2StorageService, R2StorageService>();
+builder.Services.AddScoped<IEtiquetaService, EtiquetaService>();
 
 builder.Services.AddScoped<JwtHelper>();
 

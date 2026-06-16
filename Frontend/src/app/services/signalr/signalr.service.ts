@@ -33,10 +33,16 @@ export class SignalRService {
   private registrarEventos(): void {
     if (!this.hubConnection) return;
 
-    // Mensaje nuevo en conversación abierta
+    // Mensaje nuevo
     this.hubConnection.on('NuevoMensaje', (mensaje: Message) => {
       console.log('Mensaje recibido via SignalR:', mensaje);
       this.state.addMessage(mensaje);
+
+      // Si el mensaje es de la conversación activa, scrollear al fondo
+      const convActiva = this.state.selectedConversation();
+      if (convActiva && mensaje.conversacionId === convActiva.id) {
+        this.state.triggerScrollToBottom();
+      }
     });
 
     // Conversación actualizada o nueva

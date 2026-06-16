@@ -45,6 +45,10 @@ export class InboxStateService {
   // Si ya no hay más páginas para una conversación
   private _noMoreMessages = signal<Record<number, boolean>>({});
 
+  // Trigger para scroll al fondo: emite un contador que se incrementa cada vez
+  // que hay que scrollear (permite disparar aunque el convId sea el mismo)
+  private _scrollToBottomCounter = signal<number>(0);
+
   vets = ['Dr. Soto', 'Dra. Pérez', 'Dr. González'];
 
   // COMPUTED
@@ -54,6 +58,7 @@ export class InboxStateService {
   loadingConversations = computed(() => this._loadingConversations());
   loadingMessages = computed(() => this._loadingMessages());
   loadingMoreMessages = computed(() => this._loadingMoreMessages());
+  scrollToBottomCounter = computed(() => this._scrollToBottomCounter());
 
   isRightPanelOpen = computed(() => this._activeRightPanel() !== null);
 
@@ -138,6 +143,11 @@ export class InboxStateService {
         [message.conversacionId]: [...existing, message]
       };
     });
+  }
+
+  // Dispara scroll al fondo en el chat-window activo
+  triggerScrollToBottom() {
+    this._scrollToBottomCounter.update(n => n + 1);
   }
 
   setMobileView(view: 'conversations' | 'chat' | 'contact') {
