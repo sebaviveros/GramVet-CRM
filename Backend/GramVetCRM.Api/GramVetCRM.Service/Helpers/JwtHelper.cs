@@ -30,7 +30,9 @@ namespace GramVetCRM.Service.Helpers
             {
                 new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
                 new Claim(ClaimTypes.Name, usuario.Username ?? ""),
-                new Claim(ClaimTypes.Role, usuario.RolId.ToString())
+                new Claim(ClaimTypes.Role, usuario.RolId.ToString()),
+                new Claim("rolId", usuario.RolId.ToString()),
+                new Claim("rolNombre", usuario.Rol?.Nombre ?? "")
             };
 
             var token = new JwtSecurityToken(

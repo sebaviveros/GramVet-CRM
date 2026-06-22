@@ -1,4 +1,4 @@
-﻿using GramVetCRM.Model;
+using GramVetCRM.Model;
 using GramVetCRM.Repository.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +17,12 @@ namespace GramVetCRM.Repository.Repositories
         {
             return await _context.Contacto
                 .FirstOrDefaultAsync(c => c.Telefono == telefono && c.Active);
+        }
+
+        public async Task<Contacto?> GetById(int id)
+        {
+            return await _context.Contacto
+                .FirstOrDefaultAsync(c => c.Id == id && c.Active);
         }
 
         public async Task Add(Contacto contacto)

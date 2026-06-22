@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
+import { AuthService } from '../../services/auth/auth.service';
 import { NgScrollbar } from 'ngx-scrollbar';
 
 import { IconDirective } from '@coreui/icons-angular';
@@ -48,5 +49,10 @@ function isOverflown(element: HTMLElement) {
   ]
 })
 export class DefaultLayoutComponent {
-  public navItems = [...navItems];
+  #auth = inject(AuthService);
+
+  // Oculta "Usuarios" del menú si el usuario no es administrador
+  public navItems = this.#auth.isAdmin()
+    ? [...navItems]
+    : navItems.filter(item => item.name !== 'Usuarios');
 }

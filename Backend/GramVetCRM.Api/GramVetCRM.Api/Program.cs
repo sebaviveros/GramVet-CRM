@@ -50,6 +50,22 @@ builder.Services.AddAuthentication(options =>
             Encoding.UTF8.GetBytes(jwtSettings["Key"])
         )
     };
+
+    // Permite que SignalR reciba el JWT por query string (?access_token=...)
+    // en la conexión WebSocket al hub /hubs/chat
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/chat"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
 // Add services to the container.
@@ -68,6 +84,9 @@ builder.Services.AddScoped<IConversacionRepository, ConversacionRepository>();
 builder.Services.AddScoped<IMensajeRepository, MensajeRepository>();
 builder.Services.AddScoped<IContactoRepository, ContactoRepository>();
 builder.Services.AddScoped<IEtiquetaRepository, EtiquetaRepository>();
+builder.Services.AddScoped<IRespuestaRapidaRepository, RespuestaRapidaRepository>();
+builder.Services.AddScoped<IMascotaRepository, MascotaRepository>();
+builder.Services.AddScoped<IRolRepository, RolRepository>();
 
 //Services
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
@@ -76,6 +95,11 @@ builder.Services.AddScoped<IConversacionService, ConversacionService>();
 builder.Services.AddScoped<IWhatsAppService, WhatsAppService>();
 builder.Services.AddSingleton<IR2StorageService, R2StorageService>();
 builder.Services.AddScoped<IEtiquetaService, EtiquetaService>();
+builder.Services.AddScoped<IRespuestaRapidaService, RespuestaRapidaService>();
+builder.Services.AddScoped<IContactoService, ContactoService>();
+builder.Services.AddScoped<IMascotaService, MascotaService>();
+builder.Services.AddScoped<IRolService, RolService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddScoped<JwtHelper>();
 

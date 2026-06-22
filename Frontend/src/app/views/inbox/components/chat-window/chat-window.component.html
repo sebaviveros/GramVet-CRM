@@ -54,7 +54,6 @@
   </c-card-header>
 
   <!-- ================= BODY ================= -->
-  <!-- div nativo con #scrollContainer — controlamos 100% el scroll aquí -->
   <c-card-body class="chat-body-wrapper">
     <div #scrollContainer class="scroll-container" (scroll)="onScroll()">
 
@@ -118,6 +117,19 @@
 
   <!-- ================= FOOTER ================= -->
   <c-card-footer>
+
+    <!-- Panel de sugerencias de respuestas rápidas -->
+    @if (mostrarSugerencias()) {
+      <div class="quick-replies-panel">
+        @for (r of sugerencias(); track r.id) {
+          <div class="quick-reply-item" (click)="seleccionarRespuesta(r)">
+            <span class="quick-reply-comando">/{{ r.comando }}</span>
+            <span class="quick-reply-texto">{{ r.texto }}</span>
+          </div>
+        }
+      </div>
+    }
+
     <div class="d-flex gap-2 align-items-center">
 
       <label class="btn btn-outline-secondary mb-0" style="cursor: pointer;">
@@ -136,7 +148,9 @@
         (input)="messageInput.set($any($event.target).value)" (keyup.enter)="sendMessage()"
         [disabled]="!!imagenSeleccionada()">
 
-      <button class="btn btn-primary" (click)="sendMessage()">Enviar</button>
+      <button class="btn btn-primary" (click)="sendMessage()" [disabled]="enviando()">
+        {{ enviando() ? 'Enviando...' : 'Enviar' }}
+      </button>
 
     </div>
   </c-card-footer>

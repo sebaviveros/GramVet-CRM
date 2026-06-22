@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CardModule, ButtonModule, FormModule } from '@coreui/angular';
 import { EtiquetaService, EtiquetaDto } from '../../../services/etiqueta/etiqueta.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-tags',
@@ -93,9 +94,19 @@ export class TagsComponent implements OnInit {
   }
 
   eliminar(id: number) {
-    if (!confirm('¿Eliminar esta etiqueta?')) return;
-    this.etiquetaService.eliminar(id).subscribe(() => {
-      this.etiquetas.update(list => list.filter(e => e.id !== id));
+    Swal.fire({
+      icon: 'warning',
+      title: '¿Eliminar etiqueta?',
+      text: 'Esta acción no se puede deshacer',
+      showCancelButton: true,
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#dc3545'
+    }).then(res => {
+      if (!res.isConfirmed) return;
+      this.etiquetaService.eliminar(id).subscribe(() => {
+        this.etiquetas.update(list => list.filter(e => e.id !== id));
+      });
     });
   }
 }

@@ -5,7 +5,8 @@ namespace GramVetCRM.Service
 {
     public interface IConversacionService
     {
-        Task<List<ConversacionDto>> GetAll();
+        Task<List<ConversacionDto>> GetAll(int? filtroUsuarioAsignadoId = null);
+        Task<ConversacionDto> AsignarUsuario(int conversacionId, int? usuarioAsignadoId, int actorUsuarioId);
         Task<List<MensajeDto>> GetMensajes(int conversacionId, int page, int pageSize);
         Task<MensajeDto> EnviarMensaje(EnviarMensajeDto dto, int usuarioId);
         Task MarcarComoLeida(int conversacionId);

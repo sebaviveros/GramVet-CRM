@@ -19,5 +19,6 @@
         // Navegación
         public Contacto Contacto { get; set; }
         public Canal Canal { get; set; }
+        public Usuario? UsuarioAsignado { get; set; }
     }
 }

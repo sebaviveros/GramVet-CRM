@@ -12,6 +12,7 @@ namespace GramVetCRM.Repository.Repositories
 
         // ContactoEtiqueta
         Task<List<ContactoEtiqueta>> GetByContacto(int contactoId);
+        Task<List<ContactoEtiqueta>> GetByContactos(List<int> contactoIds);
         Task<ContactoEtiqueta?> GetContactoEtiqueta(int contactoId, int etiquetaId);
         Task AddContactoEtiqueta(ContactoEtiqueta ce);
         Task RemoveContactoEtiqueta(ContactoEtiqueta ce);

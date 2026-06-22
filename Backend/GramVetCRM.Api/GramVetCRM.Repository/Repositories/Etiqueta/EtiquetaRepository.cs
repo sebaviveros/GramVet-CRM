@@ -50,7 +50,15 @@ namespace GramVetCRM.Repository.Repositories
         {
             return await _context.ContactoEtiqueta
                 .Include(ce => ce.Etiqueta)
-                .Where(ce => ce.ContactoId == contactoId && ce.Active)
+                .Where(ce => ce.ContactoId == contactoId && ce.Active && ce.Etiqueta.Active)
+                .ToListAsync();
+        }
+
+        public async Task<List<ContactoEtiqueta>> GetByContactos(List<int> contactoIds)
+        {
+            return await _context.ContactoEtiqueta
+                .Include(ce => ce.Etiqueta)
+                .Where(ce => contactoIds.Contains(ce.ContactoId) && ce.Active && ce.Etiqueta.Active)
                 .ToListAsync();
         }
 

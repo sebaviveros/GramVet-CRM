@@ -1,53 +1,118 @@
 <c-card class="h-100">
 
-  <c-card-header>
-    Conversaciones
+  <c-card-header class="conv-header">
+    <span>Conversaciones</span>
+    <button class="filtros-toggle" [class.activo]="filtroActivo()"
+            (click)="mostrarFiltros.set(!mostrarFiltros())" title="Filtros">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+      </svg>
+    </button>
   </c-card-header>
+
+  <!-- ================= FILTROS ================= -->
+  @if (mostrarFiltros()) {
+    <div class="filtros-panel">
+
+      <input class="filtro-input" placeholder="Buscar nombre o teléfono..."
+        [value]="searchText()" (input)="searchText.set($any($event.target).value)" />
+
+      <div class="filtro-row">
+        <select class="filtro-select" [value]="estadoFiltro()"
+          (change)="estadoFiltro.set($any($event.target).value)">
+          <option value="">Todos los estados</option>
+          <option value="Abierta">Abierta</option>
+          <option value="Pendiente">Pendiente</option>
+          <option value="Cerrada">Cerrada</option>
+        </select>
+
+        <select class="filtro-select" [value]="etiquetaFiltro() ?? ''"
+          (change)="etiquetaFiltro.set($any($event.target).value ? +$any($event.target).value : null)">
+          <option value="">Todas las etiquetas</option>
+          @for (et of etiquetas(); track et.id) {
+            <option [value]="et.id">{{ et.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      @if (esStaff) {
+        <div class="filtro-row">
+          <select class="filtro-select" [value]="veterinarioFiltro() ?? ''"
+            (change)="veterinarioFiltro.set($any($event.target).value ? +$any($event.target).value : null)">
+            <option value="">Todos los veterinarios</option>
+            @for (v of veterinarios(); track v.id) {
+              <option [value]="v.id">{{ v.nombre }} {{ v.apellido }}</option>
+            }
+          </select>
+        </div>
+      }
+
+      <div class="filtro-checks">
+        <label class="filtro-check">
+          <input type="checkbox" [checked]="soloNoLeidos()"
+            (change)="soloNoLeidos.set($any($event.target).checked)" />
+          No leídos
+        </label>
+        @if (esStaff) {
+          <label class="filtro-check">
+            <input type="checkbox" [checked]="sinAsignar()"
+              (change)="sinAsignar.set($any($event.target).checked)" />
+            Sin asignar
+          </label>
+        }
+        @if (filtroActivo()) {
+          <button class="filtro-limpiar" (click)="limpiarFiltros()">Limpiar</button>
+        }
+      </div>
+
+    </div>
+  }
 
   <c-card-body class="p-0 conversations-container">
 
     @if (state.loadingConversations()) {
-    <div class="p-3 text-center">Cargando conversaciones...</div>
+      <div class="p-3 text-center">Cargando conversaciones...</div>
     }
 
-    @for (conversation of state.conversations(); track conversation.id) {
+    @for (conversation of conversacionesFiltradas(); track conversation.id) {
 
-    <div class="conversation-item" [class.selected]="state.selectedConversation()?.id === conversation.id"
-      [class.unread]="conversation.cantidadNoLeidos > 0" (click)="onSelectConversation(conversation.id)">
+      <div class="conversation-item" [class.selected]="state.selectedConversation()?.id === conversation.id"
+        [class.unread]="conversation.cantidadNoLeidos > 0" (click)="onSelectConversation(conversation.id)">
 
-      <div class="conversation-row">
+        <div class="conversation-row">
 
-        <!-- AVATAR -->
-        <div class="avatar">
-          {{ conversation.nombreContacto.charAt(0) }}
-        </div>
-
-        <!-- INFO -->
-        <div class="conversation-content">
-
-          <div class="conversation-name">
-            {{ conversation.nombreContacto }} {{ conversation.apellidoContacto }}
+          <div class="avatar">
+            {{ conversation.nombreContacto.charAt(0) }}
           </div>
 
-          <div class="conversation-phone">
-            {{ conversation.telefono }}
+          <div class="conversation-content">
+
+            <div class="conversation-name">
+              {{ conversation.nombreContacto }} {{ conversation.apellidoContacto }}
+            </div>
+
+            <div class="conversation-phone">
+              {{ conversation.telefono }}
+            </div>
+
+            @if (conversation.ultimoMensaje) {
+              <div class="last-message">{{ conversation.ultimoMensaje }}</div>
+            }
+
           </div>
 
-          @if (conversation.ultimoMensaje) {
-          <div class="last-message">{{ conversation.ultimoMensaje }}</div>
+          @if (conversation.cantidadNoLeidos > 0) {
+            <span class="badge-unread">{{ conversation.cantidadNoLeidos }}</span>
           }
 
         </div>
 
-        <!-- BADGE NO LEIDOS -->
-        @if (conversation.cantidadNoLeidos > 0) {
-        <span class="badge-unread">{{ conversation.cantidadNoLeidos }}</span>
-        }
-
       </div>
 
-    </div>
-
+    } @empty {
+      @if (!state.loadingConversations()) {
+        <div class="p-3 text-center sin-resultados">Sin conversaciones</div>
+      }
     }
 
   </c-card-body>

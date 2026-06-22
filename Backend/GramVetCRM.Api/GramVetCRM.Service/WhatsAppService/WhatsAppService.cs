@@ -187,8 +187,13 @@ namespace GramVetCRM.Service
                     UsuarioId = mensaje.UsuarioId
                 };
 
+                // Grupos destino: staff (admin/secretario) + veterinario asignado (si lo hay)
+                var grupos = new List<string> { ChatGroups.Staff };
+                if (conversacion.UsuarioAsignadoId.HasValue)
+                    grupos.Add(ChatGroups.Usuario(conversacion.UsuarioAsignadoId.Value));
+
                 // Notificar mensaje nuevo
-                await _hubContext.Clients.All.SendAsync("NuevoMensaje", mensajeDto);
+                await _hubContext.Clients.Groups(grupos).SendAsync("NuevoMensaje", mensajeDto);
 
                 // Recargar conversación con includes para el DTO
                 conversacion = await _conversacionRepo.GetById(conversacion.Id) ?? conversacion;
@@ -206,10 +211,19 @@ namespace GramVetCRM.Service
                     FechaUltimoMensaje = conversacion.FechaUltimoMensaje,
                     CantidadNoLeidos = conversacion.CantidadNoLeidos,
                     Canal = conversacion.Canal?.Nombre ?? "WhatsApp",
+                    UsuarioAsignado = conversacion.UsuarioAsignado != null
+                        ? $"{conversacion.UsuarioAsignado.Nombre} {conversacion.UsuarioAsignado.Apellido}".Trim()
+                        : null,
+                    UsuarioAsignadoId = conversacion.UsuarioAsignadoId,
                     EsNuevo = conversacion.Contacto?.EsNuevo ?? true
                 };
 
-                await _hubContext.Clients.All.SendAsync("ConversacionActualizada", conversacionDto);
+                // Recalcular grupos por si la conversación recargada trae asignado
+                var gruposConv = new List<string> { ChatGroups.Staff };
+                if (conversacion.UsuarioAsignadoId.HasValue)
+                    gruposConv.Add(ChatGroups.Usuario(conversacion.UsuarioAsignadoId.Value));
+
+                await _hubContext.Clients.Groups(gruposConv).SendAsync("ConversacionActualizada", conversacionDto);
 
                 _logger.LogInformation("Notificaciones SignalR enviadas para conversación {Id}", conversacion.Id);
             }

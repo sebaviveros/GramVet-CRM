@@ -10,35 +10,55 @@
         {{ state.selectedConversation()?.nombreContacto?.charAt(0) }}
       </div>
 
-      <div class="name">
-        {{ state.selectedConversation()?.nombreContacto }}
-        {{ state.selectedConversation()?.apellidoContacto }}
-      </div>
-
-      <div class="phone">{{ state.selectedConversation()?.telefono }}</div>
-      <div class="canal">Canal: {{ state.selectedConversation()?.canal }}</div>
-      <div class="client-id">ID Contacto: {{ state.selectedConversation()?.contactoId }}</div>
-      <div class="estado">Estado: {{ state.selectedConversation()?.estado }}</div>
+      <!-- ===== DATOS DEL CONTACTO ===== -->
+      @if (!editandoContacto()) {
+        <div class="name">
+          {{ contacto()?.nombre ?? state.selectedConversation()?.nombreContacto }}
+          {{ contacto()?.apellido ?? state.selectedConversation()?.apellidoContacto }}
+        </div>
+        <div class="phone">{{ state.selectedConversation()?.telefono }}</div>
+        @if (contacto()?.email) {
+          <div class="email">{{ contacto()?.email }}</div>
+        }
+        <div class="canal">Canal: {{ state.selectedConversation()?.canal }}</div>
+        <button class="btn-editar-contacto" (click)="startEditContacto()">✏ Editar contacto</button>
+      } @else {
+        <div class="edit-contacto-form">
+          <input class="edit-input" placeholder="Nombre *"
+            [value]="editNombre()" (input)="editNombre.set($any($event.target).value)" />
+          <input class="edit-input" placeholder="Apellido"
+            [value]="editApellido()" (input)="editApellido.set($any($event.target).value)" />
+          <input class="edit-input" placeholder="Email"
+            [value]="editEmail()" (input)="editEmail.set($any($event.target).value)" />
+          <div class="edit-contacto-actions">
+            <button class="btn-cancelar-sm" (click)="cancelEditContacto()">Cancelar</button>
+            <button class="btn-guardar-sm" (click)="guardarContacto()">Guardar</button>
+          </div>
+        </div>
+      }
 
       <!-- ===== ASIGNAR VETERINARIO ===== -->
       <div class="asignar-section">
         <div class="section-title">Veterinario asignado</div>
-        <select class="vet-select"
-                [value]="state.selectedConversation()?.usuarioAsignado ?? ''"
-                (change)="state.setAssignedVet(state.selectedConversation()!.id, $any($event.target).value)">
-          <option value="">Sin asignar</option>
-          @for (vet of state.vets; track vet) {
-            <option [value]="vet">{{ vet }}</option>
-          }
-        </select>
+        @if (puedeAsignar) {
+          <select class="vet-select"
+                  [value]="state.selectedConversation()?.usuarioAsignadoId ?? ''"
+                  (change)="asignarVeterinario($any($event.target).value)">
+            <option value="">Sin asignar</option>
+            @for (vet of veterinarios(); track vet.id) {
+              <option [value]="vet.id">{{ vet.nombre }} {{ vet.apellido }}</option>
+            }
+          </select>
+        } @else {
+          <div class="vet-readonly">
+            {{ state.selectedConversation()?.usuarioAsignado ?? 'Sin asignar' }}
+          </div>
+        }
       </div>
 
       <!-- ===== ETIQUETAS ===== -->
       <div class="etiquetas-section">
-
         <div class="section-title">Etiquetas</div>
-
-        <!-- Chips asignadas -->
         <div class="etiquetas-list">
           @for (etiqueta of etiquetasContacto(); track etiqueta.id) {
             <span class="etiqueta-chip"
@@ -54,15 +74,11 @@
             <span class="sin-etiquetas">Sin etiquetas</span>
           }
         </div>
-
-        <!-- Botón mostrar selector -->
         @if (!mostrarSelector()) {
           <button class="btn-agregar-etiqueta" (click)="mostrarSelector.set(true)">
             + Agregar etiqueta
           </button>
         }
-
-        <!-- Selector de etiquetas disponibles -->
         @if (mostrarSelector()) {
           <div class="etiqueta-selector">
             @if (etiquetasDisponibles().length > 0) {
@@ -76,14 +92,122 @@
                 }
               </div>
             } @else {
-              <p class="sin-disponibles">
-                Todas las etiquetas ya están asignadas
-              </p>
+              <p class="sin-disponibles">Todas las etiquetas ya están asignadas</p>
             }
             <button class="btn-cancelar" (click)="mostrarSelector.set(false)">Cancelar</button>
           </div>
         }
+      </div>
 
+      <!-- ===== MASCOTAS ===== -->
+      <div class="mascotas-section">
+        <div class="section-header">
+          <div class="section-title">Mascotas</div>
+          @if (!mostrarFormMascota()) {
+            <button class="btn-add-mascota" (click)="mostrarFormMascota.set(true)" title="Agregar mascota">+</button>
+          }
+        </div>
+
+        <!-- Formulario nueva mascota -->
+        @if (mostrarFormMascota()) {
+          <div class="mascota-form">
+            <input class="edit-input" placeholder="Nombre *"
+              [value]="newMascotaNombre()" (input)="newMascotaNombre.set($any($event.target).value)" />
+            <input class="edit-input" placeholder="Especie (perro, gato...)"
+              [value]="newMascotaEspecie()" (input)="newMascotaEspecie.set($any($event.target).value)" />
+            <input class="edit-input" placeholder="Raza"
+              [value]="newMascotaRaza()" (input)="newMascotaRaza.set($any($event.target).value)" />
+            <input class="edit-input" type="date"
+              [value]="newMascotaFecha()" (input)="newMascotaFecha.set($any($event.target).value)" />
+            <div class="edit-contacto-actions">
+              <button class="btn-cancelar-sm" (click)="mostrarFormMascota.set(false)">Cancelar</button>
+              <button class="btn-guardar-sm" (click)="crearMascota()">Agregar</button>
+            </div>
+          </div>
+        }
+
+        <!-- Lista de mascotas -->
+        @if (mascotas().length === 0 && !mostrarFormMascota()) {
+          <span class="sin-mascotas">Sin mascotas registradas</span>
+        }
+
+        @for (m of mascotas(); track m.id) {
+          @if (editandoMascotaId() === m.id) {
+            <!-- Fila en edición -->
+            <div class="mascota-card editing">
+              <input class="edit-input" placeholder="Nombre *"
+                [value]="editMascotaNombre()" (input)="editMascotaNombre.set($any($event.target).value)" />
+              <input class="edit-input" placeholder="Especie"
+                [value]="editMascotaEspecie()" (input)="editMascotaEspecie.set($any($event.target).value)" />
+              <input class="edit-input" placeholder="Raza"
+                [value]="editMascotaRaza()" (input)="editMascotaRaza.set($any($event.target).value)" />
+              <input class="edit-input" type="date"
+                [value]="editMascotaFecha()" (input)="editMascotaFecha.set($any($event.target).value)" />
+              <div class="edit-contacto-actions">
+                <button class="btn-cancelar-sm" (click)="cancelEditMascota()">Cancelar</button>
+                <button class="btn-guardar-sm" (click)="guardarMascota(m.id)">Guardar</button>
+              </div>
+            </div>
+          } @else {
+            <!-- Fila normal -->
+            <div class="mascota-card">
+              <div class="mascota-info">
+                <span class="mascota-nombre-row">
+                  <span class="mascota-nombre">{{ m.nombre }}</span>
+                  @switch (especieTipo(m.especie)) {
+                    @case ('gato') {
+                      <svg class="especie-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15" title="Gato">
+                        <path d="M12 5c-1.5 0-2.7.8-3.5 2L4 5l1.5 5.5C5 11.4 4.7 12.4 4.7 13.5 4.7 17 7.9 19 12 19s7.3-2 7.3-5.5c0-1.1-.3-2.1-.8-3L20 5l-4.5 2C14.7 5.8 13.5 5 12 5z"/>
+                        <circle cx="9.5" cy="13" r="0.6" fill="currentColor"/>
+                        <circle cx="14.5" cy="13" r="0.6" fill="currentColor"/>
+                        <path d="M12 15v1M10.5 15.5h3"/>
+                      </svg>
+                    }
+                    @case ('perro') {
+                      <svg class="especie-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15" title="Perro">
+                        <path d="M10 5.5 7 4C5.5 4 5 6 5 8v4c0 3.3 3.1 6 7 6s7-2.7 7-6V8c0-2 -.5-4-2-4l-3 1.5"/>
+                        <path d="M7 4C4 4.5 3 7 3.5 9.5M17 4c3 .5 4 3 3.5 5.5"/>
+                        <circle cx="9.5" cy="11" r="0.6" fill="currentColor"/>
+                        <circle cx="14.5" cy="11" r="0.6" fill="currentColor"/>
+                        <path d="M12 13.5v1.5M10.5 14h3"/>
+                      </svg>
+                    }
+                    @default {
+                      <svg class="especie-icon" viewBox="0 0 24 24" fill="currentColor" width="15" height="15" title="Mascota">
+                        <ellipse cx="12" cy="16" rx="3.5" ry="3"/>
+                        <circle cx="6.5" cy="11" r="1.7"/>
+                        <circle cx="17.5" cy="11" r="1.7"/>
+                        <circle cx="9" cy="6.5" r="1.7"/>
+                        <circle cx="15" cy="6.5" r="1.7"/>
+                      </svg>
+                    }
+                  }
+                </span>
+                @if (m.especie) {
+                  <span class="mascota-detalle">{{ m.especie }}{{ m.raza ? ' · ' + m.raza : '' }}</span>
+                }
+                @if (m.fechaNacimiento) {
+                  <span class="mascota-detalle">{{ calcularEdad(m.fechaNacimiento) }}</span>
+                }
+              </div>
+              <div class="mascota-actions">
+                <button class="mascota-btn" title="Editar" (click)="startEditMascota(m)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </button>
+                <button class="mascota-btn mascota-btn--danger" title="Eliminar" (click)="eliminarMascota(m.id)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                    <path d="M10 11v6M14 11v6"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          }
+        }
       </div>
 
     } @else {

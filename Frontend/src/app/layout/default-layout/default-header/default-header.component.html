@@ -69,9 +69,9 @@
         </h6>
       </li>
       <li>
-        <a cDropdownItem routerLink="/profile">
-          <svg cIcon class="me-2" name="cilUser"></svg>
-          Perfil
+        <a cDropdownItem (click)="onCambiarPassword()" style="cursor: pointer;">
+          <svg cIcon class="me-2" name="cilLockLocked"></svg>
+          Cambiar contraseña
         </a>
       </li>
       <li>

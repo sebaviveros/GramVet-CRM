@@ -2,6 +2,7 @@ import {
   Component,
   inject,
   signal,
+  computed,
   ViewChild,
   ElementRef,
   effect,
@@ -15,6 +16,7 @@ import { CardModule } from '@coreui/angular';
 import { InboxStateService } from '../../../../services/inbox/inbox-state.service';
 import { ConversacionService } from '../../../../services/conversacion/conversacion.service';
 import { EtiquetaService, EtiquetaDto } from '../../../../services/etiqueta/etiqueta.service';
+import { RespuestaRapidaService, RespuestaRapidaDto } from '../../../../services/respuesta-rapida/respuesta-rapida.service';
 
 const PAGE_SIZE = 15;
 
@@ -30,13 +32,27 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
   state = inject(InboxStateService);
   conversacionService = inject(ConversacionService);
   etiquetaService = inject(EtiquetaService);
+  respuestaRapidaService = inject(RespuestaRapidaService);
   #injector = inject(Injector);
 
   messageInput = signal('');
+  enviando = signal(false);
   imagenSeleccionada = signal<File | null>(null);
   imagenPreview = signal<string | null>(null);
   lightboxUrl = signal<string | null>(null);
   etiquetasContacto = signal<EtiquetaDto[]>([]);
+
+  // Respuestas rápidas
+  todasLasRespuestas = signal<RespuestaRapidaDto[]>([]);
+  sugerencias = computed(() => {
+    const input = this.messageInput();
+    if (!input.startsWith('/') || input.length < 2) return [];
+    const filtro = input.slice(1).toLowerCase();
+    return this.todasLasRespuestas().filter(r =>
+      r.comando.toLowerCase().includes(filtro)
+    );
+  });
+  mostrarSugerencias = computed(() => this.sugerencias().length > 0);
 
   @ViewChild('scrollContainer')
   scrollContainer?: ElementRef<HTMLDivElement>;
@@ -56,13 +72,9 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
     });
 
     // Scroll al fondo
-    // Usamos afterNextRender para garantizar que el DOM ya tiene los mensajes
-    // nuevos renderizados antes de ejecutar el scroll — elimina la race condition
-    // que había con ngAfterViewChecked.
     effect(() => {
-      // Leer el counter para que el effect se re-ejecute cada vez que cambia
       const counter = this.state.scrollToBottomCounter();
-      if (counter === 0) return; // valor inicial, ignorar
+      if (counter === 0) return;
 
       afterNextRender(() => {
         const el = this.scrollContainer?.nativeElement;
@@ -71,13 +83,15 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
         }
       }, { injector: this.#injector });
     });
+
+    // Cargar respuestas rápidas una vez al iniciar
+    this.respuestaRapidaService.getAll().subscribe(r => this.todasLasRespuestas.set(r));
   }
 
   ngAfterViewChecked() {
     const el = this.scrollContainer?.nativeElement;
     if (!el) return;
 
-    // Restaurar posición después de un prepend (scroll infinito hacia arriba)
     if (this.#isPrepending && this.#scrollHeightBeforePrepend > 0) {
       const added = el.scrollHeight - this.#scrollHeightBeforePrepend;
       if (added > 0) {
@@ -128,13 +142,23 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
     });
   }
 
+  // ── Respuestas rápidas ───────────────────────────────────────────
+
+  seleccionarRespuesta(r: RespuestaRapidaDto) {
+    this.messageInput.set(r.texto);
+  }
+
   // ── Envío de mensajes ────────────────────────────────────────────
 
   sendMessage() {
     const conversation = this.state.selectedConversation();
     if (!conversation) return;
 
+    // Evita envíos duplicados: si ya hay un envío en curso, ignorar
+    if (this.enviando()) return;
+
     if (this.imagenSeleccionada()) {
+      this.enviando.set(true);
       this.conversacionService.subirImagen(this.imagenSeleccionada()!).subscribe({
         next: ({ mediaId, mediaUrl }) => {
           this.conversacionService.enviarMensaje({
@@ -147,11 +171,18 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
             next: () => {
               this.messageInput.set('');
               this.cancelarImagen();
+              this.enviando.set(false);
             },
-            error: (err) => console.error('Error enviando imagen', err)
+            error: (err) => {
+              console.error('Error enviando imagen', err);
+              this.enviando.set(false);
+            }
           });
         },
-        error: (err) => console.error('Error subiendo imagen', err)
+        error: (err) => {
+          console.error('Error subiendo imagen', err);
+          this.enviando.set(false);
+        }
       });
       return;
     }
@@ -159,13 +190,20 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
     const text = this.messageInput().trim();
     if (!text) return;
 
+    this.enviando.set(true);
     this.conversacionService.enviarMensaje({
       conversacionId: conversation.id,
       contenido: text,
       tipoMensaje: 'text'
     }).subscribe({
-      next: () => this.messageInput.set(''),
-      error: (err) => console.error('Error enviando mensaje', err)
+      next: () => {
+        this.messageInput.set('');
+        this.enviando.set(false);
+      },
+      error: (err) => {
+        console.error('Error enviando mensaje', err);
+        this.enviando.set(false);
+      }
     });
   }
 

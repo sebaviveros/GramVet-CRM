@@ -11,7 +11,9 @@ export interface Conversation {
   fechaUltimoMensaje?: Date;
   cantidadNoLeidos: number;
   usuarioAsignado?: string;
+  usuarioAsignadoId?: number | null;
   canal: string;
+  etiquetas?: { id: number; nombre: string; color?: string }[];
 }
 
 export interface Message {
@@ -48,8 +50,6 @@ export class InboxStateService {
   // Trigger para scroll al fondo: emite un contador que se incrementa cada vez
   // que hay que scrollear (permite disparar aunque el convId sea el mismo)
   private _scrollToBottomCounter = signal<number>(0);
-
-  vets = ['Dr. Soto', 'Dra. Pérez', 'Dr. González'];
 
   // COMPUTED
   conversations = computed(() => this._conversations());
@@ -175,6 +175,11 @@ export class InboxStateService {
       const index = convs.findIndex(c => c.id === conversacion.id);
       if (index >= 0) {
         const updated = [...convs];
+        // Preservar etiquetas existentes si el evento de SignalR no las trae
+        // (las emisiones en tiempo real no incluyen etiquetas)
+        if (!conversacion.etiquetas?.length && convs[index].etiquetas?.length) {
+          conversacion = { ...conversacion, etiquetas: convs[index].etiquetas };
+        }
         updated[index] = conversacion;
         return updated.sort((a, b) => {
           const dateA = a.fechaUltimoMensaje ? new Date(a.fechaUltimoMensaje).getTime() : 0;
@@ -197,11 +202,19 @@ export class InboxStateService {
     );
   }
 
-  setAssignedVet(conversacionId: number, vet: string) {
+  removeConversacion(conversacionId: number) {
+    this._conversations.update(convs => convs.filter(c => c.id !== conversacionId));
+    // Si era la conversación seleccionada, deseleccionarla
+    if (this._selectedConversationId() === conversacionId) {
+      this._selectedConversationId.set(null);
+    }
+  }
+
+  setAssignedVet(conversacionId: number, usuarioAsignadoId: number | null, usuarioAsignado?: string) {
     this._conversations.update(convs =>
       convs.map(c =>
         c.id === conversacionId
-          ? { ...c, usuarioAsignado: vet }
+          ? { ...c, usuarioAsignadoId, usuarioAsignado }
           : c
       )
     );

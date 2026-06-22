@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { InboxStateService, Message, Conversation } from '../inbox/inbox-state.service';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,13 +11,14 @@ export class SignalRService {
   private hubConnection: signalR.HubConnection | null = null;
   private readonly hubUrl = 'https://localhost:7101/hubs/chat';
 
-  constructor(private state: InboxStateService) {}
+  constructor(private state: InboxStateService, private auth: AuthService) {}
 
   startConnection(): void {
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(this.hubUrl, {
         skipNegotiation: true,
-        transport: signalR.HttpTransportType.WebSockets
+        transport: signalR.HttpTransportType.WebSockets,
+        accessTokenFactory: () => this.auth.getToken() ?? ''
       })
       .withAutomaticReconnect()
       .configureLogging(signalR.LogLevel.Information)
@@ -49,6 +51,12 @@ export class SignalRService {
     this.hubConnection.on('ConversacionActualizada', (conversacion: Conversation) => {
       console.log('Conversación actualizada via SignalR:', conversacion);
       this.state.upsertConversacion(conversacion);
+    });
+
+    // Conversación que dejó de estar asignada a este usuario (reasignada a otro)
+    this.hubConnection.on('ConversacionDesasignada', (conversacionId: number) => {
+      console.log('Conversación desasignada via SignalR:', conversacionId);
+      this.state.removeConversacion(conversacionId);
     });
   }
 

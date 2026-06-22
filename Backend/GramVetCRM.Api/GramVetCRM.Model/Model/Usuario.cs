@@ -11,5 +11,8 @@
         public int RolId { get; set; }
 
         public bool Active { get; set; }
+
+        // Navegación
+        public Rol? Rol { get; set; }
     }
 }

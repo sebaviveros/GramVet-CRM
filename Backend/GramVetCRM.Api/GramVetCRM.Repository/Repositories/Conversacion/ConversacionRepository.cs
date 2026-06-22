@@ -13,12 +13,19 @@ namespace GramVetCRM.Repository.Repositories
             _context = context;
         }
 
-        public async Task<List<Conversacion>> GetAll()
+        public async Task<List<Conversacion>> GetAll(int? usuarioAsignadoId = null)
         {
-            return await _context.Conversacion
+            var query = _context.Conversacion
                 .Include(c => c.Contacto)
                 .Include(c => c.Canal)
-                .Where(c => c.Active)
+                .Include(c => c.UsuarioAsignado)
+                .Where(c => c.Active);
+
+            // Si se especifica un usuario (caso veterinario), filtrar solo sus asignadas
+            if (usuarioAsignadoId.HasValue)
+                query = query.Where(c => c.UsuarioAsignadoId == usuarioAsignadoId.Value);
+
+            return await query
                 .OrderByDescending(c => c.FechaUltimoMensaje)
                 .ToListAsync();
         }
@@ -28,6 +35,7 @@ namespace GramVetCRM.Repository.Repositories
             return await _context.Conversacion
                 .Include(c => c.Contacto)
                 .Include(c => c.Canal)
+                .Include(c => c.UsuarioAsignado)
                 .FirstOrDefaultAsync(c => c.Id == id && c.Active);
         }
 

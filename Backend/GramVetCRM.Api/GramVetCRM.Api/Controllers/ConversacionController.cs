@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using GramVetCRM.Service;
 using GramVetCRM.Model.DTOs.Mensaje;
+using GramVetCRM.Model.DTOs.Conversacion;
 using System.Security.Claims;
 
 namespace GramVetCRM.Api.Controllers
@@ -29,7 +30,34 @@ namespace GramVetCRM.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var result = await _service.GetAll();
+            var usuarioIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var rolNombre = User.FindFirst("rolNombre")?.Value ?? "";
+
+            // Veterinario: solo ve las conversaciones asignadas a él.
+            // Admin / Secretario: ven todas.
+            int? filtro = null;
+            if (rolNombre.ToLower().Contains("veterinario") && usuarioIdClaim != null)
+                filtro = int.Parse(usuarioIdClaim);
+
+            var result = await _service.GetAll(filtro);
+            return Ok(result);
+        }
+
+        // PUT api/Conversacion/5/asignar  (body: { usuarioAsignadoId: int|null })
+        [HttpPut("{id}/asignar")]
+        public async Task<IActionResult> Asignar(int id, [FromBody] AsignarUsuarioDto dto)
+        {
+            var usuarioIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var rolNombre = User.FindFirst("rolNombre")?.Value ?? "";
+
+            // Solo Admin y Secretario pueden asignar
+            var rolLower = rolNombre.ToLower();
+            if (!rolLower.Contains("admin") && !rolLower.Contains("secretario"))
+                return Forbid();
+
+            if (usuarioIdClaim == null) return Unauthorized();
+
+            var result = await _service.AsignarUsuario(id, dto.UsuarioAsignadoId, int.Parse(usuarioIdClaim));
             return Ok(result);
         }
 

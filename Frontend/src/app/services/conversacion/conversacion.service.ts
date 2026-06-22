@@ -2,6 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+export interface EtiquetaResumen {
+  id: number;
+  nombre: string;
+  color?: string;
+}
+
 export interface ConversacionDto {
   id: number;
   contactoId: number;
@@ -13,7 +19,9 @@ export interface ConversacionDto {
   fechaUltimoMensaje?: Date;
   cantidadNoLeidos: number;
   usuarioAsignado?: string;
+  usuarioAsignadoId?: number | null;
   canal: string;
+  etiquetas?: EtiquetaResumen[];
 }
 
 export interface MensajeDto {
@@ -72,5 +80,9 @@ export class ConversacionService {
 
   marcarLeida(conversacionId: number): Observable<any> {
     return this.http.put(`${this.apiUrl}/${conversacionId}/leer`, {});
+  }
+
+  asignarUsuario(conversacionId: number, usuarioAsignadoId: number | null): Observable<ConversacionDto> {
+    return this.http.put<ConversacionDto>(`${this.apiUrl}/${conversacionId}/asignar`, { usuarioAsignadoId });
   }
 }

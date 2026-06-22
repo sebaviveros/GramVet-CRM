@@ -33,4 +33,34 @@ export class AuthService {
   isLoggedIn(): boolean {
     return !!sessionStorage.getItem('token');
   }
+
+  // ── Decodificación del JWT ──────────────────────────────────────
+
+  private decodeToken(): any | null {
+    const token = this.getToken();
+    if (!token) return null;
+    try {
+      const payload = token.split('.')[1];
+      const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+      return JSON.parse(decoded);
+    } catch {
+      return null;
+    }
+  }
+
+  getRolNombre(): string {
+    const payload = this.decodeToken();
+    return (payload?.['rolNombre'] ?? '').toString();
+  }
+
+  getUserId(): number | null {
+    const payload = this.decodeToken();
+    const id = payload?.['nameid'] ??
+               payload?.['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'];
+    return id ? Number(id) : null;
+  }
+
+  isAdmin(): boolean {
+    return this.getRolNombre().toLowerCase().includes('admin');
+  }
 }

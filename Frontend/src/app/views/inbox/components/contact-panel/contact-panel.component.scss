@@ -95,6 +95,14 @@ c-card {
   &:focus { border-color: #235347; }
 }
 
+.vet-readonly {
+  font-size: 13px;
+  color: #1a2e25;
+  padding: 7px 12px;
+  background: #f4f7f5;
+  border-radius: 8px;
+}
+
 /* ===== ETIQUETAS ===== */
 .etiquetas-section {
   width: 100%;
@@ -207,6 +215,202 @@ c-card {
   color: #b0c4bc;
   text-align: center;
   margin: 4px 0 8px;
+}
+
+/* ===== EDICIÓN CONTACTO ===== */
+.email {
+  font-size: 13px;
+  color: #4a7060;
+  margin-bottom: 2px;
+}
+
+.btn-editar-contacto {
+  margin-top: 8px;
+  background: none;
+  border: 1px dashed rgba(35, 83, 71, 0.35);
+  border-radius: 20px;
+  color: #235347;
+  font-size: 12px;
+  padding: 4px 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover {
+    background: rgba(35, 83, 71, 0.06);
+    border-color: #235347;
+  }
+}
+
+.edit-contacto-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.edit-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid rgba(35, 83, 71, 0.25);
+  border-radius: 8px;
+  font-size: 13px;
+  color: #1a2e25;
+  background: #f8faf9;
+  outline: none;
+
+  &:focus { border-color: #235347; }
+}
+
+.edit-contacto-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  margin-top: 2px;
+}
+
+.btn-cancelar-sm {
+  padding: 4px 12px;
+  background: none;
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 20px;
+  color: #888;
+  font-size: 12px;
+  cursor: pointer;
+
+  &:hover { background: rgba(0,0,0,0.04); }
+}
+
+.btn-guardar-sm {
+  padding: 4px 14px;
+  background: linear-gradient(135deg, #235347, #163832);
+  border: none;
+  border-radius: 20px;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+
+  &:hover { opacity: 0.88; }
+}
+
+/* ===== MASCOTAS ===== */
+.mascotas-section {
+  width: 100%;
+  margin-top: 20px;
+  text-align: left;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+
+  .section-title { margin-bottom: 0; }
+}
+
+.btn-add-mascota {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #235347, #163832);
+  color: white;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  &:hover { opacity: 0.85; }
+}
+
+.mascota-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding: 10px;
+  background: rgba(35, 83, 71, 0.04);
+  border-radius: 10px;
+  border: 1px dashed rgba(35, 83, 71, 0.2);
+}
+
+.sin-mascotas {
+  font-size: 12px;
+  color: #b0c4bc;
+  font-style: italic;
+}
+
+.mascota-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.07);
+  background: #f8faf9;
+  margin-bottom: 6px;
+
+  &.editing {
+    flex-direction: column;
+    background: rgba(35, 83, 71, 0.04);
+    border-color: rgba(35, 83, 71, 0.2);
+  }
+}
+
+.mascota-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.mascota-nombre-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mascota-nombre {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a2e25;
+}
+
+.especie-icon {
+  color: #235347;
+  flex-shrink: 0;
+}
+
+.mascota-detalle {
+  font-size: 11px;
+  color: #6c8a7a;
+}
+
+.mascota-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.mascota-btn {
+  background: none;
+  border: none;
+  padding: 3px;
+  cursor: pointer;
+  color: #6c8a7a;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover { background: rgba(0,0,0,0.06); color: #235347; }
+
+  &--danger:hover { background: rgba(220,53,69,0.08); color: #dc3545; }
 }
 
 .btn-cancelar {
