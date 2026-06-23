@@ -81,8 +81,13 @@
 
         <div class="conversation-row">
 
-          <div class="avatar">
-            {{ conversation.nombreContacto.charAt(0) }}
+          <div class="avatar-wrap">
+            <div class="avatar">
+              {{ conversation.nombreContacto.charAt(0) }}
+            </div>
+            <span class="channel-badge">
+              <app-channel-badge [canal]="conversation.canal" />
+            </span>
           </div>
 
           <div class="conversation-content">

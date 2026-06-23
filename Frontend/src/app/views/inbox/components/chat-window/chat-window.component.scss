@@ -77,6 +77,11 @@ c-card {
   gap: 5px;
 }
 
+.avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
 .avatar {
   width: 38px;
   height: 38px;
@@ -89,6 +94,21 @@ c-card {
   font-weight: 600;
   font-size: 15px;
   flex-shrink: 0;
+}
+
+/* Badge del canal sobre el avatar */
+.channel-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  padding: 1px;
+  box-shadow: 0 0 0 1.5px #fff;
+  display: block;
+  line-height: 0;
 }
 
 .back-button {

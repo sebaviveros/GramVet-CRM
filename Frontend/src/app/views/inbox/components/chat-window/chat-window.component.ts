@@ -17,13 +17,14 @@ import { InboxStateService } from '../../../../services/inbox/inbox-state.servic
 import { ConversacionService } from '../../../../services/conversacion/conversacion.service';
 import { EtiquetaService, EtiquetaDto } from '../../../../services/etiqueta/etiqueta.service';
 import { RespuestaRapidaService, RespuestaRapidaDto } from '../../../../services/respuesta-rapida/respuesta-rapida.service';
+import { ChannelBadgeComponent } from '../../../../shared/channel-badge/channel-badge.component';
 
 const PAGE_SIZE = 15;
 
 @Component({
   selector: 'app-chat-window',
   standalone: true,
-  imports: [CommonModule, CardModule],
+  imports: [CommonModule, CardModule, ChannelBadgeComponent],
   templateUrl: './chat-window.component.html',
   styleUrls: ['./chat-window.component.scss']
 })

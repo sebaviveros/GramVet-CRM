@@ -1,194 +1,136 @@
-# Traspaso GramVet CRM — Continuación de sesión (para Claude Code)
+# Traspaso GramVet CRM — Documento de continuación (para otra instancia de Claude)
 
-## Qué es esto
+> Lee este documento completo antes de actuar. Con esto puedes retomar el trabajo sin pedirle a Sebastian que repita nada. También existe una memoria en `C:\Users\svive\.claude\projects\E--Workspace-GRAMVET-GramVet-CRM\memory\` (MEMORY.md + archivos) que complementa esto.
 
-CRM veterinario tipo respond.io (~60-70% completado) para una clínica veterinaria cliente.
-Sebastian es el project lead, trabaja con un frontend developer separado pero él dirige arquitectura e implementación.
+---
 
-**Restricción crítica de negocio: nunca interrumpir el WhatsApp Business real del cliente durante desarrollo.**
+## 1. Qué es el proyecto y objetivo general
 
-**Esta es la primera vez que Sebastian usa Claude Code** — hasta ahora todo el trabajo se hizo vía chat conversacional con Claude, leyendo y escribiendo archivos completos. Su forma de trabajar:
-- Implementa los cambios entre mensajes y reporta resultados con observaciones concretas (a veces en español)
-- Prefiere archivos completos listos para reemplazar, no diffs parciales (esto puede ser distinto con Claude Code al tener acceso directo al filesystem)
-- Trabaja de forma iterativa — prueba cada feature antes de seguir con la próxima
-- Al final de cada sesión pide un git commit message consolidando los cambios
-- Antes de editar cualquier archivo, hay que leerlo completo primero — nunca asumir contenido
+CRM veterinario **multicanal tipo respond.io** (~70-80% hecho) para la clínica **GramVet** (veterinario a domicilio, V Región, Chile). Sebastian Viveros es el project lead (arquitectura + implementación); trabaja con un frontend dev aparte pero él dirige.
 
-## Stack
+**Objetivo central del proyecto:** un buzón único donde se atienden conversaciones de **WhatsApp, Facebook Messenger e Instagram** mezcladas, con etiquetas, respuestas rápidas, gestión de usuarios por rol, panel de contacto con mascotas, y (futuro) agendamiento de citas con IA a Google Calendar.
 
-- **Frontend:** Angular 21, CoreUI Angular, standalone components, Angular Signals, SCSS
-- **Backend:** ASP.NET Core .NET 8, C#, Entity Framework Core, SQL Server, arquitectura en capas (Api → Service → Repository → Model)
-- **Real-time:** SignalR vía `ChatHub` (en `GramVetCRM.Service/Hubs`)
-- **Mensajería:** WhatsApp Cloud API (Meta)
-- **Media storage:** Cloudflare R2 (S3-compatible vía AWSSDK.S3) — bucket `gramvetcrm-media`, URL pública `https://pub-fa94e83d8318492d87b9d41e72b93de0.r2.dev`, CORS permite GET desde cualquier origen
-- **Dev tunneling:** ngrok en `E:\Workspace\Ngrok\ngrok-v3-stable-windows-amd64`
+**Restricción crítica de negocio:** NUNCA interrumpir el WhatsApp Business real del cliente. Las pruebas de WhatsApp van con el número de prueba. (Messenger/IG sí se pueden correr en paralelo con respond.io — ver sección 8.)
 
-## Configuración importante
+---
 
-- Backend corre en `https://localhost:7101`
-- ngrok: `.\ngrok.exe http https://localhost:7101 --host-header="localhost:7101"` (la URL pública cambia al reiniciar ngrok, hay que actualizarla en Meta for Developers cuando cambie)
-- Frontend: `ng serve`, corre en `http://localhost:4200`
+## 2. Cómo trabaja Sebastian (preferencias — respétalas)
 
-**Meta / WhatsApp:**
-- App: VetCRM (ID: 167917039309284) — el nombre "GramVetCRM" fue rechazado por Meta por contener "Gram" (trademark de Instagram)
-- Número de prueba: +56 9 2172 4181, PhoneNumberId: 1158710177318339
-- System User: `gramvet-crm` (token permanente)
-- Webhook verify token: `gramvet_gonzalord`
-- Webhook suscrito a evento `messages`
+- **NUNCA modificar código ni hacer commits sin autorización explícita.** Primero proponer el plan/código, preguntar "¿lo aplico?", esperar el "sí", y recién entonces editar. Sin excepciones.
+- **Leer el archivo completo antes de editarlo** — nunca asumir su contenido.
+- Trabaja iterativo: prueba cada feature antes de seguir.
+- Al final de cada sesión pide un **mensaje de commit** (conventional commits, y la descripción **poco técnica**, entendible por no programadores).
+- Reporta resultados concretos de qué se hizo y por qué.
+- Está en Chile (precios/ejemplos en CLP cuando aplica).
 
-**Cloudflare R2:**
-- AccountId: 9fbd50ca0b9f525768d3dcc352ef2cb6
-- Bucket: gramvetcrm-media
+---
 
-## Trabajo resuelto en sesiones anteriores (antes de esta sesión)
+## 3. Stack y arquitectura
 
-Esto ya estaba hecho al iniciar esta sesión, documentado solo como contexto:
+- **Frontend:** Angular 21, CoreUI, standalone components, Angular Signals, SCSS. Usa **SweetAlert2 (`Swal`)** para modales.
+- **Backend:** ASP.NET Core .NET 8, C#, EF Core, SQL Server. Capas: **Api (Controller) → Service → Repository → Model**. Interfaces de Repository y Service registradas en `Program.cs` como **Scoped**.
+- **Real-time:** SignalR vía `ChatHub` (en `GramVetCRM.Service/Hubs`).
+- **Media storage:** Cloudflare R2 (S3-compatible). Bucket `gramvetcrm-media`, URL pública `https://pub-fa94e83d8318492d87b9d41e72b93de0.r2.dev`.
+- **Patrón soft delete:** marcar `Active = false` + `Fechaup`/`Userup` en vez de borrar.
 
-- Logout funcional (frontend) con limpieza del dropdown de demo items
-- SignalR al enviar mensaje outbound — `ConversacionService.cs` emite `NuevoMensaje` y `ConversacionActualizada` vía `IHubContext<ChatHub>`
-- Fix imagen outbound no visible para el agente — upload paralelo a WhatsApp Media API y Cloudflare R2 usando dos `MemoryStream` independientes desde un único `byte[]` (decisión importante: `OpenReadStream()` sobre el mismo `IFormFile` no es seguro para lecturas paralelas)
-- Scroll infinito (carga de mensajes antiguos al hacer scroll hacia arriba) — funcionaba bien
-- CRUD Etiquetas — modelo `Etiqueta` y tabla `ContactoEtiqueta` ya existían en DB desde antes
+### Rutas/comandos para correr
+- Backend: `https://localhost:7101` (`dotnet run` o F5 en Visual Studio). Entorno Development.
+- Frontend: `http://localhost:4200` (`ng serve`).
+- ngrok (solo para webhooks entrantes de Meta): en `E:\Workspace\Ngrok\ngrok-v3-stable-windows-amd64`, comando `.\ngrok.exe http https://localhost:7101 --host-header="localhost:7101"`.
+- **El backend suele quedar corriendo durante el trabajo**: al compilar con `dotnet build` da errores MSB3021/MSB3027 de DLL bloqueada (NO son errores de código). Para verificar compilación sin tocar el Api en uso: `dotnet build GramVetCRM.Service\GramVetCRM.Service.csproj`. El `ng serve` recompila solo (los warnings NG8113/NG8102 son preexistentes e inofensivos).
 
-## Trabajo resuelto EN ESTA SESIÓN
+---
 
-### 1. Fix scroll-to-bottom al abrir conversación
+## 4. Credenciales y configuración (todo en `appsettings.json`, TRACKEADO en git)
 
-**Problema:** al hacer click en una conversación, el guard triple en `ngAfterViewChecked` (`conv.id === pendingId && msgs.length > 0 && scrollHeight > 100`) se cumplía con el DOM todavía mostrando mensajes de la conversación *anterior*, porque Angular no había re-renderizado aún. Resultado: el scroll al fondo solo ocurría cuando el usuario hacía scroll manual.
+⚠️ **`appsettings.json` está trackeado en git y contiene secretos** (App Password Gmail, token WhatsApp, llaves R2, JWT, token Meta). **Sebastian se encarga manualmente de NO subirlo.** Pendiente futuro opcional: mover secretos a `appsettings.Development.json` + `.gitignore`.
 
-**Decisión tomada:** descartar el guard triple basado en `ngAfterViewChecked` por completo. En su lugar:
-- `InboxStateService` — nuevo signal `_scrollToBottomCounter` (numérico, no un ID de conversación) con método `triggerScrollToBottom()` que lo incrementa. Se usa un counter en vez de un conversationId para poder disparar el scroll aunque la conversación activa no cambie (ej: llega un mensaje nuevo en la conversación que ya está abierta).
-- `conversations.component.ts` — al seleccionar una conversación: `setMessages(id, [])` para limpiar, luego carga la página 1, y en el callback `next` (cuando los mensajes ya están en el state) llama `state.triggerScrollToBottom()`.
-- `signalr.service.ts` — en el handler de `NuevoMensaje`, si el mensaje pertenece a la conversación activa, también llama `triggerScrollToBottom()`.
-- `chat-window.component.ts` — eliminada toda la lógica de `#pendingScrollConvId`. Reemplazada por un `effect()` en el constructor que observa `scrollToBottomCounter()` y, cuando cambia, llama `afterNextRender(() => { el.scrollTop = el.scrollHeight })` usando el `Injector` del componente. `afterNextRender` garantiza que el DOM ya está actualizado con los mensajes nuevos antes de ejecutar el scroll — esto es lo que elimina la race condition.
+- **JWT:** Key `GramVetCRM_gonzalord_XkP9mN3qR7vL2wJ8`, Issuer `GramVet.Api`, Audience `GramVet.Client`, 480 min.
+- **WhatsApp:** VerifyToken `gramvet_gonzalord`, PhoneNumberId `1158710177318339`, número de prueba +56 9 2172 4181. App de Meta: **VetCRM**, App ID `167917039309284`.
+- **Email (SMTP, FUNCIONANDO):** sección `Email`: Host `smtp.gmail.com`, Port `587`, User **`gramvetadministracion@gmail.com`**, FromName "GramVet CRM", Password = App Password de Gmail de 16 chars (configurada). La contraseña normal de Gmail NO sirve para SMTP — requiere activar verificación en 2 pasos y generar App Password en myaccount.google.com/apppasswords.
+- **Meta (Messenger/Instagram):** sección `Meta`: PageId **`101078882762015`**, VerifyToken `gramvet_meta_verify`, PageAccessToken (configurado, ~201 chars).
 
-**Estado: resuelto y confirmado funcionando por Sebastian.**
+### Roles en DB (tabla `Rol`)
+- RolId 1 = **Admin** (acceso total; único que ve/entra al panel de usuarios)
+- RolId 2 = **Secretario**
+- RolId 3 = **Veterinario**
+- Detección admin en frontend: `rolNombre.toLowerCase().includes('admin')` (funciona porque el rol se llama "Admin"). El JWT incluye `rolNombre` y `rolId` (`JwtHelper`). Frontend decodifica el JWT en `AuthService` (`getRolNombre`, `isAdmin`, `getUserId`).
 
-### 2. CRUD Etiquetas — implementación completa full stack
+---
 
-El modelo `Etiqueta` y la tabla `ContactoEtiqueta` ya existían en la DB desde antes, pero no había ninguna capa de implementación. Se construyó todo el stack:
+## 5. Lo IMPLEMENTADO y FUNCIONANDO (esta entrega)
 
-**Backend (archivos nuevos):**
-- `GramVetCRM.Model/DTOs/Etiqueta/EtiquetaDto.cs` — `EtiquetaDto`, `CrearEtiquetaDto`, `AsignarEtiquetaDto`
-- `GramVetCRM.Repository/Repositories/Etiqueta/Interface/IEtiquetaRepository.cs`
-- `GramVetCRM.Repository/Repositories/Etiqueta/EtiquetaRepository.cs` — implementa soft delete (`Active = false`), `GetByContacto`, `GetContactoEtiqueta`, `AddContactoEtiqueta`, `RemoveContactoEtiqueta`
-- `GramVetCRM.Service/EtiquetaService/Interface/IEtiquetaService.cs`
-- `GramVetCRM.Service/EtiquetaService/EtiquetaService.cs` — `GetAll`, `Crear`, `Editar` (agregado durante la sesión, ver más abajo), `Eliminar`, `GetByContacto`, `AsignarEtiqueta`, `QuitarEtiqueta`
-- `GramVetCRM.Api/Controllers/EtiquetaController.cs` — endpoints:
-  - `GET /api/Etiqueta` — todas las etiquetas
-  - `POST /api/Etiqueta` — crear
-  - `PUT /api/Etiqueta/{id}` — editar (agregado durante la sesión)
-  - `DELETE /api/Etiqueta/{id}` — eliminar (soft delete)
-  - `GET /api/Etiqueta/contacto/{contactoId}` — etiquetas asignadas a un contacto
-  - `POST /api/Etiqueta/asignar` — asignar etiqueta a contacto
-  - `DELETE /api/Etiqueta/quitar/{contactoId}/{etiquetaId}` — quitar asignación
+Todo lo siguiente está hecho, compila y fue confirmado por Sebastian salvo donde se indique:
 
-**Backend (modificado):**
-- `Program.cs` — registrados `IEtiquetaRepository → EtiquetaRepository` y `IEtiquetaService → EtiquetaService` en DI (scoped)
+1. **Respuestas rápidas** — CRUD full stack (módulo "Respuestas rápidas" con edición inline). En el chat: al escribir `/` se despliega lista filtrada por comando; click inserta el texto en el input. Comando se guarda sin `/` y en minúsculas.
+2. **Panel de contacto completo** — editar nombre/apellido/email del contacto (inline) + **CRUD de mascotas** (botón +, editar inline, eliminar). Iconos de especie junto al nombre (gato/perro/genérico, detección por texto de `especie`). Edad detallada: "1 año 5 meses 15 días", "5 meses 15 días" o "15 días" (omite ceros). Secciones de etiquetas y veterinario asignado ya existían.
+3. **Gestión de usuarios** — CRUD + roles dinámicos (dropdown desde `GET /api/Rol`, ligado a tabla `Rol`). Al crear usuario → contraseña aleatoria por correo. Admin puede **restablecer contraseña** (nueva al correo). Usuario cambia su contraseña desde dropdown del header (modal Swal: actual + nueva ×2). Validación de unicidad: `Crear` valida username+email; `Editar` valida que el email no sea de otro usuario. (Unicidad solo entre activos: tras soft-delete se puede reutilizar — decisión confirmada por Sebastian.) Username NO editable.
+4. **Permisos por rol:**
+   - Panel de usuarios: solo Admin lo ve (item de menú oculto vía `default-layout`) y solo Admin entra (`adminGuard`).
+   - Buzón: **Veterinario ve solo sus conversaciones asignadas**; Admin/Secretario ven todas (backend filtra por rol leído del JWT en `GET /api/Conversacion`).
+   - Asignación de veterinario cableada a DB real (`Conversacion.UsuarioAsignadoId`). Dropdown del contact-panel usa `GET /api/Usuario/veterinarios` (mismos usuarios creados con rol Veterinario; ligados por `Usuario.Id`). Solo Admin/Secretario ven el selector y pueden asignar (`PUT /api/Conversacion/{id}/asignar`, Forbid si no).
+   - SignalR dirigido por grupos: `ChatHub` `[Authorize]`, veterinario → grupo `user-{id}`, admin/secretario → grupo `staff`. Emisiones a staff + user-{asignado}. JWT pasa por query string (`?access_token=`) configurado en `Program.cs` (`OnMessageReceived`); frontend usa `accessTokenFactory`. Reasignación en tiempo real: evento `ConversacionDesasignada` al vet anterior → `removeConversacion(id)`.
+5. **Filtros del buzón** (botón embudo en header de conversations). Todos: búsqueda (nombre/teléfono), estado, etiqueta, no leídos. Solo Admin/Secretario: por veterinario, sin asignar. Filtrado client-side. `ConversacionDto` ahora incluye `Etiquetas` (cargadas en lote en `GetAll` vía `IEtiquetaRepository.GetByContactos`).
+6. **Mejoras de UX:**
+   - **Loader global temático GramVet** (overlay con spinner verde + patita + "GramVet CRM"): `LoaderService` + `loading.interceptor` (muestra solo si la petición tarda >300ms; excluye `/api/Conversacion` para no estorbar el buzón) + `LoaderComponent` en `AppComponent`. Reemplaza el loader del login.
+   - **Anti-duplicado de mensajes:** signal `enviando` en chat-window; botón deshabilitado + "Enviando..." mientras dura; ignora repeticiones.
+   - **Todas las confirmaciones de eliminar** usan modal SweetAlert (etiquetas, respuestas rápidas, mascotas, usuarios) — ya no hay `confirm()` nativo en el proyecto.
+   - Fix: etiquetas eliminadas ya no aparecen en contactos (filtro `ce.Etiqueta.Active` en `GetByContacto`/`GetByContactos`).
+7. **Email SMTP real** funcionando (`EmailService`, System.Net.Mail; fallback a consola `[EMAIL SIMULADO]` si no hay credenciales).
+8. **Badge de canal** sobre el avatar en lista del buzón y header del chat (`channel-badge.component`): WhatsApp verde, Instagram rosa, Messenger azul. Buzón unificado multicanal.
 
-**Frontend (archivo nuevo):**
-- `src/app/services/etiqueta/etiqueta.service.ts` — interfaces `EtiquetaDto`, `CrearEtiquetaDto`, y todos los métodos HTTP (`getAll`, `crear`, `editar`, `eliminar`, `getByContacto`, `asignar`, `quitar`)
+### Decisiones de diseño tomadas (NO volver a discutir)
+- **Gestión (CRUD) separada del punto de uso.** El CRUD de catálogos (etiquetas, respuestas rápidas) vive en su módulo de gestión; en el chat/panel solo se selecciona/asigna lo existente. Confirmado por Sebastian en etiquetas; aplicar igual a features nuevas.
+- **Trigger de respuestas rápidas:** `/` + filtro por comando (no botón). Confirmado.
+- **Edad de mascotas:** formato granular omitiendo ceros (arriba). Confirmado.
+- **Loader:** interceptor automático con umbral 300ms, excluyendo el buzón en tiempo real. Confirmado.
+- **Anti-duplicado:** deshabilitar botón mientras el envío está en vuelo (NO delay fijo, que es frágil). Confirmado.
+- **Contactos Messenger/IG** se identifican con prefijo en `Contacto.Telefono` (`FB:` / `IG:`) reusando `Mensaje.ExternalId` — **sin cambios de esquema** en tablas existentes (agregar columnas a Contacto rompería EF en el flujo WhatsApp en uso). Decisión deliberada.
+- **Dashboard:** explícitamente FUERA de alcance. No desarrollar salvo que Sebastian lo reincorpore.
 
-**Decisión importante de separación de responsabilidades (corregida a mitad de sesión):**
+---
 
-La primera implementación puso el formulario de crear etiquetas dentro del `contact-panel` (panel de contacto del chat). Sebastian corrigió esto: **la gestión completa (crear/editar/eliminar) debe vivir únicamente en el módulo "Gestión de Etiquetas"** (`tags.component`, ya existente con UI armada pero con datos mock). El panel de contacto del chat **solo debe permitir asignar/quitar etiquetas ya existentes** a un contacto puntual, nunca crear nuevas.
+## 6. CANAL MESSENGER — implementado y probado en modo Desarrollo (lo más reciente)
 
-Cambios resultantes:
-- `tags.component.ts/html/scss` (en `src/app/modules/tags/tags/`) — conectado a datos reales vía `EtiquetaService` en lugar de mock. Tiene: tabla con listado, búsqueda por nombre/descripción, formulario de creación con color picker, edición inline por fila (con inputs que aparecen reemplazando la fila normal, Enter guarda, Escape cancela), eliminar con `confirm()`. Esta vista es la única con capacidad de crear/editar/eliminar etiquetas del catálogo global.
-- `contact-panel.component.ts/html/scss` — simplificado para que **solo** muestre las etiquetas asignadas al contacto activo (todas, sin límite) con botón ✕ para quitar cada una, y un botón "+ Agregar etiqueta" que abre un selector con las etiquetas del catálogo que aún no están asignadas a ese contacto. No tiene formulario de creación.
+Arquitectura backend (toda aditiva, WhatsApp intacto):
+- `MetaMessagingService` (en `GramVetCRM.Service/MetaService/`): recibe webhooks de Messenger e Instagram (mismo formato; `object` = "page" → Messenger, "instagram" → Instagram), crea contacto+conversación+mensaje en el canal correcto, emite por SignalR a los grupos, ignora echoes, y envía vía Graph API v21.0 `POST /me/messages`. Tiene `ObtenerPerfil` que consulta el nombre real vía Graph.
+- `MetaController` (`/api/Meta/webhook`): GET verifica (verify token `gramvet_meta_verify`), POST procesa. Separado del webhook de WhatsApp.
+- `CanalRepository.GetOrCreate(nombre)`: siembra los canales Instagram/Messenger en la tabla `Canal` automáticamente.
+- `ConversacionService.EnviarMensaje` enruta por nombre de canal: si contiene "messenger"/"instagram" → `MetaMessagingService` (recipient = Telefono sin el prefijo); si no → WhatsApp (comportamiento existente intacto).
+- Registrados en `Program.cs`: `ICanalRepository`, `IMetaMessagingService`.
 
-**Estado: resuelto y confirmado funcionando por Sebastian, tanto el módulo de gestión como el panel de contacto.**
+Configuración hecha en Meta (app VetCRM):
+- Agregados casos de uso "Interactuar con clientes en Messenger" e "Instagram" (en Meta nuevo se llaman "Casos de uso", no "Agregar producto").
+- Webhook de Messenger verificado + página GramVet suscrita a campos `messages` y `messaging_postbacks`.
+- Page Access Token generado (activar "solo páginas actuales" → GramVet) y puesto en `appsettings`.
+- Cuenta personal de Sebastian de Facebook (**usuario `Bufonsillo`**, facebook.com/Bufonsillo) agregada como **Evaluador** en Roles de la app y aceptada (developers.facebook.com/settings/developer/requests/), para poder probar en dev.
 
-### 3. Etiquetas visibles en el header del chat (buzón / inbox)
+**RESULTADO:** mensajes de Messenger entran al CRM en tiempo real, con badge azul, en el buzón unificado junto a WhatsApp. Envío de respuestas operativo.
 
-Sebastian pidió que el header de la conversación (donde antes había un badge mockup de estado "Abierta"/"Cerrada") mostrara en su lugar las etiquetas reales del contacto, máximo 2 visibles + contador "+N" si hay más.
+**Limitación conocida (NO es bug — confirmado con evidencia):** en **modo Desarrollo**, la Graph API devuelve **HTTP 400** al pedir el nombre del perfil (first_name/last_name) de cuentas tester. El token se lee bien (201 chars). Por eso el contacto se guarda con el **PSID como nombre**. El código de `ObtenerPerfil` es correcto; **en producción (Live + App Review) el nombre real llegará automáticamente**. Workaround temporal: editar el nombre del contacto a mano en el CRM. (Se quitaron los logs temporales de diagnóstico; queda solo el warning "No se pudo obtener perfil".)
 
-**Implementación:**
-- `chat-window.component.ts` — se inyectó `EtiquetaService`, se agregó signal `etiquetasContacto`, y un `effect()` en el constructor que llama `etiquetaService.getByContacto(conv.contactoId)` cada vez que cambia `state.selectedConversation()`.
-- El header del chat ahora muestra etiquetas en lugar del badge de estado mockup.
+⚠️ **ngrok free cambia la URL pública cada vez que se reinicia/cierra.** Cuando pase, hay que actualizar la callback URL en **AMBOS webhooks** de Meta: WhatsApp (`/api/WhatsApp/webhook`) y Meta (`/api/Meta/webhook`). Causó que dejaran de llegar mensajes una vez. **Recomendación pendiente:** usar el dominio estático gratuito de ngrok (panel ngrok → Domains → `--domain=...`) para que la URL no cambie.
 
-**Iteración de diseño del layout (varias vueltas, esto es lo importante a preservar para no repetir la discusión):**
+---
 
-1. *Primer intento:* etiquetas en la misma fila (`name-row`) junto al nombre del contacto → **descartado**, porque con 2+ etiquetas el contenido se expandía horizontalmente y empujaba todo el layout, perdiéndose el panel de contacto y la barra de iconos de la derecha (no hay scroll horizontal en ese contenedor).
+## 7. PENDIENTES — en orden
 
-2. *Segundo intento:* aplicar `min-width: 0`, `overflow: hidden`, `flex-shrink`, `max-width` + `text-overflow: ellipsis` en cascada por todo el árbol (`chat-header-container` → `chat-user` → `user-info` → `name-row`) para forzar compresión → mejoró parcialmente pero con 3 etiquetas el problema volvía a aparecer.
+1. **Canal Instagram (DM)** — el backend YA lo soporta (mismo `MetaMessagingService`, object "instagram"; permisos `instagram_basic`/`instagram_manage_messages` ya agregados). Falta: en Meta, configurar/suscribir el webhook de **Instagram** a `messages` (similar a lo hecho con Messenger) y probar enviando un DM desde una cuenta con rol. La cuenta de IG (@gramvet.cl, ~12,8k) ya está vinculada a la página de FB.
+2. **Pasar la app de Meta a Live + App Review** (`pages_messaging`, `instagram_manage_messages`) para recibir mensajes de **clientes reales** en Messenger/IG y que lleguen los **nombres reales**. En dev solo funcionan cuentas con rol en la app. Se puede correr en paralelo con respond.io durante la prueba (ver sección 8).
+3. **Configurar dominio estático de ngrok** (opcional pero muy recomendado) para no reconfigurar Meta cada vez.
+4. **Gestión manual del estado de conversación** (cerrar/reabrir/marcar pendiente): el campo `Conversacion.Estado` existe y el webhook reabre auto, pero NO hay UI para que el agente lo cambie. **Sebastian iba a consultar al cliente si lo quiere** antes de desarrollar.
+5. **Botón "Agendar cita" en el chat → Google Calendar (con IA)** — feature grande. Extrae info de la conversación (nombre mascotas, dirección, fecha/hora, motivo) con IA y crea la cita en el Google Calendar de la veterinaria. 2 partes: (a) extracción con IA (recomendado: Claude API, modelo Haiku 4.5 o Sonnet 4.6 — baratos; con paso de confirmación humana antes de crear el evento), (b) integración Google Calendar. **BLOQUEANTE:** falta que el dueño explique CÓMO organiza su calendario (un solo calendario para todos los vets, cómo distingue por veterinario, bloques horarios). NO desarrollar la lógica de agendado hasta tenerlo. Estimación de costo IA: con Haiku ~9-20 CLP por agendado; ~500 citas/mes ≈ US$5/mes. Precios oficiales USD/1M tokens (in/out): Haiku 4.5 $1/$5, Sonnet 4.6 $3/$15, Opus 4.8 $5/$25.
 
-3. *Tercer intento (decisión intermedia):* mover las etiquetas a una segunda línea debajo del nombre (`tags-canal-row`, etiquetas + canal "WhatsApp" en la misma fila) → resolvió el desborde horizontal pero el canal "WhatsApp" terminaba pegado después de las etiquetas en lugar de en su propia línea, lo cual no era el diseño que Sebastian quería.
+---
 
-4. **Layout final (correcto, confirmado por Sebastian):** estructura de **2 columnas** dentro de `.user-info`:
-   - **Columna izquierda** (`.user-info-left`): nombre del contacto arriba, canal ("WhatsApp") abajo — apilados verticalmente.
-   - **Columna derecha** (`.user-info-tags`): primera etiqueta arriba (fila 1), segunda etiqueta + contador "+N" abajo (fila 2, en `.tags-second-row`) — solo se renderiza si hay al menos 1 etiqueta.
+## 8. Datos clave sobre la integración Meta (no reconstruibles)
 
-   En el HTML esto se implementó accediendo directamente a `etiquetasContacto()[0]` y `etiquetasContacto()[1]` (en lugar de un `@for` con `slice(0,2)`) porque cada índice va en una fila distinta del layout de 2 columnas.
+- Página de Facebook: **"GramVet Médico Veterinario a Domicilio V Región"**, Page ID `101078882762015` (~7,3k seguidores). Messenger ya recibe mensajes reales del público (lo atiende respond.io hoy).
+- Instagram: @gramvet.cl (~12,8k), cuenta profesional vinculada a la página.
+- Sebastian tiene acceso a la misma cuenta/app de Meta (VetCRM) donde está WhatsApp.
+- **Coexistencia con respond.io:** Messenger e Instagram permiten **múltiples apps suscritas a la misma página** — Meta entrega los webhooks a todas. Por eso nuestra app puede recibir en paralelo SIN romper respond.io, **mientras solo agreguemos** nuestra app y NO toquemos/desconectemos la de respond.io. (WhatsApp NO permite esto: un número solo va a un proveedor; por eso WhatsApp usa número de prueba.) Plan de producción: correr en paralelo unas semanas, y cuando funcione, el cliente desconecta respond.io. Para recibir de clientes reales en paralelo se necesita la app en Live + App Review.
 
-5. **Ajuste final de espaciado:** el chip `.header-etiqueta` tenía `max-width: 130px` sin `width: fit-content`, lo que generaba que el chip mostrara más aire/padding del necesario para textos cortos como "Nuevo Usuario". Se corrigió agregando `width: fit-content` antes del `max-width: 130px`, dejando el max-width solo como tope de seguridad para nombres muy largos (se truncan con `text-overflow: ellipsis` y tienen `[title]="etiqueta.nombre"` como tooltip nativo del navegador).
+---
 
-**CSS final de `.header-etiqueta`:**
-```scss
-.header-etiqueta {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 500;
-  border: 1px solid;
-  white-space: nowrap;
-  line-height: 1.5;
-  width: fit-content;
-  max-width: 130px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-```
-
-**También se eliminó** el `<select>` mockup "Asignar veterinario" que estaba en el header del chat (en `.chat-actions`) y **se movió al panel de contacto** (`contact-panel`), dentro de una nueva sección "Veterinario asignado" con su propio `<select>` conectado a `state.setAssignedVet(...)` (este método y el array `state.vets` ya existían previamente en `InboxStateService`, no son nuevos). Se eliminaron los estilos `.chat-actions select` del SCSS del chat-window ya que el elemento dejó de existir ahí.
-
-**Estado: resuelto y confirmado funcionando por Sebastian — esta fue la última tarea cerrada de la sesión.**
-
-## Estado general del proyecto al cierre de esta sesión
-
-| Área | Estado |
-|---|---|
-| Arquitectura y base | 100% |
-| Autenticación (login, JWT, interceptor, guard) | 100% |
-| Logout | 100% |
-| Recepción mensajes WhatsApp (texto, imagen, audio, video) | ~95% |
-| Envío texto desde CRM | 100% |
-| Envío imagen desde CRM (visible para el agente) | 100% |
-| SignalR outbound | 100% |
-| Scroll infinito (carga páginas anteriores) | 100% |
-| Scroll-to-bottom al abrir conversación | Resuelto esta sesión |
-| CRUD Etiquetas (gestión completa) | Resuelto esta sesión |
-| Asignar/quitar etiquetas desde panel de contacto | Resuelto esta sesión |
-| Etiquetas visibles en header del chat | Resuelto esta sesión |
-| Respuestas rápidas | 0% |
-| Panel de contacto completo (mascotas) | 0% (excepto la sección de etiquetas y veterinario, ya hechas) |
-| Gestión de usuarios | ~10% |
-| Dashboard | Fuera de alcance de esta entrega — explícitamente sacado del scope por Sebastian, no desarrollar. |
-
-## Próximos pasos (en orden, definidos explícitamente por Sebastian)
-
-1. **Respuestas rápidas**
-   - Mismo patrón que etiquetas: el modelo ya existe en DB (confirmar nombre exacto del modelo al leer el código), falta toda la implementación backend (repository → service → controller) y frontend.
-   - UI propuesta: un botón en el footer del chat (cerca del input de mensaje) que despliega una lista de respuestas rápidas para insertar directamente en el input.
-   - Aplicar el mismo criterio de separación de responsabilidades aprendido en etiquetas: probablemente conviene una vista de gestión (CRUD completo) separada del punto de uso en el chat (que solo selecciona/inserta).
-
-2. **Panel de contacto completo**
-   - Editar nombre/apellido del contacto.
-   - Ver mascotas asociadas (tabla `Mascota` ya existe en DB, confirmar estructura al leer el código).
-   - Nota: las secciones de etiquetas y veterinario asignado en el contact-panel ya están implementadas; esto es para sumar lo que falta del panel (datos editables del contacto + mascotas), no para rehacer lo existente.
-
-3. **Gestión de usuarios**
-   - CRUD con roles: admin, secretario, veterinario.
-   - Hay ~10% ya hecho de sesiones previas a esta — falta confirmar exactamente qué existe al retomar.
-
-**Dashboard explícitamente fuera de la entrega — no incluir en el roadmap ni desarrollar salvo que Sebastian lo reincorpore explícitamente.**
-
-## Notas de proceso para quien retome este trabajo
-
-- Antes de tocar cualquier archivo, leerlo completo primero. No asumir su contenido a partir de descripciones previas — el código puede haber cambiado.
-- Sebastian prueba cada feature antes de avanzar a la siguiente; espera reportes concretos de qué se hizo y por qué, no solo el código.
-- Al final de cada sesión de trabajo, generar un mensaje de commit de git que consolide todos los cambios de la sesión (estilo conventional commits, como se ve en el ejemplo de esta sesión: `feat: <resumen>` seguido de secciones por área).
-- La regla de WhatsApp Business real del cliente nunca debe verse interrumpida — cualquier prueba con la API de WhatsApp debe usar el número de prueba (+56 9 2172 4181), nunca tocar configuración que pueda afectar el número productivo del cliente.
-- Patrón de capas establecido y que debe respetarse para cualquier feature nueva: `Api (Controller) → Service → Repository → Model`, con interfaces para Repository y Service registradas en `Program.cs` como `Scoped`.
-- Patrón de soft delete establecido: en lugar de eliminar filas, se marca `Active = false` y se actualiza `Fechaup`/`Userup`. Ya usado en `EtiquetaRepository.Delete()` y en el quitar de `ContactoEtiqueta`.
+## 9. Estado de compilación al cierre
+Backend y frontend compilan sin errores (solo warnings preexistentes). El backend estaba corriendo; los últimos cambios de limpieza de logs en `MetaMessagingService` toman efecto al reiniciar. WhatsApp y Messenger funcionando.

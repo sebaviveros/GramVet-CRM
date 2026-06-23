@@ -87,12 +87,14 @@ builder.Services.AddScoped<IEtiquetaRepository, EtiquetaRepository>();
 builder.Services.AddScoped<IRespuestaRapidaRepository, RespuestaRapidaRepository>();
 builder.Services.AddScoped<IMascotaRepository, MascotaRepository>();
 builder.Services.AddScoped<IRolRepository, RolRepository>();
+builder.Services.AddScoped<ICanalRepository, CanalRepository>();
 
 //Services
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IConversacionService, ConversacionService>();
 builder.Services.AddScoped<IWhatsAppService, WhatsAppService>();
+builder.Services.AddScoped<IMetaMessagingService, MetaMessagingService>();
 builder.Services.AddSingleton<IR2StorageService, R2StorageService>();
 builder.Services.AddScoped<IEtiquetaService, EtiquetaService>();
 builder.Services.AddScoped<IRespuestaRapidaService, RespuestaRapidaService>();

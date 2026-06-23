@@ -6,11 +6,12 @@ import { ConversacionService } from '../../../../services/conversacion/conversac
 import { AuthService } from '../../../../services/auth/auth.service';
 import { UsuarioService, UsuarioDto } from '../../../../services/usuario/usuario.service';
 import { EtiquetaService, EtiquetaDto } from '../../../../services/etiqueta/etiqueta.service';
+import { ChannelBadgeComponent } from '../../../../shared/channel-badge/channel-badge.component';
 
 @Component({
   selector: 'app-conversations',
   standalone: true,
-  imports: [CommonModule, CardModule],
+  imports: [CommonModule, CardModule, ChannelBadgeComponent],
   templateUrl: './conversations.component.html',
   styleUrl: './conversations.component.scss'
 })

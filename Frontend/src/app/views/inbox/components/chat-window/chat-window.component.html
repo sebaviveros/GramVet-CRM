@@ -9,7 +9,12 @@
 
       <div class="chat-user">
         <button class="back-button d-lg-none" (click)="goBackToConversations($event)">←</button>
-        <div class="avatar">{{ state.selectedConversation()?.nombreContacto?.charAt(0) }}</div>
+        <div class="avatar-wrap">
+          <div class="avatar">{{ state.selectedConversation()?.nombreContacto?.charAt(0) }}</div>
+          <span class="channel-badge">
+            <app-channel-badge [canal]="state.selectedConversation()?.canal" />
+          </span>
+        </div>
         <div class="user-info">
           <!-- Columna izquierda: nombre + canal -->
           <div class="user-info-left">

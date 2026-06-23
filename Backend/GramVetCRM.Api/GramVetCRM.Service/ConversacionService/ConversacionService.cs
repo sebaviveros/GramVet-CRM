@@ -13,6 +13,7 @@ namespace GramVetCRM.Service
         private readonly IConversacionRepository _conversacionRepo;
         private readonly IMensajeRepository _mensajeRepo;
         private readonly IWhatsAppService _whatsAppService;
+        private readonly IMetaMessagingService _metaService;
         private readonly IHubContext<ChatHub> _hubContext;
         private readonly IEtiquetaRepository _etiquetaRepo;
 
@@ -20,12 +21,14 @@ namespace GramVetCRM.Service
             IConversacionRepository conversacionRepo,
             IMensajeRepository mensajeRepo,
             IWhatsAppService whatsAppService,
+            IMetaMessagingService metaService,
             IHubContext<ChatHub> hubContext,
             IEtiquetaRepository etiquetaRepo)
         {
             _conversacionRepo = conversacionRepo;
             _mensajeRepo = mensajeRepo;
             _whatsAppService = whatsAppService;
+            _metaService = metaService;
             _hubContext = hubContext;
             _etiquetaRepo = etiquetaRepo;
         }
@@ -168,16 +171,34 @@ namespace GramVetCRM.Service
             conversacion.Fechaup = DateTime.Now;
             await _conversacionRepo.Save();
 
-            // Enviar via WhatsApp
+            // Enviar por el canal correspondiente
             var telefono = conversacion.Contacto.Telefono;
+            var canalNombre = (conversacion.Canal?.Nombre ?? "").ToLower();
 
-            if (dto.TipoMensaje == "text" && dto.Contenido != null)
+            if (canalNombre.Contains("messenger") || canalNombre.Contains("instagram"))
             {
-                await _whatsAppService.EnviarMensajeTexto(telefono, dto.Contenido);
+                // Messenger / Instagram: el id del destinatario va en Telefono con prefijo (FB:/IG:)
+                var destinatarioId = telefono;
+                var idx = destinatarioId.IndexOf(':');
+                if (idx >= 0) destinatarioId = destinatarioId.Substring(idx + 1);
+
+                if (dto.TipoMensaje == "text" && dto.Contenido != null)
+                {
+                    await _metaService.EnviarMensaje(destinatarioId, dto.Contenido);
+                }
+                // (envío de imagen por Meta queda como mejora futura)
             }
-            else if (dto.TipoMensaje == "image" && dto.MediaId != null)
+            else
             {
-                await _whatsAppService.EnviarImagen(telefono, dto.MediaId, dto.Caption);
+                // WhatsApp (comportamiento existente, sin cambios)
+                if (dto.TipoMensaje == "text" && dto.Contenido != null)
+                {
+                    await _whatsAppService.EnviarMensajeTexto(telefono, dto.Contenido);
+                }
+                else if (dto.TipoMensaje == "image" && dto.MediaId != null)
+                {
+                    await _whatsAppService.EnviarImagen(telefono, dto.MediaId, dto.Caption);
+                }
             }
 
             var mensajeDto = new MensajeDto
