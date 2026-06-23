@@ -32,17 +32,6 @@ export class LoginComponent {
 
   onSubmit() {
 
-    // Loader inmediato para que la UI no se vea congelada durante la espera
-    Swal.fire({
-      title: 'Ingresando...',
-      background: '#0d0d0d',
-      color: '#e0e0e0',
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      customClass: { popup: 'swal-dark' },
-      didOpen: () => Swal.showLoading()
-    });
-
     this.authService.login(this.username, this.password)
       .subscribe({
         next: (res) => {

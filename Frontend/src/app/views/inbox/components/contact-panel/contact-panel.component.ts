@@ -162,12 +162,30 @@ export class ContactPanelComponent {
     if (!fechaNacimiento) return '';
     const hoy = new Date();
     const nac = new Date(fechaNacimiento);
-    const años = hoy.getFullYear() - nac.getFullYear();
-    const meses = hoy.getMonth() - nac.getMonth();
-    const total = años * 12 + meses;
-    if (total < 12) return `${total} mes${total !== 1 ? 'es' : ''}`;
-    const a = Math.floor(total / 12);
-    return `${a} año${a !== 1 ? 's' : ''}`;
+    if (isNaN(nac.getTime()) || nac > hoy) return '';
+
+    let años = hoy.getFullYear() - nac.getFullYear();
+    let meses = hoy.getMonth() - nac.getMonth();
+    let dias = hoy.getDate() - nac.getDate();
+
+    // Ajustar días negativos tomando los días del mes anterior
+    if (dias < 0) {
+      meses--;
+      dias += new Date(hoy.getFullYear(), hoy.getMonth(), 0).getDate();
+    }
+    if (meses < 0) {
+      años--;
+      meses += 12;
+    }
+
+    // Armar el texto omitiendo las unidades en cero
+    const partes: string[] = [];
+    if (años > 0) partes.push(`${años} ${años === 1 ? 'año' : 'años'}`);
+    if (meses > 0) partes.push(`${meses} ${meses === 1 ? 'mes' : 'meses'}`);
+    if (dias > 0) partes.push(`${dias} ${dias === 1 ? 'día' : 'días'}`);
+
+    if (partes.length === 0) return 'Recién nacido';
+    return partes.join(' ');
   }
 
   crearMascota() {

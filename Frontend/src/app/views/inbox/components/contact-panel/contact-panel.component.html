@@ -187,7 +187,7 @@
                   <span class="mascota-detalle">{{ m.especie }}{{ m.raza ? ' · ' + m.raza : '' }}</span>
                 }
                 @if (m.fechaNacimiento) {
-                  <span class="mascota-detalle">{{ calcularEdad(m.fechaNacimiento) }}</span>
+                  <span class="mascota-detalle">Edad: {{ calcularEdad(m.fechaNacimiento) }}</span>
                 }
               </div>
               <div class="mascota-actions">
