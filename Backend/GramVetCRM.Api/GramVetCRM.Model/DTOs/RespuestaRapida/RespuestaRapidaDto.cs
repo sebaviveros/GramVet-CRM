@@ -5,11 +5,13 @@ namespace GramVetCRM.Model.DTOs.RespuestaRapida
         public int Id { get; set; }
         public string Comando { get; set; }
         public string Texto { get; set; }
+        public List<int> VeterinarioIds { get; set; } = new();
     }
 
     public class CrearRespuestaRapidaDto
     {
         public string Comando { get; set; }
         public string Texto { get; set; }
+        public List<int> VeterinarioIds { get; set; } = new();
     }
 }

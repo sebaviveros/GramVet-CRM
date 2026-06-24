@@ -5,7 +5,6 @@ import { InboxSidebarComponent } from './components/inbox-sidebar/inbox-sidebar.
 import { ConversationsComponent } from './components/conversations/conversations.component';
 import { ChatWindowComponent } from './components/chat-window/chat-window.component';
 import { ContactPanelComponent } from './components/contact-panel/contact-panel.component';
-import { RightToolbarComponent } from './components/right-toolbar/right-toolbar.component';
 import { MobileBottomNavComponent } from './components/mobile-bottom-nav/mobile-bottom-nav.component';
 
 import { InboxStateService } from '../../services/inbox/inbox-state.service';
@@ -21,7 +20,6 @@ import { SignalRService } from '../../services/signalr/signalr.service';
     ConversationsComponent,
     ChatWindowComponent,
     ContactPanelComponent,
-    RightToolbarComponent,
     MobileBottomNavComponent
   ],
   templateUrl: './inbox.component.html',

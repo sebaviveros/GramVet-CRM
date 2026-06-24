@@ -39,8 +39,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
+  gap: 6px;
   height: 30px;
+  padding: 0 10px;
   border: 1px solid rgba(0,0,0,0.12);
   border-radius: 8px;
   background: #fff;
@@ -50,6 +51,11 @@
 
   &:hover { background: rgba(35,83,71,0.06); color: #235347; }
   &.activo { background: #235347; border-color: #235347; color: #fff; }
+}
+
+.filtros-label {
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .filtros-panel {
@@ -167,6 +173,57 @@
   gap: 12px;
 }
 
+/* Columna derecha: no leídos + veterinario asignado */
+.conversation-meta {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.vet-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 110px;
+  padding: 2px 8px 2px 2px;
+  border-radius: 20px;
+  background: rgba(35, 83, 71, 0.08);
+  border: 1px solid rgba(35, 83, 71, 0.15);
+}
+
+.vet-chip-avatar {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #235347, #163832);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.vet-chip-nombre {
+  font-size: 11px;
+  color: #4a6357;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* En conversación seleccionada (fondo verde oscuro) */
+.conversation-item.selected .vet-chip {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.conversation-item.selected .vet-chip-nombre { color: rgba(255, 255, 255, 0.9); }
+.conversation-item.selected .vet-chip-avatar { background: rgba(255, 255, 255, 0.25); }
+
 //Estilo conversaciones no leidas
 .conversation-item.unread {
   background: rgba(35, 83, 71, 0.06);
@@ -231,4 +288,16 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+  flex: 1;
+  min-width: 0; // permite que el texto se recorte con ellipsis en vez de estirar el item
+}
+
+/* Truncar a una sola línea con "…" */
+.conversation-name,
+.conversation-phone,
+.last-message {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }

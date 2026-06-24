@@ -51,8 +51,21 @@ function isOverflown(element: HTMLElement) {
 export class DefaultLayoutComponent {
   #auth = inject(AuthService);
 
-  // Oculta "Usuarios" del menú si el usuario no es administrador
-  public navItems = this.#auth.isAdmin()
-    ? [...navItems]
-    : navItems.filter(item => item.name !== 'Usuarios');
+  // Nav según rol:
+  // - Admin: ve todo
+  // - Secretario: ve todo menos "Usuarios"
+  // - Veterinario: solo el módulo de buzón
+  public navItems = this.#buildNav();
+
+  #buildNav() {
+    if (this.#auth.isAdmin()) {
+      return [...navItems];
+    }
+    if (this.#auth.isStaff()) {
+      // Secretario: oculta "Usuarios"
+      return navItems.filter(item => item.name !== 'Usuarios');
+    }
+    // Veterinario: solo el buzón (descarta gestión y el título de sección)
+    return navItems.filter(item => item.url === '/inbox');
+  }
 }

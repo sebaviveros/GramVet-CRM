@@ -115,6 +115,24 @@ namespace GramVetCRM.Api.Controllers
             return Ok(new { mediaId, mediaUrl });
         }
 
+        // POST api/Conversacion/mensaje/5/reaccion  (body: { emoji: "❤️" })
+        [HttpPost("mensaje/{id}/reaccion")]
+        public async Task<IActionResult> Reaccionar(int id, [FromBody] ReaccionDto dto)
+        {
+            var usuarioIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (usuarioIdClaim == null) return Unauthorized();
+
+            try
+            {
+                await _service.ReaccionarMensaje(id, dto.Emoji, int.Parse(usuarioIdClaim));
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+        }
+
         // PUT api/Conversacion/5/leer
         [HttpPut("{id}/leer")]
         public async Task<IActionResult> MarcarLeida(int id)

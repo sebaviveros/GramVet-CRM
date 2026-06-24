@@ -8,5 +8,15 @@
         public string? MediaId { get; set; }
         public string? MediaUrl { get; set; }
         public string? Caption { get; set; }
+
+        // Ubicación (TipoMensaje == "location")
+        public double? Latitud { get; set; }
+        public double? Longitud { get; set; }
+        public string? NombreUbicacion { get; set; }
+    }
+
+    public class ReaccionDto
+    {
+        public string Emoji { get; set; } = "";
     }
 }

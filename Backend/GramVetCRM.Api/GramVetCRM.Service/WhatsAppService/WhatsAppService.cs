@@ -6,6 +6,7 @@ using GramVetCRM.Service.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Globalization;
 using System.Text;
 using System.Text.Json;
 
@@ -64,6 +65,13 @@ namespace GramVetCRM.Service
 
                 _logger.LogInformation("Mensaje recibido de {From}, tipo: {Tipo}", from, tipo);
 
+                // Reacción a un mensaje existente — no crea fila, actualiza el target
+                if (tipo == "reaction")
+                {
+                    await ProcesarReaccion(message);
+                    return;
+                }
+
                 string? contenido = null;
                 string? mediaUrl = null;
 
@@ -93,6 +101,22 @@ namespace GramVetCRM.Service
                     if (message.GetProperty("video").TryGetProperty("caption", out var caption))
                         contenido = caption.GetString();
                 }
+                else if (tipo == "location")
+                {
+                    var loc = message.GetProperty("location");
+                    var lat = loc.GetProperty("latitude").GetDouble();
+                    var lng = loc.GetProperty("longitude").GetDouble();
+                    mediaUrl = MapsUrl(lat, lng);
+
+                    var partes = new List<string>();
+                    if (loc.TryGetProperty("name", out var nm) && !string.IsNullOrWhiteSpace(nm.GetString()))
+                        partes.Add(nm.GetString()!);
+                    if (loc.TryGetProperty("address", out var ad) && !string.IsNullOrWhiteSpace(ad.GetString()))
+                        partes.Add(ad.GetString()!);
+                    contenido = partes.Count > 0 ? string.Join(" — ", partes) : null;
+                }
+
+                var resumen = ResumenMensaje(tipo!, contenido);
 
                 // Buscar o crear contacto
                 var contacto = await _contactoRepo.GetByTelefono(from!);
@@ -135,7 +159,7 @@ namespace GramVetCRM.Service
                             ContactoId = contacto.Id,
                             CanalId = 1,
                             Estado = "Abierta",
-                            UltimoMensaje = tipo == "text" ? contenido : $"[{tipo}]",
+                            UltimoMensaje = resumen,
                             FechaUltimoMensaje = DateTime.Now,
                             CantidadNoLeidos = 0,
                             Usercr = "whatsapp",
@@ -169,7 +193,7 @@ namespace GramVetCRM.Service
                 _logger.LogInformation("Mensaje guardado con Id: {Id}", mensaje.Id);
 
                 // Actualizar conversación
-                conversacion.UltimoMensaje = tipo == "text" ? contenido : $"[{tipo}]";
+                conversacion.UltimoMensaje = resumen;
                 conversacion.FechaUltimoMensaje = DateTime.Now;
                 conversacion.CantidadNoLeidos += 1;
                 await _conversacionRepo.Save();
@@ -184,7 +208,8 @@ namespace GramVetCRM.Service
                     TipoMensaje = mensaje.TipoMensaje,
                     Direccion = mensaje.Direccion,
                     FechaEnvio = mensaje.FechaEnvio,
-                    UsuarioId = mensaje.UsuarioId
+                    UsuarioId = mensaje.UsuarioId,
+                    Reaccion = mensaje.Reaccion
                 };
 
                 // Grupos destino: staff (admin/secretario) + veterinario asignado (si lo hay)
@@ -233,7 +258,48 @@ namespace GramVetCRM.Service
             }
         }
 
-        public async Task<bool> EnviarMensajeTexto(string telefono, string mensaje)
+        // Procesa una reacción entrante: ubica el mensaje por su wamid y guarda el emoji
+        private async Task ProcesarReaccion(JsonElement message)
+        {
+            try
+            {
+                var reaction = message.GetProperty("reaction");
+                var targetId = reaction.GetProperty("message_id").GetString();
+                var emoji = reaction.TryGetProperty("emoji", out var e) ? e.GetString() : null;
+                if (string.IsNullOrEmpty(targetId)) return;
+
+                var mensaje = await _mensajeRepo.GetByExternalId(targetId);
+                if (mensaje == null)
+                {
+                    _logger.LogWarning("Reacción a mensaje desconocido {Id}", targetId);
+                    return;
+                }
+
+                // emoji vacío = el usuario quitó la reacción
+                mensaje.Reaccion = string.IsNullOrEmpty(emoji) ? null : emoji;
+                await _mensajeRepo.Save();
+
+                var conv = await _conversacionRepo.GetById(mensaje.ConversacionId);
+                var grupos = new List<string> { ChatGroups.Staff };
+                if (conv?.UsuarioAsignadoId.HasValue == true)
+                    grupos.Add(ChatGroups.Usuario(conv.UsuarioAsignadoId.Value));
+
+                await _hubContext.Clients.Groups(grupos).SendAsync("MensajeReaccionado", new
+                {
+                    MensajeId = mensaje.Id,
+                    Reaccion = mensaje.Reaccion,
+                    ConversacionId = mensaje.ConversacionId
+                });
+
+                _logger.LogInformation("Reacción {Emoji} aplicada al mensaje {Id}", emoji, mensaje.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error procesando reacción entrante");
+            }
+        }
+
+        public async Task<string?> EnviarMensajeTexto(string telefono, string mensaje)
         {
             try
             {
@@ -261,20 +327,20 @@ namespace GramVetCRM.Service
                 if (response.IsSuccessStatusCode)
                 {
                     _logger.LogInformation("Mensaje texto enviado a {Telefono}", telefono);
-                    return true;
+                    return ExtraerWamid(responseBody);
                 }
 
                 _logger.LogError("Error enviando texto a {Telefono}: {Error}", telefono, responseBody);
-                return false;
+                return null;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Excepción enviando texto a {Telefono}", telefono);
-                return false;
+                return null;
             }
         }
 
-        public async Task<bool> EnviarImagen(string telefono, string mediaId, string? caption)
+        public async Task<string?> EnviarImagen(string telefono, string mediaId, string? caption)
         {
             try
             {
@@ -302,16 +368,16 @@ namespace GramVetCRM.Service
                 if (response.IsSuccessStatusCode)
                 {
                     _logger.LogInformation("Imagen enviada a {Telefono}", telefono);
-                    return true;
+                    return ExtraerWamid(responseBody);
                 }
 
                 _logger.LogError("Error enviando imagen a {Telefono}: {Error}", telefono, responseBody);
-                return false;
+                return null;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Excepción enviando imagen a {Telefono}", telefono);
-                return false;
+                return null;
             }
         }
 
@@ -352,6 +418,122 @@ namespace GramVetCRM.Service
                 return null;
             }
         }
+
+        public async Task<string?> EnviarUbicacion(string telefono, double latitud, double longitud, string? nombre)
+        {
+            try
+            {
+                var phoneNumberId = _config["WhatsApp:PhoneNumberId"];
+                var accessToken = _config["WhatsApp:AccessToken"];
+                var url = $"https://graph.facebook.com/v25.0/{phoneNumberId}/messages";
+
+                var payload = new
+                {
+                    messaging_product = "whatsapp",
+                    to = telefono,
+                    type = "location",
+                    location = new
+                    {
+                        latitude = latitud,
+                        longitude = longitud,
+                        name = nombre
+                    }
+                };
+
+                var json = JsonSerializer.Serialize(payload);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                _httpClient.DefaultRequestHeaders.Clear();
+                _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+
+                var response = await _httpClient.PostAsync(url, content);
+                var responseBody = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    _logger.LogInformation("Ubicación enviada a {Telefono}", telefono);
+                    return ExtraerWamid(responseBody);
+                }
+
+                _logger.LogError("Error enviando ubicación a {Telefono}: {Error}", telefono, responseBody);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Excepción enviando ubicación a {Telefono}", telefono);
+                return null;
+            }
+        }
+
+        public async Task<bool> EnviarReaccion(string telefono, string messageId, string emoji)
+        {
+            try
+            {
+                var phoneNumberId = _config["WhatsApp:PhoneNumberId"];
+                var accessToken = _config["WhatsApp:AccessToken"];
+                var url = $"https://graph.facebook.com/v25.0/{phoneNumberId}/messages";
+
+                var payload = new
+                {
+                    messaging_product = "whatsapp",
+                    to = telefono,
+                    type = "reaction",
+                    reaction = new { message_id = messageId, emoji }
+                };
+
+                var json = JsonSerializer.Serialize(payload);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                _httpClient.DefaultRequestHeaders.Clear();
+                _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+
+                var response = await _httpClient.PostAsync(url, content);
+                var responseBody = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    _logger.LogInformation("Reacción enviada a {Telefono}", telefono);
+                    return true;
+                }
+
+                _logger.LogError("Error enviando reacción a {Telefono}: {Error}", telefono, responseBody);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Excepción enviando reacción a {Telefono}", telefono);
+                return false;
+            }
+        }
+
+        // Extrae el wamid (messages[0].id) de la respuesta de envío de WhatsApp
+        private static string? ExtraerWamid(string responseBody)
+        {
+            try
+            {
+                var json = JsonDocument.Parse(responseBody).RootElement;
+                if (json.TryGetProperty("messages", out var msgs) && msgs.GetArrayLength() > 0 &&
+                    msgs[0].TryGetProperty("id", out var idEl))
+                    return idEl.GetString();
+            }
+            catch { /* ignore */ }
+            return null;
+        }
+
+        // URL de Google Maps a partir de coordenadas (InvariantCulture para no usar coma decimal)
+        public static string MapsUrl(double lat, double lng) =>
+            $"https://www.google.com/maps?q={lat.ToString(CultureInfo.InvariantCulture)},{lng.ToString(CultureInfo.InvariantCulture)}";
+
+        // Texto resumen para "último mensaje" según el tipo
+        public static string ResumenMensaje(string tipo, string? contenido) => tipo switch
+        {
+            "text" => contenido ?? "",
+            "location" => "📍 Ubicación",
+            "image" => "📷 Imagen",
+            "audio" => "🎵 Audio",
+            "video" => "🎬 Video",
+            _ => $"[{tipo}]"
+        };
 
         private async Task<string?> DescargarMedia(string mediaId, string tipo)
         {

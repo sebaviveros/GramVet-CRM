@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
+import { staffGuard } from './core/guards/staff.guard';
 
 export const routes: Routes = [
 
@@ -47,11 +48,13 @@ export const routes: Routes = [
       },
       {
         path: 'tags',
+        canActivate: [staffGuard],
         loadComponent: () =>
           import('./modules/tags/tags/tags.component').then(m => m.TagsComponent)
       },
       {
         path: 'macros',
+        canActivate: [staffGuard],
         loadComponent: () =>
           import('./modules/macros/macros/macros.component').then(m => m.MacrosComponent)
       },

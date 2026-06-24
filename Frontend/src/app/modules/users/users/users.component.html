@@ -127,10 +127,9 @@
                 </td>
                 <td>
                   <select class="field-input field-select"
-                    [value]="editRolId() ?? ''"
                     (change)="editRolId.set($any($event.target).value ? +$any($event.target).value : null)">
                     @for (rol of roles(); track rol.id) {
-                      <option [value]="rol.id">{{ rol.nombre }}</option>
+                      <option [value]="rol.id" [selected]="rol.id === editRolId()">{{ rol.nombre }}</option>
                     }
                   </select>
                 </td>

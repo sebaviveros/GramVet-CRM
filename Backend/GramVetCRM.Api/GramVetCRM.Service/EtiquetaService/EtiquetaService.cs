@@ -13,10 +13,22 @@ namespace GramVetCRM.Service
             _repo = repo;
         }
 
-        public async Task<List<EtiquetaDto>> GetAll()
+        public async Task<List<EtiquetaDto>> GetAll(int? veterinarioId)
         {
-            var etiquetas = await _repo.GetAll();
-            return etiquetas.Select(ToDto).ToList();
+            // Veterinario: solo las etiquetas que el admin le habilitó.
+            // Admin / Secretario (veterinarioId == null): todas.
+            var etiquetas = veterinarioId.HasValue
+                ? await _repo.GetAllForVeterinario(veterinarioId.Value)
+                : await _repo.GetAll();
+
+            // Vínculos de veterinarios por etiqueta (para el form de gestión)
+            var links = await _repo.GetAllVeterinarioLinks();
+            var porEtiqueta = links
+                .GroupBy(l => l.EtiquetaId)
+                .ToDictionary(g => g.Key, g => g.Select(l => l.UsuarioId).ToList());
+
+            return etiquetas.Select(e => ToDto(e,
+                porEtiqueta.TryGetValue(e.Id, out var ids) ? ids : new List<int>())).ToList();
         }
 
         public async Task<EtiquetaDto> Crear(CrearEtiquetaDto dto, int usuarioId)
@@ -34,7 +46,10 @@ namespace GramVetCRM.Service
             await _repo.Add(etiqueta);
             await _repo.Save();
 
-            return ToDto(etiqueta);
+            await _repo.SetVeterinarios(etiqueta.Id, dto.VeterinarioIds, usuarioId);
+            await _repo.Save();
+
+            return ToDto(etiqueta, dto.VeterinarioIds);
         }
 
         public async Task<EtiquetaDto> Editar(int id, CrearEtiquetaDto dto, int usuarioId)
@@ -48,8 +63,9 @@ namespace GramVetCRM.Service
             etiqueta.Userup = usuarioId.ToString();
             etiqueta.Fechaup = DateTime.Now;
 
+            await _repo.SetVeterinarios(id, dto.VeterinarioIds, usuarioId);
             await _repo.Save();
-            return ToDto(etiqueta);
+            return ToDto(etiqueta, dto.VeterinarioIds);
         }
 
         public async Task Eliminar(int id, int usuarioId)
@@ -65,7 +81,7 @@ namespace GramVetCRM.Service
         public async Task<List<EtiquetaDto>> GetByContacto(int contactoId)
         {
             var lista = await _repo.GetByContacto(contactoId);
-            return lista.Select(ce => ToDto(ce.Etiqueta)).ToList();
+            return lista.Select(ce => ToDto(ce.Etiqueta, new List<int>())).ToList();
         }
 
         public async Task AsignarEtiqueta(AsignarEtiquetaDto dto, int usuarioId)
@@ -100,12 +116,13 @@ namespace GramVetCRM.Service
             await _repo.Save();
         }
 
-        private static EtiquetaDto ToDto(Etiqueta e) => new EtiquetaDto
+        private static EtiquetaDto ToDto(Etiqueta e, List<int> veterinarioIds) => new EtiquetaDto
         {
             Id = e.Id,
             Nombre = e.Nombre,
             Color = e.Color,
-            Descripcion = e.Descripcion
+            Descripcion = e.Descripcion,
+            VeterinarioIds = veterinarioIds
         };
     }
 }

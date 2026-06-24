@@ -136,7 +136,8 @@ namespace GramVetCRM.Service
                 TipoMensaje = m.TipoMensaje,
                 Direccion = m.Direccion,
                 FechaEnvio = m.FechaEnvio,
-                UsuarioId = m.UsuarioId
+                UsuarioId = m.UsuarioId,
+                Reaccion = m.Reaccion
             }).ToList();
         }
 
@@ -146,12 +147,21 @@ namespace GramVetCRM.Service
             if (conversacion == null)
                 throw new Exception($"Conversación {dto.ConversacionId} no encontrada");
 
-            // Guardar mensaje en DB — MediaUrl viene del dto (URL pública de R2)
+            // Ubicación: arma la URL de Maps y usa el nombre como contenido (no hay cambio de BD)
+            var contenido = dto.Contenido;
+            var mediaUrl = dto.MediaUrl;
+            if (dto.TipoMensaje == "location" && dto.Latitud.HasValue && dto.Longitud.HasValue)
+            {
+                mediaUrl = WhatsAppService.MapsUrl(dto.Latitud.Value, dto.Longitud.Value);
+                contenido = dto.NombreUbicacion;
+            }
+
+            // Guardar mensaje en DB — MediaUrl viene del dto (URL pública de R2) o de la ubicación
             var mensaje = new Mensaje
             {
                 ConversacionId = dto.ConversacionId,
-                Contenido = dto.Contenido,
-                MediaUrl = dto.MediaUrl,
+                Contenido = contenido,
+                MediaUrl = mediaUrl,
                 TipoMensaje = dto.TipoMensaje,
                 Direccion = "outbound",
                 UsuarioId = usuarioId,
@@ -165,7 +175,7 @@ namespace GramVetCRM.Service
             await _mensajeRepo.Save();
 
             // Actualizar resumen de la conversación
-            conversacion.UltimoMensaje = dto.TipoMensaje == "image" ? "📷 Imagen" : dto.Contenido;
+            conversacion.UltimoMensaje = WhatsAppService.ResumenMensaje(dto.TipoMensaje, contenido);
             conversacion.FechaUltimoMensaje = mensaje.FechaEnvio;
             conversacion.Userup = usuarioId.ToString();
             conversacion.Fechaup = DateTime.Now;
@@ -174,6 +184,8 @@ namespace GramVetCRM.Service
             // Enviar por el canal correspondiente
             var telefono = conversacion.Contacto.Telefono;
             var canalNombre = (conversacion.Canal?.Nombre ?? "").ToLower();
+
+            string? externalId = null;
 
             if (canalNombre.Contains("messenger") || canalNombre.Contains("instagram"))
             {
@@ -184,7 +196,12 @@ namespace GramVetCRM.Service
 
                 if (dto.TipoMensaje == "text" && dto.Contenido != null)
                 {
-                    await _metaService.EnviarMensaje(destinatarioId, dto.Contenido);
+                    externalId = await _metaService.EnviarMensaje(destinatarioId, dto.Contenido);
+                }
+                else if (dto.TipoMensaje == "location" && mediaUrl != null)
+                {
+                    // Messenger/IG no tienen ubicación nativa al enviar → va como link de Maps
+                    externalId = await _metaService.EnviarMensaje(destinatarioId, mediaUrl);
                 }
                 // (envío de imagen por Meta queda como mejora futura)
             }
@@ -193,12 +210,23 @@ namespace GramVetCRM.Service
                 // WhatsApp (comportamiento existente, sin cambios)
                 if (dto.TipoMensaje == "text" && dto.Contenido != null)
                 {
-                    await _whatsAppService.EnviarMensajeTexto(telefono, dto.Contenido);
+                    externalId = await _whatsAppService.EnviarMensajeTexto(telefono, dto.Contenido);
                 }
                 else if (dto.TipoMensaje == "image" && dto.MediaId != null)
                 {
-                    await _whatsAppService.EnviarImagen(telefono, dto.MediaId, dto.Caption);
+                    externalId = await _whatsAppService.EnviarImagen(telefono, dto.MediaId, dto.Caption);
                 }
+                else if (dto.TipoMensaje == "location" && dto.Latitud.HasValue && dto.Longitud.HasValue)
+                {
+                    externalId = await _whatsAppService.EnviarUbicacion(telefono, dto.Latitud.Value, dto.Longitud.Value, dto.NombreUbicacion);
+                }
+            }
+
+            // Guardar el id externo (wamid / message_id) para poder mapear reacciones
+            if (!string.IsNullOrEmpty(externalId))
+            {
+                mensaje.ExternalId = externalId;
+                await _mensajeRepo.Save();
             }
 
             var mensajeDto = new MensajeDto
@@ -210,7 +238,8 @@ namespace GramVetCRM.Service
                 TipoMensaje = mensaje.TipoMensaje,
                 Direccion = mensaje.Direccion,
                 FechaEnvio = mensaje.FechaEnvio,
-                UsuarioId = mensaje.UsuarioId
+                UsuarioId = mensaje.UsuarioId,
+                Reaccion = mensaje.Reaccion
             };
 
             // Notificar via SignalR (dirigido por rol: staff + veterinario asignado)
@@ -222,6 +251,40 @@ namespace GramVetCRM.Service
             await _hubContext.Clients.Groups(grupos).SendAsync("ConversacionActualizada", conversacionDto);
 
             return mensajeDto;
+        }
+
+        public async Task ReaccionarMensaje(int mensajeId, string emoji, int usuarioId)
+        {
+            var mensaje = await _mensajeRepo.GetById(mensajeId)
+                ?? throw new Exception($"Mensaje {mensajeId} no encontrado");
+
+            var conversacion = await _conversacionRepo.GetById(mensaje.ConversacionId)
+                ?? throw new Exception("Conversación no encontrada");
+
+            var canalNombre = (conversacion.Canal?.Nombre ?? "").ToLower();
+            var esMeta = canalNombre.Contains("messenger") || canalNombre.Contains("instagram");
+
+            // Solo WhatsApp permite enviar reacciones por API de páginas
+            if (esMeta)
+                throw new Exception("Las reacciones solo están disponibles en WhatsApp");
+
+            if (string.IsNullOrEmpty(mensaje.ExternalId))
+                throw new Exception("No se puede reaccionar a este mensaje");
+
+            await _whatsAppService.EnviarReaccion(conversacion.Contacto.Telefono, mensaje.ExternalId, emoji);
+
+            mensaje.Reaccion = emoji;
+            mensaje.Userup = usuarioId.ToString();
+            mensaje.Fechaup = DateTime.Now;
+            await _mensajeRepo.Save();
+
+            var grupos = GruposDestino(conversacion.UsuarioAsignadoId);
+            await _hubContext.Clients.Groups(grupos).SendAsync("MensajeReaccionado", new
+            {
+                MensajeId = mensaje.Id,
+                Reaccion = emoji,
+                ConversacionId = mensaje.ConversacionId
+            });
         }
 
         public async Task MarcarComoLeida(int conversacionId)

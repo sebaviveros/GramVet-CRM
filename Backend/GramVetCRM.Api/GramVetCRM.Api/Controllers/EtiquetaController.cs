@@ -18,11 +18,12 @@ namespace GramVetCRM.Api.Controllers
             _service = service;
         }
 
-        // GET api/Etiqueta — todas las etiquetas disponibles
+        // GET api/Etiqueta — etiquetas visibles según el rol
+        // Veterinario: solo las habilitadas para él. Admin / Secretario: todas.
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var result = await _service.GetAll();
+            var result = await _service.GetAll(GetVeterinarioFiltro());
             return Ok(result);
         }
 
@@ -90,6 +91,16 @@ namespace GramVetCRM.Api.Controllers
         {
             var claim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             return claim != null ? int.Parse(claim) : null;
+        }
+
+        // Devuelve el Id del veterinario si el rol lo es (para filtrar); null si es admin/secretario.
+        private int? GetVeterinarioFiltro()
+        {
+            var rolNombre = User.FindFirst("rolNombre")?.Value ?? "";
+            var usuarioIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (rolNombre.ToLower().Contains("veterinario") && usuarioIdClaim != null)
+                return int.Parse(usuarioIdClaim);
+            return null;
         }
     }
 }

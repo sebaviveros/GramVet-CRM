@@ -4,7 +4,7 @@ namespace GramVetCRM.Service
 {
     public interface IEtiquetaService
     {
-        Task<List<EtiquetaDto>> GetAll();
+        Task<List<EtiquetaDto>> GetAll(int? veterinarioId);
         Task<EtiquetaDto> Crear(CrearEtiquetaDto dto, int usuarioId);
         Task<EtiquetaDto> Editar(int id, CrearEtiquetaDto dto, int usuarioId);
         Task Eliminar(int id, int usuarioId);

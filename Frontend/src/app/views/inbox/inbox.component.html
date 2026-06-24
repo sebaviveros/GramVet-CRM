@@ -19,7 +19,7 @@
     </div>
 
     <!-- contact panel -->
-    @if (state.isRightPanelOpen() || isClosingPanel) {
+    @if ((state.isRightPanelOpen() && state.selectedConversation()) || isClosingPanel) {
 
       <div class="col-3 contact-panel-anim"
         [class.panel-closing]="isClosingPanel"
@@ -40,11 +40,6 @@
       </div>
 
     }
-
-    <!-- right toolbar -->
-    <div class="col-auto p-0">
-      <app-right-toolbar></app-right-toolbar>
-    </div>
 
   </div>
 

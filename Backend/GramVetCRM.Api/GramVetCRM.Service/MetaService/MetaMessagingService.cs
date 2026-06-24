@@ -100,17 +100,29 @@ namespace GramVetCRM.Service
             string? contenido = message.TryGetProperty("text", out var textEl) ? textEl.GetString() : null;
             string? externalId = message.TryGetProperty("mid", out var midEl) ? midEl.GetString() : null;
 
-            // Adjuntos (imagen/audio/video) — tomamos la url del primero
+            // Adjuntos (imagen/audio/video/ubicación) — tomamos el primero
             string? mediaUrl = null;
             string tipo = "text";
             if (message.TryGetProperty("attachments", out var attachments) && attachments.GetArrayLength() > 0)
             {
                 var att = attachments[0];
                 if (att.TryGetProperty("type", out var attType)) tipo = attType.GetString() ?? "file";
-                if (att.TryGetProperty("payload", out var payload) &&
-                    payload.TryGetProperty("url", out var urlEl))
-                    mediaUrl = urlEl.GetString();
+                if (att.TryGetProperty("payload", out var payload))
+                {
+                    // Ubicación: el payload trae coordinates {lat, long} en vez de url
+                    if (tipo == "location" && payload.TryGetProperty("coordinates", out var coord) &&
+                        coord.TryGetProperty("lat", out var latEl) && coord.TryGetProperty("long", out var lngEl))
+                    {
+                        mediaUrl = WhatsAppService.MapsUrl(latEl.GetDouble(), lngEl.GetDouble());
+                    }
+                    else if (payload.TryGetProperty("url", out var urlEl))
+                    {
+                        mediaUrl = urlEl.GetString();
+                    }
+                }
             }
+
+            var resumen = WhatsAppService.ResumenMensaje(tipo, contenido);
 
             // Clave única del contacto por plataforma (no hay teléfono en Messenger/IG)
             var prefijo = plataforma == "Instagram" ? "IG:" : "FB:";
@@ -160,7 +172,7 @@ namespace GramVetCRM.Service
                         ContactoId = contacto.Id,
                         CanalId = canal.Id,
                         Estado = "Abierta",
-                        UltimoMensaje = tipo == "text" ? contenido : $"[{tipo}]",
+                        UltimoMensaje = resumen,
                         FechaUltimoMensaje = DateTime.Now,
                         CantidadNoLeidos = 0,
                         Usercr = plataforma.ToLower(),
@@ -190,7 +202,7 @@ namespace GramVetCRM.Service
             await _mensajeRepo.Add(mensaje);
             await _mensajeRepo.Save();
 
-            conversacion.UltimoMensaje = tipo == "text" ? contenido : $"[{tipo}]";
+            conversacion.UltimoMensaje = resumen;
             conversacion.FechaUltimoMensaje = DateTime.Now;
             conversacion.CantidadNoLeidos += 1;
             await _conversacionRepo.Save();
@@ -209,7 +221,8 @@ namespace GramVetCRM.Service
                 TipoMensaje = mensaje.TipoMensaje,
                 Direccion = mensaje.Direccion,
                 FechaEnvio = mensaje.FechaEnvio,
-                UsuarioId = mensaje.UsuarioId
+                UsuarioId = mensaje.UsuarioId,
+                Reaccion = mensaje.Reaccion
             };
             await _hubContext.Clients.Groups(grupos).SendAsync("NuevoMensaje", mensajeDto);
 
@@ -281,7 +294,7 @@ namespace GramVetCRM.Service
             }
         }
 
-        public async Task<bool> EnviarMensaje(string destinatarioId, string mensaje)
+        public async Task<string?> EnviarMensaje(string destinatarioId, string mensaje)
         {
             try
             {
@@ -289,7 +302,7 @@ namespace GramVetCRM.Service
                 if (string.IsNullOrWhiteSpace(pageToken))
                 {
                     _logger.LogWarning("[META SIMULADO - sin PageAccessToken] Para {Id}: {Msg}", destinatarioId, mensaje);
-                    return false;
+                    return null;
                 }
 
                 var url = $"https://graph.facebook.com/{GraphVersion}/me/messages?access_token={pageToken}";
@@ -310,16 +323,22 @@ namespace GramVetCRM.Service
                 if (response.IsSuccessStatusCode)
                 {
                     _logger.LogInformation("Mensaje Meta enviado a {Id}", destinatarioId);
-                    return true;
+                    try
+                    {
+                        var j = JsonDocument.Parse(responseBody).RootElement;
+                        if (j.TryGetProperty("message_id", out var mid)) return mid.GetString();
+                    }
+                    catch { /* ignore */ }
+                    return null;
                 }
 
                 _logger.LogError("Error enviando mensaje Meta a {Id}: {Error}", destinatarioId, responseBody);
-                return false;
+                return null;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Excepción enviando mensaje Meta a {Id}", destinatarioId);
-                return false;
+                return null;
             }
         }
     }

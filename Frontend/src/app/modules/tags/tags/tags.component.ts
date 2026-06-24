@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CardModule, ButtonModule, FormModule } from '@coreui/angular';
 import { EtiquetaService, EtiquetaDto } from '../../../services/etiqueta/etiqueta.service';
+import { UsuarioService, UsuarioDto } from '../../../services/usuario/usuario.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -15,8 +16,10 @@ import Swal from 'sweetalert2';
 export class TagsComponent implements OnInit {
 
   etiquetaService = inject(EtiquetaService);
+  usuarioService = inject(UsuarioService);
 
   etiquetas = signal<EtiquetaDto[]>([]);
+  veterinarios = signal<UsuarioDto[]>([]);
   searchTerm = signal('');
   cargando = signal(false);
 
@@ -24,12 +27,14 @@ export class TagsComponent implements OnInit {
   nuevoNombre = signal('');
   nuevoColor = signal('#235347');
   nuevoDesc = signal('');
+  nuevoVets = signal<number[]>([]);
 
   // Edición inline
   editandoId = signal<number | null>(null);
   editNombre = signal('');
   editColor = signal('');
   editDesc = signal('');
+  editVets = signal<number[]>([]);
 
   filtradas = computed(() => {
     const term = this.searchTerm().toLowerCase();
@@ -42,6 +47,7 @@ export class TagsComponent implements OnInit {
 
   ngOnInit() {
     this.cargar();
+    this.usuarioService.getVeterinarios().subscribe(v => this.veterinarios.set(v));
   }
 
   cargar() {
@@ -52,6 +58,17 @@ export class TagsComponent implements OnInit {
     });
   }
 
+  // ── Selección de veterinarios ──────────────────────────────────────
+  toggleNuevoVet(id: number) {
+    this.nuevoVets.update(v => v.includes(id) ? v.filter(x => x !== id) : [...v, id]);
+  }
+  isNuevoVet(id: number) { return this.nuevoVets().includes(id); }
+
+  toggleEditVet(id: number) {
+    this.editVets.update(v => v.includes(id) ? v.filter(x => x !== id) : [...v, id]);
+  }
+  isEditVet(id: number) { return this.editVets().includes(id); }
+
   crear() {
     const nombre = this.nuevoNombre().trim();
     if (!nombre) return;
@@ -59,12 +76,14 @@ export class TagsComponent implements OnInit {
     this.etiquetaService.crear({
       nombre,
       color: this.nuevoColor(),
-      descripcion: this.nuevoDesc().trim() || undefined
+      descripcion: this.nuevoDesc().trim() || undefined,
+      veterinarioIds: this.nuevoVets()
     }).subscribe(nueva => {
       this.etiquetas.update(list => [...list, nueva]);
       this.nuevoNombre.set('');
       this.nuevoColor.set('#235347');
       this.nuevoDesc.set('');
+      this.nuevoVets.set([]);
     });
   }
 
@@ -73,6 +92,7 @@ export class TagsComponent implements OnInit {
     this.editNombre.set(e.nombre);
     this.editColor.set(e.color ?? '#235347');
     this.editDesc.set(e.descripcion ?? '');
+    this.editVets.set([...(e.veterinarioIds ?? [])]);
   }
 
   cancelarEdicion() {
@@ -86,7 +106,8 @@ export class TagsComponent implements OnInit {
     this.etiquetaService.editar(id, {
       nombre,
       color: this.editColor(),
-      descripcion: this.editDesc().trim() || undefined
+      descripcion: this.editDesc().trim() || undefined,
+      veterinarioIds: this.editVets()
     }).subscribe(actualizada => {
       this.etiquetas.update(list => list.map(e => e.id === id ? actualizada : e));
       this.editandoId.set(null);

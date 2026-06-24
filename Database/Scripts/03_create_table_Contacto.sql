@@ -4,6 +4,8 @@ CREATE TABLE Contacto (
 	Apellido NVARCHAR(150) NULL,
     Telefono NVARCHAR(50) NOT NULL,
     Email NVARCHAR(150),
+    Direccion NVARCHAR(300) NULL,
+    ReferenciaDireccion NVARCHAR(500) NULL,
 	EsNuevo BIT DEFAULT 0 NOT NULL,
     usercr NVARCHAR(100),
     userup NVARCHAR(100),

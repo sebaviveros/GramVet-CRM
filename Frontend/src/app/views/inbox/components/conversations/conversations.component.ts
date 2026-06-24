@@ -32,7 +32,6 @@ export class ConversationsComponent {
   // Estado de los filtros
   mostrarFiltros = signal(false);
   searchText = signal('');
-  estadoFiltro = signal('');
   soloNoLeidos = signal(false);
   sinAsignar = signal(false);
   veterinarioFiltro = signal<number | null>(null);
@@ -44,7 +43,6 @@ export class ConversationsComponent {
 
   filtroActivo = computed(() =>
     !!this.searchText().trim() ||
-    !!this.estadoFiltro() ||
     this.soloNoLeidos() ||
     this.sinAsignar() ||
     this.veterinarioFiltro() !== null ||
@@ -61,9 +59,6 @@ export class ConversationsComponent {
         c.telefono.toLowerCase().includes(txt)
       );
     }
-
-    const est = this.estadoFiltro();
-    if (est) list = list.filter(c => c.estado === est);
 
     if (this.soloNoLeidos()) list = list.filter(c => c.cantidadNoLeidos > 0);
 
@@ -86,9 +81,30 @@ export class ConversationsComponent {
     }
   }
 
+  // Formatea el resumen del último mensaje: convierte [image]/[audio]/etc. a texto con ícono
+  previewUltimoMensaje(texto?: string): string {
+    if (!texto) return '';
+    const map: Record<string, string> = {
+      '[image]': '📷 Imagen',
+      '[audio]': '🎵 Audio',
+      '[video]': '🎬 Video',
+      '[location]': '📍 Ubicación',
+      '[sticker]': 'Sticker',
+      '[document]': '📄 Documento',
+      '[file]': '📎 Archivo'
+    };
+    return map[texto.toLowerCase()] ?? texto;
+  }
+
+  // Iniciales del veterinario asignado (para el chip en la lista)
+  vetIniciales(nombre?: string): string {
+    if (!nombre) return '';
+    const p = nombre.trim().split(/\s+/);
+    return ((p[0]?.[0] ?? '') + (p[1]?.[0] ?? '')).toUpperCase();
+  }
+
   limpiarFiltros() {
     this.searchText.set('');
-    this.estadoFiltro.set('');
     this.soloNoLeidos.set(false);
     this.sinAsignar.set(false);
     this.veterinarioFiltro.set(null);

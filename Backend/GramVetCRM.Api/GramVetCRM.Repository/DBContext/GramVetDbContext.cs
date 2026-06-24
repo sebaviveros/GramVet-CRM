@@ -15,12 +15,16 @@ namespace GramVetCRM.Repository.Context
         public DbSet<Rol> Rol { get; set; }
         public DbSet<Contacto> Contacto { get; set; }
         public DbSet<Mascota> Mascota { get; set; }
+        public DbSet<MascotaBitacora> MascotaBitacora { get; set; }
+        public DbSet<MascotaFoto> MascotaFoto { get; set; }
         public DbSet<Canal> Canal { get; set; }
         public DbSet<Conversacion> Conversacion { get; set; }
         public DbSet<Mensaje> Mensaje { get; set; }
         public DbSet<Etiqueta> Etiqueta { get; set; }
         public DbSet<ContactoEtiqueta> ContactoEtiqueta { get; set; }
+        public DbSet<EtiquetaUsuario> EtiquetaUsuario { get; set; }
         public DbSet<RespuestaRapida> RespuestaRapida { get; set; }
+        public DbSet<RespuestaRapidaUsuario> RespuestaRapidaUsuario { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -29,6 +33,20 @@ namespace GramVetCRM.Repository.Context
                 .HasOne(m => m.Contacto)
                 .WithMany(c => c.Mascotas)
                 .HasForeignKey(m => m.ContactoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // MascotaBitacora → Mascota
+            modelBuilder.Entity<MascotaBitacora>()
+                .HasOne(b => b.Mascota)
+                .WithMany()
+                .HasForeignKey(b => b.MascotaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // MascotaFoto → Mascota
+            modelBuilder.Entity<MascotaFoto>()
+                .HasOne(f => f.Mascota)
+                .WithMany()
+                .HasForeignKey(f => f.MascotaId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Conversacion → Contacto
@@ -64,6 +82,30 @@ namespace GramVetCRM.Repository.Context
                 .HasOne(ce => ce.Etiqueta)
                 .WithMany()
                 .HasForeignKey(ce => ce.EtiquetaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // EtiquetaUsuario → Etiqueta / Usuario
+            modelBuilder.Entity<EtiquetaUsuario>()
+                .HasOne(eu => eu.Etiqueta)
+                .WithMany()
+                .HasForeignKey(eu => eu.EtiquetaId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<EtiquetaUsuario>()
+                .HasOne(eu => eu.Usuario)
+                .WithMany()
+                .HasForeignKey(eu => eu.UsuarioId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // RespuestaRapidaUsuario → RespuestaRapida / Usuario
+            modelBuilder.Entity<RespuestaRapidaUsuario>()
+                .HasOne(ru => ru.RespuestaRapida)
+                .WithMany()
+                .HasForeignKey(ru => ru.RespuestaRapidaId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<RespuestaRapidaUsuario>()
+                .HasOne(ru => ru.Usuario)
+                .WithMany()
+                .HasForeignKey(ru => ru.UsuarioId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

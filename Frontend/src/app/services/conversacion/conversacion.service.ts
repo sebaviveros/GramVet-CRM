@@ -33,6 +33,7 @@ export interface MensajeDto {
   direccion: string; // inbound / outbound
   fechaEnvio: Date;
   usuarioId?: number;
+  reaccion?: string;
 }
 
 export interface EnviarMensajeDto {
@@ -42,6 +43,9 @@ export interface EnviarMensajeDto {
   mediaId?: string;
   mediaUrl?: string;
   caption?: string;
+  latitud?: number;
+  longitud?: number;
+  nombreUbicacion?: string;
 }
 
 export interface SubirImagenResponse {
@@ -84,5 +88,9 @@ export class ConversacionService {
 
   asignarUsuario(conversacionId: number, usuarioAsignadoId: number | null): Observable<ConversacionDto> {
     return this.http.put<ConversacionDto>(`${this.apiUrl}/${conversacionId}/asignar`, { usuarioAsignadoId });
+  }
+
+  reaccionar(mensajeId: number, emoji: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/mensaje/${mensajeId}/reaccion`, { emoji });
   }
 }

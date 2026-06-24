@@ -7,6 +7,8 @@
         public string? Apellido { get; set; }
         public string Telefono { get; set; }
         public string? Email { get; set; }
+        public string? Direccion { get; set; }
+        public string? ReferenciaDireccion { get; set; }
         public bool EsNuevo { get; set; } = false; // true cuando lo crea el webhook
         public string Usercr { get; set; }
         public string? Userup { get; set; }

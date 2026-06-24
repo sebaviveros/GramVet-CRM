@@ -8,12 +8,16 @@ export interface ContactoDto {
   apellido?: string;
   telefono: string;
   email?: string;
+  direccion?: string;
+  referenciaDireccion?: string;
 }
 
 export interface EditarContactoDto {
   nombre: string;
   apellido?: string;
   email?: string;
+  direccion?: string;
+  referenciaDireccion?: string;
 }
 
 export interface MascotaDto {
@@ -38,6 +42,26 @@ export interface EditarMascotaDto {
   especie?: string;
   raza?: string;
   fechaNacimiento?: string;
+}
+
+export interface BitacoraEntradaDto {
+  id: number;
+  mascotaId: number;
+  contenido: string;
+  fecha: string;
+  autor?: string;
+}
+
+export interface CrearBitacoraDto {
+  mascotaId: number;
+  contenido: string;
+}
+
+export interface MascotaFotoDto {
+  id: number;
+  mascotaId: number;
+  url: string;
+  descripcion?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -68,5 +92,36 @@ export class ContactoService {
 
   eliminarMascota(id: number): Observable<void> {
     return this.#http.delete<void>(`${this.#mascotaBase}/${id}`);
+  }
+
+  // ── Bitácora ───────────────────────────────────────────────────────
+
+  getBitacora(mascotaId: number): Observable<BitacoraEntradaDto[]> {
+    return this.#http.get<BitacoraEntradaDto[]>(`${this.#mascotaBase}/${mascotaId}/bitacora`);
+  }
+
+  crearBitacora(dto: CrearBitacoraDto): Observable<BitacoraEntradaDto> {
+    return this.#http.post<BitacoraEntradaDto>(`${this.#mascotaBase}/bitacora`, dto);
+  }
+
+  eliminarBitacora(id: number): Observable<void> {
+    return this.#http.delete<void>(`${this.#mascotaBase}/bitacora/${id}`);
+  }
+
+  // ── Fotos de mascota ───────────────────────────────────────────────
+
+  getFotos(mascotaId: number): Observable<MascotaFotoDto[]> {
+    return this.#http.get<MascotaFotoDto[]>(`${this.#mascotaBase}/${mascotaId}/fotos`);
+  }
+
+  subirFoto(mascotaId: number, file: File, descripcion?: string): Observable<MascotaFotoDto> {
+    const fd = new FormData();
+    fd.append('file', file);
+    if (descripcion) fd.append('descripcion', descripcion);
+    return this.#http.post<MascotaFotoDto>(`${this.#mascotaBase}/${mascotaId}/fotos`, fd);
+  }
+
+  eliminarFoto(id: number): Observable<void> {
+    return this.#http.delete<void>(`${this.#mascotaBase}/fotos/${id}`);
   }
 }

@@ -35,9 +35,11 @@ namespace GramVetCRM.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Crear([FromBody] CrearUsuarioDto dto)
         {
+            var actorId = GetUsuarioId();
+            if (actorId == null) return Unauthorized();
             try
             {
-                var result = await _service.Crear(dto);
+                var result = await _service.Crear(dto, actorId.Value);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -49,9 +51,11 @@ namespace GramVetCRM.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Editar(int id, [FromBody] EditarUsuarioDto dto)
         {
+            var actorId = GetUsuarioId();
+            if (actorId == null) return Unauthorized();
             try
             {
-                var result = await _service.Editar(id, dto);
+                var result = await _service.Editar(id, dto, actorId.Value);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -63,14 +67,18 @@ namespace GramVetCRM.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Eliminar(int id)
         {
-            await _service.Eliminar(id);
+            var actorId = GetUsuarioId();
+            if (actorId == null) return Unauthorized();
+            await _service.Eliminar(id, actorId.Value);
             return Ok();
         }
 
         [HttpPost("{id}/reset-password")]
         public async Task<IActionResult> ResetPassword(int id)
         {
-            await _service.ResetPassword(id);
+            var actorId = GetUsuarioId();
+            if (actorId == null) return Unauthorized();
+            await _service.ResetPassword(id, actorId.Value);
             return Ok(new { mensaje = "Se envió una nueva contraseña al correo del usuario" });
         }
 

@@ -27,6 +27,8 @@ namespace GramVetCRM.Service
             contacto.Nombre = dto.Nombre;
             contacto.Apellido = dto.Apellido;
             contacto.Email = dto.Email;
+            contacto.Direccion = dto.Direccion;
+            contacto.ReferenciaDireccion = dto.ReferenciaDireccion;
             contacto.Userup = usuarioId.ToString();
             contacto.Fechaup = DateTime.Now;
 
@@ -40,7 +42,9 @@ namespace GramVetCRM.Service
             Nombre = c.Nombre,
             Apellido = c.Apellido,
             Telefono = c.Telefono,
-            Email = c.Email
+            Email = c.Email,
+            Direccion = c.Direccion,
+            ReferenciaDireccion = c.ReferenciaDireccion
         };
     }
 }

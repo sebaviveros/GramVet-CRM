@@ -45,7 +45,10 @@ app-right-toolbar {
 }
 
 .panel-opening {
-  animation: slideInRight 0.2s ease forwards;
+  // Sin "forwards": la animación de entrada NO debe dejar un transform pegado,
+  // porque un transform persistente en un ancestro atrapa al lightbox (position: fixed)
+  // dentro de la columna en vez de cubrir toda la pantalla.
+  animation: slideInRight 0.2s ease;
 }
 
 .panel-closing {

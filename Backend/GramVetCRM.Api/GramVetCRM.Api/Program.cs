@@ -86,6 +86,8 @@ builder.Services.AddScoped<IContactoRepository, ContactoRepository>();
 builder.Services.AddScoped<IEtiquetaRepository, EtiquetaRepository>();
 builder.Services.AddScoped<IRespuestaRapidaRepository, RespuestaRapidaRepository>();
 builder.Services.AddScoped<IMascotaRepository, MascotaRepository>();
+builder.Services.AddScoped<IMascotaBitacoraRepository, MascotaBitacoraRepository>();
+builder.Services.AddScoped<IMascotaFotoRepository, MascotaFotoRepository>();
 builder.Services.AddScoped<IRolRepository, RolRepository>();
 builder.Services.AddScoped<ICanalRepository, CanalRepository>();
 
@@ -100,6 +102,8 @@ builder.Services.AddScoped<IEtiquetaService, EtiquetaService>();
 builder.Services.AddScoped<IRespuestaRapidaService, RespuestaRapidaService>();
 builder.Services.AddScoped<IContactoService, ContactoService>();
 builder.Services.AddScoped<IMascotaService, MascotaService>();
+builder.Services.AddScoped<IMascotaBitacoraService, MascotaBitacoraService>();
+builder.Services.AddScoped<IMascotaFotoService, MascotaFotoService>();
 builder.Services.AddScoped<IRolService, RolService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 

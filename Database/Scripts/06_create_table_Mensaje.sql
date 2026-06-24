@@ -7,9 +7,10 @@ CREATE TABLE Mensaje (
 
     Direccion NVARCHAR(20), -- inbound / outbound
 
-    ExternalId NVARCHAR(100), -- ID de WhatsApp (CRÍTICO)
+    ExternalId NVARCHAR(100), -- ID de WhatsApp (CRï¿½TICO)
 	UsuarioId INT NULL, -- quien envia el msj (solo outbound)
 	MediaUrl NVARCHAR(500) NULL,
+	Reaccion NVARCHAR(20) NULL, -- emoji de reacciÃ³n al mensaje (WhatsApp/Meta)
     FechaEnvio DATETIME NOT NULL,
 	
     usercr NVARCHAR(100),

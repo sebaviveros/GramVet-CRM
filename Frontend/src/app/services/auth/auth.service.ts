@@ -63,4 +63,14 @@ export class AuthService {
   isAdmin(): boolean {
     return this.getRolNombre().toLowerCase().includes('admin');
   }
+
+  isVeterinario(): boolean {
+    return this.getRolNombre().toLowerCase().includes('veterinario');
+  }
+
+  // Admin o Secretario: acceso a los módulos de gestión
+  isStaff(): boolean {
+    const rol = this.getRolNombre().toLowerCase();
+    return rol.includes('admin') || rol.includes('secretario');
+  }
 }

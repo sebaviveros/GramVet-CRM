@@ -32,8 +32,25 @@
           (input)="newTexto.set($any($event.target).value)"
           (keyup.enter)="crear()" />
       </div>
+      <div class="form-row vets-row">
+        <span class="vets-label">Veterinarios que la ven</span>
+        @if (veterinarios().length === 0) {
+          <span class="vets-empty">No hay veterinarios registrados</span>
+        } @else {
+          <div class="vets-checks">
+            @for (v of veterinarios(); track v.id) {
+              <label class="vet-check">
+                <input type="checkbox" [checked]="isNewVet(v.id)" (change)="toggleNewVet(v.id)" />
+                {{ v.nombre }} {{ v.apellido }}
+              </label>
+            }
+          </div>
+          <span class="vets-hint">Si no marcás a nadie, ningún veterinario la verá (admin y secretario siempre la ven).</span>
+        }
+      </div>
+
       <div class="form-actions">
-        <button class="btn btn-cancel" (click)="newComando.set(''); newTexto.set('')">Cancelar</button>
+        <button class="btn btn-cancel" (click)="newComando.set(''); newTexto.set(''); newVets.set([])">Cancelar</button>
         <button class="btn btn-primary" (click)="crear()">+ Crear respuesta</button>
       </div>
     </div>
@@ -83,6 +100,23 @@
                   <td class="td-actions">
                     <button class="icon-btn icon-btn--success" title="Guardar" (click)="guardarEdit(r.id)">✓</button>
                     <button class="icon-btn" title="Cancelar" (click)="cancelEdit()">✕</button>
+                  </td>
+                </tr>
+                <tr class="editing-row editing-vets-row">
+                  <td colspan="3">
+                    <span class="vets-label">Veterinarios que la ven</span>
+                    @if (veterinarios().length === 0) {
+                      <span class="vets-empty">No hay veterinarios registrados</span>
+                    } @else {
+                      <div class="vets-checks">
+                        @for (v of veterinarios(); track v.id) {
+                          <label class="vet-check">
+                            <input type="checkbox" [checked]="isEditVet(v.id)" (change)="toggleEditVet(v.id)" />
+                            {{ v.nombre }} {{ v.apellido }}
+                          </label>
+                        }
+                      </div>
+                    }
                   </td>
                 </tr>
               } @else {

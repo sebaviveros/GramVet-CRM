@@ -8,6 +8,7 @@ namespace GramVetCRM.Service
         Task ProcesarMensaje(JsonElement body);
 
         // Envía un mensaje de texto a un usuario de Messenger/Instagram (recipient = PSID/IGSID)
-        Task<bool> EnviarMensaje(string destinatarioId, string mensaje);
+        // Devuelve el message_id si está disponible (para mapear reacciones), null si no.
+        Task<string?> EnviarMensaje(string destinatarioId, string mensaje);
     }
 }

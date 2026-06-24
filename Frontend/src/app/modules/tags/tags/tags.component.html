@@ -43,9 +43,26 @@
         </div>
       </div>
 
+      <div class="form-row vets-row">
+        <span class="vets-label">Veterinarios que la ven</span>
+        @if (veterinarios().length === 0) {
+          <span class="vets-empty">No hay veterinarios registrados</span>
+        } @else {
+          <div class="vets-checks">
+            @for (v of veterinarios(); track v.id) {
+              <label class="vet-check">
+                <input type="checkbox" [checked]="isNuevoVet(v.id)" (change)="toggleNuevoVet(v.id)" />
+                {{ v.nombre }} {{ v.apellido }}
+              </label>
+            }
+          </div>
+          <span class="vets-hint">Si no marcás a nadie, ningún veterinario la verá (admin y secretario siempre la ven).</span>
+        }
+      </div>
+
       <div class="form-actions">
         <button class="btn btn-cancel"
-                (click)="nuevoNombre.set(''); nuevoDesc.set(''); nuevoColor.set('#235347')">
+                (click)="nuevoNombre.set(''); nuevoDesc.set(''); nuevoColor.set('#235347'); nuevoVets.set([])">
           Cancelar
         </button>
         <button class="btn btn-primary" (click)="crear()">
@@ -155,6 +172,23 @@
                           <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                         </svg>
                       </button>
+                    </td>
+                  </tr>
+                  <tr class="editing-row editing-vets-row">
+                    <td colspan="4">
+                      <span class="vets-label">Veterinarios que la ven</span>
+                      @if (veterinarios().length === 0) {
+                        <span class="vets-empty">No hay veterinarios registrados</span>
+                      } @else {
+                        <div class="vets-checks">
+                          @for (v of veterinarios(); track v.id) {
+                            <label class="vet-check">
+                              <input type="checkbox" [checked]="isEditVet(v.id)" (change)="toggleEditVet(v.id)" />
+                              {{ v.nombre }} {{ v.apellido }}
+                            </label>
+                          }
+                        </div>
+                      }
                     </td>
                   </tr>
                 }

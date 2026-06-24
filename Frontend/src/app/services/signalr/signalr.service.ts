@@ -58,6 +58,12 @@ export class SignalRService {
       console.log('Conversación desasignada via SignalR:', conversacionId);
       this.state.removeConversacion(conversacionId);
     });
+
+    // Reacción aplicada/quitada a un mensaje
+    this.hubConnection.on('MensajeReaccionado',
+      (data: { mensajeId: number; reaccion: string | null; conversacionId: number }) => {
+        this.state.updateReaccion(data.mensajeId, data.conversacionId, data.reaccion);
+      });
   }
 
   stopConnection(): void {

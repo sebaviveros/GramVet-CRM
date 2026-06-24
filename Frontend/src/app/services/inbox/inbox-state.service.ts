@@ -25,6 +25,7 @@ export interface Message {
   direccion: string; // 'inbound' | 'outbound'
   fechaEnvio: Date;
   usuarioId?: number;
+  reaccion?: string;
 }
 
 @Injectable({
@@ -141,6 +142,20 @@ export class InboxStateService {
       return {
         ...current,
         [message.conversacionId]: [...existing, message]
+      };
+    });
+  }
+
+  // Actualiza la reacción de un mensaje (evento SignalR MensajeReaccionado)
+  updateReaccion(mensajeId: number, conversacionId: number, reaccion: string | null) {
+    this._messages.update(current => {
+      const msgs = current[conversacionId];
+      if (!msgs) return current;
+      return {
+        ...current,
+        [conversacionId]: msgs.map(m =>
+          m.id === mensajeId ? { ...m, reaccion: reaccion ?? undefined } : m
+        )
       };
     });
   }

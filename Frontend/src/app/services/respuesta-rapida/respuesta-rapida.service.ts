@@ -6,11 +6,13 @@ export interface RespuestaRapidaDto {
   id: number;
   comando: string;
   texto: string;
+  veterinarioIds?: number[];
 }
 
 export interface CrearRespuestaRapidaDto {
   comando: string;
   texto: string;
+  veterinarioIds: number[];
 }
 
 @Injectable({ providedIn: 'root' })

@@ -7,12 +7,14 @@ export interface EtiquetaDto {
   nombre: string;
   color: string;
   descripcion?: string;
+  veterinarioIds?: number[];
 }
 
 export interface CrearEtiquetaDto {
   nombre: string;
   color: string;
   descripcion?: string;
+  veterinarioIds: number[];
 }
 
 @Injectable({

@@ -16,11 +16,17 @@
           {{ contacto()?.nombre ?? state.selectedConversation()?.nombreContacto }}
           {{ contacto()?.apellido ?? state.selectedConversation()?.apellidoContacto }}
         </div>
-        <div class="phone">{{ state.selectedConversation()?.telefono }}</div>
+        <div class="phone"><span class="campo-label">Teléfono:</span> {{ state.selectedConversation()?.telefono }}</div>
         @if (contacto()?.email) {
-          <div class="email">{{ contacto()?.email }}</div>
+          <div class="email"><span class="campo-label">Email:</span> {{ contacto()?.email }}</div>
         }
-        <div class="canal">Canal: {{ state.selectedConversation()?.canal }}</div>
+        @if (contacto()?.direccion) {
+          <div class="dato-campo"><span class="campo-label">Dirección:</span> {{ contacto()?.direccion }}</div>
+        }
+        @if (contacto()?.referenciaDireccion) {
+          <div class="dato-campo"><span class="campo-label">Referencia:</span> {{ contacto()?.referenciaDireccion }}</div>
+        }
+        <div class="canal"><span class="campo-label">Canal:</span> {{ state.selectedConversation()?.canal }}</div>
         <button class="btn-editar-contacto" (click)="startEditContacto()">✏ Editar contacto</button>
       } @else {
         <div class="edit-contacto-form">
@@ -30,6 +36,10 @@
             [value]="editApellido()" (input)="editApellido.set($any($event.target).value)" />
           <input class="edit-input" placeholder="Email"
             [value]="editEmail()" (input)="editEmail.set($any($event.target).value)" />
+          <input class="edit-input" placeholder="Dirección"
+            [value]="editDireccion()" (input)="editDireccion.set($any($event.target).value)" />
+          <input class="edit-input" placeholder="Referencia de dirección"
+            [value]="editReferencia()" (input)="editReferencia.set($any($event.target).value)" />
           <div class="edit-contacto-actions">
             <button class="btn-cancelar-sm" (click)="cancelEditContacto()">Cancelar</button>
             <button class="btn-guardar-sm" (click)="guardarContacto()">Guardar</button>
@@ -43,7 +53,7 @@
         @if (puedeAsignar) {
           <select class="vet-select"
                   [value]="state.selectedConversation()?.usuarioAsignadoId ?? ''"
-                  (change)="asignarVeterinario($any($event.target).value)">
+                  (change)="asignarVeterinario($event)">
             <option value="">Sin asignar</option>
             @for (vet of veterinarios(); track vet.id) {
               <option [value]="vet.id">{{ vet.nombre }} {{ vet.apellido }}</option>
@@ -191,6 +201,21 @@
                 }
               </div>
               <div class="mascota-actions">
+                <button class="mascota-btn" [class.activo]="fotosAbiertaMascotaId() === m.id"
+                        title="Fotos" (click)="toggleFotos(m.id)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <path d="M21 15l-5-5L5 21"/>
+                  </svg>
+                </button>
+                <button class="mascota-btn" [class.activo]="bitacoraAbiertaMascotaId() === m.id"
+                        title="Bitácora" (click)="toggleBitacora(m.id)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                  </svg>
+                </button>
                 <button class="mascota-btn" title="Editar" (click)="startEditMascota(m)">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -207,6 +232,74 @@
               </div>
             </div>
           }
+
+          <!-- Panel de bitácora de la mascota -->
+          @if (bitacoraAbiertaMascotaId() === m.id) {
+            <div class="bitacora-panel">
+              <div class="bitacora-add">
+                <textarea class="bitacora-textarea" rows="3"
+                  placeholder="Escribir una anotación (atención, tip, observación)..."
+                  [value]="nuevaBitacora()" (input)="nuevaBitacora.set($any($event.target).value)"></textarea>
+                <button class="btn-guardar-sm bitacora-btn-add"
+                        [disabled]="!nuevaBitacora().trim()" (click)="agregarBitacora(m.id)">
+                  Agregar anotación
+                </button>
+              </div>
+
+              @if (cargandoBitacora()) {
+                <div class="bitacora-loading">Cargando bitácora...</div>
+              } @else if (bitacoraEntradas().length === 0) {
+                <div class="bitacora-vacia">Sin anotaciones todavía</div>
+              } @else {
+                <div class="bitacora-entradas">
+                  @for (e of bitacoraEntradas(); track e.id) {
+                    <div class="bitacora-entrada">
+                      <div class="bitacora-entrada-head">
+                        <span class="bitacora-fecha">{{ e.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
+                        @if (e.autor) {
+                          <span class="bitacora-autor">{{ e.autor }}</span>
+                        }
+                        <button class="bitacora-remove" title="Eliminar" (click)="eliminarBitacora(e.id)">✕</button>
+                      </div>
+                      <div class="bitacora-contenido">{{ e.contenido }}</div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Panel de fotos de la mascota -->
+          @if (fotosAbiertaMascotaId() === m.id) {
+            <div class="fotos-panel">
+              <label class="fotos-add" [class.subiendo]="subiendoFoto()">
+                @if (subiendoFoto()) {
+                  <span>Subiendo...</span>
+                } @else {
+                  <span>+ Agregar foto</span>
+                }
+                <input type="file" accept="image/*" style="display: none;"
+                       [disabled]="subiendoFoto()"
+                       (change)="onSeleccionarFoto($event, m.id)" />
+              </label>
+
+              @if (cargandoFotos()) {
+                <div class="fotos-loading">Cargando fotos...</div>
+              } @else if (fotos().length === 0) {
+                <div class="fotos-vacia">Sin fotos todavía</div>
+              } @else {
+                <div class="fotos-grid">
+                  @for (f of fotos(); track f.id) {
+                    <div class="foto-item">
+                      <img [src]="f.url" [alt]="f.descripcion ?? 'foto'"
+                           (click)="abrirFoto(f.url)" />
+                      <button class="foto-remove" title="Eliminar" (click)="eliminarFoto(f.id)">✕</button>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
         }
       </div>
 
@@ -215,5 +308,15 @@
     }
 
   </c-card-body>
+
+  <!-- Lightbox de foto de mascota -->
+  @if (lightboxFotoUrl()) {
+    <div class="lightbox-overlay" (click)="cerrarFoto()">
+      <div class="lightbox-container" (click)="$event.stopPropagation()">
+        <button class="lightbox-close" (click)="cerrarFoto()">✕</button>
+        <img [src]="lightboxFotoUrl()" class="lightbox-img" />
+      </div>
+    </div>
+  }
 
 </c-card>

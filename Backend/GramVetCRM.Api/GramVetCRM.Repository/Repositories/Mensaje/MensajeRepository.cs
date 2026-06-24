@@ -24,6 +24,20 @@ namespace GramVetCRM.Repository.Repositories
                 .ToListAsync();
         }
 
+        public async Task<Mensaje?> GetById(int id)
+        {
+            return await _context.Mensaje
+                .FirstOrDefaultAsync(m => m.Id == id && m.Active);
+        }
+
+        public async Task<Mensaje?> GetByExternalId(string externalId)
+        {
+            return await _context.Mensaje
+                .Where(m => m.ExternalId == externalId && m.Active)
+                .OrderByDescending(m => m.Id)
+                .FirstOrDefaultAsync();
+        }
+
         public async Task Add(Mensaje mensaje)
         {
             await _context.Mensaje.AddAsync(mensaje);

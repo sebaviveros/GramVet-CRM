@@ -6,6 +6,7 @@
         public string Nombre { get; set; }
         public string? Color { get; set; }
         public string? Descripcion { get; set; }
+        public List<int> VeterinarioIds { get; set; } = new();
     }
 
     public class CrearEtiquetaDto
@@ -13,6 +14,7 @@
         public string Nombre { get; set; }
         public string? Color { get; set; }
         public string? Descripcion { get; set; }
+        public List<int> VeterinarioIds { get; set; } = new();
     }
 
     public class AsignarEtiquetaDto

@@ -4,6 +4,7 @@
     <span>Conversaciones</span>
     <button class="filtros-toggle" [class.activo]="filtroActivo()"
             (click)="mostrarFiltros.set(!mostrarFiltros())" title="Filtros">
+      <span class="filtros-label">Filtros:</span>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
         <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
       </svg>
@@ -18,14 +19,6 @@
         [value]="searchText()" (input)="searchText.set($any($event.target).value)" />
 
       <div class="filtro-row">
-        <select class="filtro-select" [value]="estadoFiltro()"
-          (change)="estadoFiltro.set($any($event.target).value)">
-          <option value="">Todos los estados</option>
-          <option value="Abierta">Abierta</option>
-          <option value="Pendiente">Pendiente</option>
-          <option value="Cerrada">Cerrada</option>
-        </select>
-
         <select class="filtro-select" [value]="etiquetaFiltro() ?? ''"
           (change)="etiquetaFiltro.set($any($event.target).value ? +$any($event.target).value : null)">
           <option value="">Todas las etiquetas</option>
@@ -101,14 +94,22 @@
             </div>
 
             @if (conversation.ultimoMensaje) {
-              <div class="last-message">{{ conversation.ultimoMensaje }}</div>
+              <div class="last-message">{{ previewUltimoMensaje(conversation.ultimoMensaje) }}</div>
             }
 
           </div>
 
-          @if (conversation.cantidadNoLeidos > 0) {
-            <span class="badge-unread">{{ conversation.cantidadNoLeidos }}</span>
-          }
+          <div class="conversation-meta">
+            @if (conversation.cantidadNoLeidos > 0) {
+              <span class="badge-unread">{{ conversation.cantidadNoLeidos }}</span>
+            }
+            @if (conversation.usuarioAsignado) {
+              <span class="vet-chip" [title]="'Asignado a ' + conversation.usuarioAsignado">
+                <span class="vet-chip-avatar">{{ vetIniciales(conversation.usuarioAsignado) }}</span>
+                <span class="vet-chip-nombre">{{ conversation.usuarioAsignado }}</span>
+              </span>
+            }
+          </div>
 
         </div>
 

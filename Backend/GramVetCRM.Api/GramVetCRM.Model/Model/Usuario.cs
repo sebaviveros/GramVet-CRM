@@ -10,6 +10,10 @@
         public string PasswordHash { get; set; }
         public int RolId { get; set; }
 
+        public string? Usercr { get; set; }
+        public string? Userup { get; set; }
+        public DateTime Fechacr { get; set; }
+        public DateTime? Fechaup { get; set; }
         public bool Active { get; set; }
 
         // Navegación

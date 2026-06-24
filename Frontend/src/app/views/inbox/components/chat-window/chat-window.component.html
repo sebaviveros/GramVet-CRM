@@ -2,7 +2,8 @@
 
   <!-- ================= HEADER ================= -->
 
-  <c-card-header class="chat-header clickable" (click)="openContactPanel()">
+  <c-card-header class="chat-header clickable" (click)="openContactPanel()"
+                 title="Ver u ocultar el panel de contacto">
 
     @if (state.selectedConversation()) {
     <div class="chat-header-container">
@@ -111,6 +112,36 @@
               </div>
             }
 
+            @if (message.tipoMensaje === 'location' && message.mediaUrl) {
+              <a class="location-bubble" [href]="message.mediaUrl" target="_blank" rel="noopener">
+                <svg class="location-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <span class="location-texts">
+                  <span class="location-title">{{ message.contenido || 'Ubicación compartida' }}</span>
+                  <span class="location-link">Ver en el mapa</span>
+                </span>
+              </a>
+              <span class="message-time">{{ message.fechaEnvio | date:'h:mm a' }}</span>
+            }
+
+            @if (message.reaccion) {
+              <span class="reaccion-badge">{{ message.reaccion }}</span>
+            }
+
+            @if (esWhatsApp()) {
+              <button class="reaccion-trigger" type="button" title="Reaccionar"
+                      (click)="toggleReaccionPicker(message.id)">🙂</button>
+              @if (reaccionAbiertaMensajeId() === message.id) {
+                <div class="reaccion-picker">
+                  @for (e of emojisReaccion; track e) {
+                    <button type="button" (click)="reaccionar(message.id, e)">{{ e }}</button>
+                  }
+                </div>
+              }
+            }
+
           </div>
         }
       } @else {
@@ -135,12 +166,41 @@
       </div>
     }
 
+    <!-- Panel de emojis -->
+    @if (mostrarEmojis()) {
+      <div class="emoji-panel">
+        @for (e of emojis; track e) {
+          <button class="emoji-btn" type="button" (click)="agregarEmoji(e)">{{ e }}</button>
+        }
+      </div>
+    }
+
     <div class="d-flex gap-2 align-items-center">
 
-      <label class="btn btn-outline-secondary mb-0" style="cursor: pointer;">
-        📎
+      <label class="btn btn-outline-secondary mb-0 d-flex align-items-center" style="cursor: pointer;" title="Adjuntar imagen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+          <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+        </svg>
         <input type="file" accept="image/*" style="display: none;" (change)="seleccionarImagen($event)" />
       </label>
+
+      <button class="btn btn-outline-secondary mb-0 d-flex align-items-center" type="button"
+              title="Enviar mi ubicación" [disabled]="enviando()" (click)="enviarUbicacion()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+          <circle cx="12" cy="10" r="3"/>
+        </svg>
+      </button>
+
+      <button class="btn btn-outline-secondary mb-0 d-flex align-items-center" type="button"
+              title="Emojis" [class.active]="mostrarEmojis()" (click)="toggleEmojis()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+          <line x1="9" y1="9" x2="9.01" y2="9"/>
+          <line x1="15" y1="9" x2="15.01" y2="9"/>
+        </svg>
+      </button>
 
       @if (imagenSeleccionada()) {
         <div class="d-flex align-items-center gap-1">

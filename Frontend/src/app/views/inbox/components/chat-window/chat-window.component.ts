@@ -18,6 +18,7 @@ import { ConversacionService } from '../../../../services/conversacion/conversac
 import { EtiquetaService, EtiquetaDto } from '../../../../services/etiqueta/etiqueta.service';
 import { RespuestaRapidaService, RespuestaRapidaDto } from '../../../../services/respuesta-rapida/respuesta-rapida.service';
 import { ChannelBadgeComponent } from '../../../../shared/channel-badge/channel-badge.component';
+import Swal from 'sweetalert2';
 
 const PAGE_SIZE = 15;
 
@@ -43,6 +44,14 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
   lightboxUrl = signal<string | null>(null);
   etiquetasContacto = signal<EtiquetaDto[]>([]);
 
+  // Emojis del composer
+  mostrarEmojis = signal(false);
+  emojis = ['😀','😁','😂','🤣','😊','😍','😘','😎','🤗','🤔','😅','🙂','😉','😴','😢','😭','😡','😱','👍','👎','🙏','👏','🙌','💪','❤️','🧡','💛','💚','💙','💜','✅','❌','⚠️','📍','🎉','🔥','💉','🩺','🐶','🐱','🐾','🦴'];
+
+  // Reacciones rápidas a un mensaje
+  emojisReaccion = ['👍','❤️','😂','😮','😢','🙏'];
+  reaccionAbiertaMensajeId = signal<number | null>(null);
+
   // Respuestas rápidas
   todasLasRespuestas = signal<RespuestaRapidaDto[]>([]);
   sugerencias = computed(() => {
@@ -54,6 +63,11 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
     );
   });
   mostrarSugerencias = computed(() => this.sugerencias().length > 0);
+
+  // Las reacciones por API solo están disponibles en WhatsApp
+  esWhatsApp = computed(() =>
+    (this.state.selectedConversation()?.canal ?? '').toLowerCase().includes('whatsapp'));
+
 
   @ViewChild('scrollContainer')
   scrollContainer?: ElementRef<HTMLDivElement>;
@@ -149,6 +163,37 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
     this.messageInput.set(r.texto);
   }
 
+  // ── Emojis ───────────────────────────────────────────────────────
+
+  toggleEmojis() {
+    this.mostrarEmojis.update(v => !v);
+  }
+
+  agregarEmoji(emoji: string) {
+    this.messageInput.update(t => t + emoji);
+  }
+
+  // ── Reacciones ───────────────────────────────────────────────────
+
+  toggleReaccionPicker(mensajeId: number) {
+    this.reaccionAbiertaMensajeId.update(id => id === mensajeId ? null : mensajeId);
+  }
+
+  reaccionar(mensajeId: number, emoji: string) {
+    this.reaccionAbiertaMensajeId.set(null);
+    this.conversacionService.reaccionar(mensajeId, emoji).subscribe({
+      next: () => { /* la UI se actualiza por SignalR (MensajeReaccionado) */ },
+      error: (err) => {
+        console.error('Error reaccionando', err);
+        Swal.fire({
+          icon: 'warning',
+          title: 'No se pudo reaccionar',
+          text: err?.error?.mensaje ?? ''
+        });
+      }
+    });
+  }
+
   // ── Envío de mensajes ────────────────────────────────────────────
 
   sendMessage() {
@@ -208,6 +253,47 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
     });
   }
 
+  // ── Ubicación ────────────────────────────────────────────────────
+
+  enviarUbicacion() {
+    const conversation = this.state.selectedConversation();
+    if (!conversation) return;
+    if (this.enviando()) return;
+
+    if (!navigator.geolocation) {
+      Swal.fire({ icon: 'error', title: 'Tu navegador no soporta geolocalización' });
+      return;
+    }
+
+    this.enviando.set(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        this.conversacionService.enviarMensaje({
+          conversacionId: conversation.id,
+          tipoMensaje: 'location',
+          latitud: pos.coords.latitude,
+          longitud: pos.coords.longitude
+        }).subscribe({
+          next: () => this.enviando.set(false),
+          error: (err) => {
+            console.error('Error enviando ubicación', err);
+            this.enviando.set(false);
+          }
+        });
+      },
+      (err) => {
+        console.error('Error obteniendo ubicación', err);
+        this.enviando.set(false);
+        Swal.fire({
+          icon: 'warning',
+          title: 'No se pudo obtener tu ubicación',
+          text: 'Revisá que el navegador tenga permiso de ubicación.'
+        });
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }
+
   // ── Imagen ───────────────────────────────────────────────────────
 
   seleccionarImagen(event: Event) {
@@ -236,9 +322,13 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
   }
 
   openContactPanel() {
-    this.state.openRightPanel('contact');
+    // Mobile: siempre navega a la vista de contacto
     if (window.innerWidth <= 992) {
+      this.state.openRightPanel('contact');
       this.state.setMobileView('contact');
+      return;
     }
+    // Desktop: alterna (pliega/despliega) el panel de contacto
+    this.state.setRightPanel('contact');
   }
 }

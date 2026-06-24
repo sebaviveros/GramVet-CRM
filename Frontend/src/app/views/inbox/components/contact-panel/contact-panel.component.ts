@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CardModule } from '@coreui/angular';
 import { InboxStateService } from '../../../../services/inbox/inbox-state.service';
 import { EtiquetaService, EtiquetaDto } from '../../../../services/etiqueta/etiqueta.service';
-import { ContactoService, MascotaDto, ContactoDto } from '../../../../services/contacto/contacto.service';
+import { ContactoService, MascotaDto, ContactoDto, BitacoraEntradaDto, MascotaFotoDto } from '../../../../services/contacto/contacto.service';
 import { ConversacionService } from '../../../../services/conversacion/conversacion.service';
 import { UsuarioService, UsuarioDto } from '../../../../services/usuario/usuario.service';
 import { AuthService } from '../../../../services/auth/auth.service';
@@ -44,6 +44,8 @@ export class ContactPanelComponent {
   editNombre = signal('');
   editApellido = signal('');
   editEmail = signal('');
+  editDireccion = signal('');
+  editReferencia = signal('');
 
   // Mascotas
   mascotas = signal<MascotaDto[]>([]);
@@ -59,6 +61,19 @@ export class ContactPanelComponent {
   editMascotaEspecie = signal('');
   editMascotaRaza = signal('');
   editMascotaFecha = signal('');
+
+  // Bitácora de mascota
+  bitacoraAbiertaMascotaId = signal<number | null>(null);
+  bitacoraEntradas = signal<BitacoraEntradaDto[]>([]);
+  cargandoBitacora = signal(false);
+  nuevaBitacora = signal('');
+
+  // Fotos de mascota
+  fotosAbiertaMascotaId = signal<number | null>(null);
+  fotos = signal<MascotaFotoDto[]>([]);
+  cargandoFotos = signal(false);
+  subiendoFoto = signal(false);
+  lightboxFotoUrl = signal<string | null>(null);
 
   constructor() {
     this.etiquetaService.getAll().subscribe(e => this.todasEtiquetas.set(e));
@@ -77,6 +92,12 @@ export class ContactPanelComponent {
         this.editandoContacto.set(false);
         this.mostrarFormMascota.set(false);
         this.editandoMascotaId.set(null);
+        this.bitacoraAbiertaMascotaId.set(null);
+        this.bitacoraEntradas.set([]);
+        this.nuevaBitacora.set('');
+        this.fotosAbiertaMascotaId.set(null);
+        this.fotos.set([]);
+        this.lightboxFotoUrl.set(null);
       } else {
         this.etiquetasContacto.set([]);
         this.contacto.set(null);
@@ -97,6 +118,8 @@ export class ContactPanelComponent {
     this.editNombre.set(c.nombre);
     this.editApellido.set(c.apellido ?? '');
     this.editEmail.set(c.email ?? '');
+    this.editDireccion.set(c.direccion ?? '');
+    this.editReferencia.set(c.referenciaDireccion ?? '');
     this.editandoContacto.set(true);
   }
 
@@ -110,7 +133,9 @@ export class ContactPanelComponent {
     this.contactoService.editar(conv.contactoId, {
       nombre: this.editNombre().trim(),
       apellido: this.editApellido().trim() || undefined,
-      email: this.editEmail().trim() || undefined
+      email: this.editEmail().trim() || undefined,
+      direccion: this.editDireccion().trim() || undefined,
+      referenciaDireccion: this.editReferencia().trim() || undefined
     }).subscribe(actualizado => {
       this.contacto.set(actualizado);
       this.editandoContacto.set(false);
@@ -251,15 +276,142 @@ export class ContactPanelComponent {
 
   // ── Asignación de veterinario ─────────────────────────────────────
 
-  asignarVeterinario(valor: string) {
+  asignarVeterinario(event: Event) {
     const conv = this.state.selectedConversation();
     if (!conv) return;
 
+    const select = event.target as HTMLSelectElement;
+    const valor = select.value;
     const id = valor ? Number(valor) : null;
-    this.conversacionService.asignarUsuario(conv.id, id).subscribe(actualizada => {
-      this.state.setAssignedVet(conv.id, actualizada.usuarioAsignadoId ?? null, actualizada.usuarioAsignado);
+    const actualId = conv.usuarioAsignadoId ?? null;
+    if (id === actualId) return;
+
+    const vet = id ? this.veterinarios().find(v => v.id === id) : null;
+    const mensaje = id
+      ? `¿Asignar la conversación a ${vet ? vet.nombre + ' ' + vet.apellido : 'este veterinario'}?`
+      : '¿Quitar la asignación del veterinario?';
+
+    Swal.fire({
+      icon: 'question',
+      title: 'Confirmar asignación',
+      text: mensaje,
+      showCancelButton: true,
+      confirmButtonText: id ? 'Asignar' : 'Desasignar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#235347'
+    }).then(res => {
+      if (!res.isConfirmed) {
+        // Revertir el select a su valor anterior
+        select.value = actualId !== null ? String(actualId) : '';
+        return;
+      }
+      this.conversacionService.asignarUsuario(conv.id, id).subscribe(actualizada => {
+        this.state.setAssignedVet(conv.id, actualizada.usuarioAsignadoId ?? null, actualizada.usuarioAsignado);
+      });
     });
   }
+
+  // ── Bitácora de mascota ───────────────────────────────────────────
+
+  toggleBitacora(mascotaId: number) {
+    if (this.bitacoraAbiertaMascotaId() === mascotaId) {
+      this.bitacoraAbiertaMascotaId.set(null);
+      this.bitacoraEntradas.set([]);
+      this.nuevaBitacora.set('');
+      return;
+    }
+    this.bitacoraAbiertaMascotaId.set(mascotaId);
+    this.nuevaBitacora.set('');
+    this.cargandoBitacora.set(true);
+    this.contactoService.getBitacora(mascotaId).subscribe({
+      next: entradas => {
+        this.bitacoraEntradas.set(entradas);
+        this.cargandoBitacora.set(false);
+      },
+      error: () => this.cargandoBitacora.set(false)
+    });
+  }
+
+  agregarBitacora(mascotaId: number) {
+    const contenido = this.nuevaBitacora().trim();
+    if (!contenido) return;
+    this.contactoService.crearBitacora({ mascotaId, contenido }).subscribe(entrada => {
+      this.bitacoraEntradas.update(list => [entrada, ...list]);
+      this.nuevaBitacora.set('');
+    });
+  }
+
+  eliminarBitacora(id: number) {
+    Swal.fire({
+      icon: 'warning',
+      title: '¿Eliminar esta anotación?',
+      text: 'Esta acción no se puede deshacer',
+      showCancelButton: true,
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#dc3545'
+    }).then(res => {
+      if (!res.isConfirmed) return;
+      this.contactoService.eliminarBitacora(id).subscribe(() => {
+        this.bitacoraEntradas.update(list => list.filter(e => e.id !== id));
+      });
+    });
+  }
+
+  // ── Fotos de mascota ──────────────────────────────────────────────
+
+  toggleFotos(mascotaId: number) {
+    if (this.fotosAbiertaMascotaId() === mascotaId) {
+      this.fotosAbiertaMascotaId.set(null);
+      this.fotos.set([]);
+      return;
+    }
+    this.fotosAbiertaMascotaId.set(mascotaId);
+    this.cargandoFotos.set(true);
+    this.contactoService.getFotos(mascotaId).subscribe({
+      next: fotos => {
+        this.fotos.set(fotos);
+        this.cargandoFotos.set(false);
+      },
+      error: () => this.cargandoFotos.set(false)
+    });
+  }
+
+  onSeleccionarFoto(event: Event, mascotaId: number) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const file = input.files[0];
+    input.value = ''; // permite re-subir el mismo archivo
+
+    this.subiendoFoto.set(true);
+    this.contactoService.subirFoto(mascotaId, file).subscribe({
+      next: foto => {
+        this.fotos.update(list => [foto, ...list]);
+        this.subiendoFoto.set(false);
+      },
+      error: () => this.subiendoFoto.set(false)
+    });
+  }
+
+  eliminarFoto(id: number) {
+    Swal.fire({
+      icon: 'warning',
+      title: '¿Eliminar esta foto?',
+      text: 'Esta acción no se puede deshacer',
+      showCancelButton: true,
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#dc3545'
+    }).then(res => {
+      if (!res.isConfirmed) return;
+      this.contactoService.eliminarFoto(id).subscribe(() => {
+        this.fotos.update(list => list.filter(f => f.id !== id));
+      });
+    });
+  }
+
+  abrirFoto(url: string) { this.lightboxFotoUrl.set(url); }
+  cerrarFoto() { this.lightboxFotoUrl.set(null); }
 
   goBackToChat() {
     this.state.setMobileView('chat');

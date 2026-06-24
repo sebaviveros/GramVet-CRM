@@ -68,6 +68,17 @@ c-card {
   color: #6c8a7a;
 }
 
+.campo-label {
+  font-weight: 600;
+  color: #235347;
+}
+
+.dato-campo {
+  font-size: 13px;
+  color: #4a7060;
+  margin-bottom: 2px;
+}
+
 .client-id {
   font-size: 11px;
   color: #9ab5aa;
@@ -411,6 +422,237 @@ c-card {
   &:hover { background: rgba(0,0,0,0.06); color: #235347; }
 
   &--danger:hover { background: rgba(220,53,69,0.08); color: #dc3545; }
+
+  &.activo { background: rgba(35,83,71,0.12); color: #235347; }
+}
+
+/* ===== BITÁCORA ===== */
+.bitacora-panel {
+  margin: -2px 0 8px;
+  padding: 10px;
+  background: rgba(35, 83, 71, 0.04);
+  border: 1px solid rgba(35, 83, 71, 0.15);
+  border-radius: 10px;
+}
+
+.bitacora-add {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.bitacora-textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid rgba(35, 83, 71, 0.25);
+  border-radius: 8px;
+  font-size: 13px;
+  color: #1a2e25;
+  background: #fff;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+
+  &:focus { border-color: #235347; }
+}
+
+.bitacora-btn-add {
+  align-self: flex-end;
+
+  &:disabled { opacity: 0.45; cursor: default; }
+}
+
+.bitacora-loading,
+.bitacora-vacia {
+  font-size: 12px;
+  color: #b0c4bc;
+  font-style: italic;
+  text-align: center;
+  padding: 4px 0;
+}
+
+.bitacora-entradas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.bitacora-entrada {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.bitacora-entrada-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.bitacora-fecha {
+  font-size: 11px;
+  font-weight: 600;
+  color: #235347;
+}
+
+.bitacora-autor {
+  font-size: 11px;
+  color: #6c8a7a;
+
+  &::before { content: '· '; }
+}
+
+.bitacora-remove {
+  margin-left: auto;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1;
+  color: #b0c4bc;
+
+  &:hover { color: #dc3545; }
+}
+
+.bitacora-contenido {
+  font-size: 13px;
+  color: #1a2e25;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ===== FOTOS DE MASCOTA ===== */
+.fotos-panel {
+  margin: -2px 0 8px;
+  padding: 10px;
+  background: rgba(35, 83, 71, 0.04);
+  border: 1px solid rgba(35, 83, 71, 0.15);
+  border-radius: 10px;
+}
+
+.fotos-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px dashed rgba(35, 83, 71, 0.35);
+  border-radius: 20px;
+  color: #235347;
+  font-size: 12px;
+  padding: 5px 14px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: all 0.15s;
+
+  &:hover { background: rgba(35, 83, 71, 0.06); border-color: #235347; }
+  &.subiendo { opacity: 0.6; cursor: default; }
+}
+
+.fotos-loading,
+.fotos-vacia {
+  font-size: 12px;
+  color: #b0c4bc;
+  font-style: italic;
+  text-align: center;
+  padding: 4px 0;
+}
+
+.fotos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.foto-item {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+    display: block;
+    transition: opacity 0.15s;
+
+    &:hover { opacity: 0.85; }
+  }
+}
+
+.foto-remove {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 10px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover { background: #dc3545; }
+}
+
+/* ===== LIGHTBOX ===== */
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.lightbox-container {
+  position: relative;
+  cursor: default;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+.lightbox-img {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 8px;
+  object-fit: contain;
+  display: block;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: -14px;
+  right: -14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: white;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+  &:hover { background: #f0f0f0; }
 }
 
 .btn-cancelar {

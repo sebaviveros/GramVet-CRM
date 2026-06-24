@@ -28,7 +28,7 @@ namespace GramVetCRM.Service
             return usuarios.Select(ToDto).ToList();
         }
 
-        public async Task<UsuarioDto> Crear(CrearUsuarioDto dto)
+        public async Task<UsuarioDto> Crear(CrearUsuarioDto dto, int actorUsuarioId)
         {
             // Validar unicidad
             var existeUsername = await _repository.GetByUsername(dto.Username);
@@ -50,6 +50,8 @@ namespace GramVetCRM.Service
                 Username = dto.Username,
                 RolId = dto.RolId,
                 PasswordHash = PasswordHelper.Hash(passwordPlano),
+                Usercr = actorUsuarioId.ToString(),
+                Fechacr = DateTime.Now,
                 Active = true
             };
 
@@ -64,7 +66,7 @@ namespace GramVetCRM.Service
             return ToDto(creado);
         }
 
-        public async Task<UsuarioDto> Editar(int id, EditarUsuarioDto dto)
+        public async Task<UsuarioDto> Editar(int id, EditarUsuarioDto dto, int actorUsuarioId)
         {
             var usuario = await _repository.GetById(id)
                 ?? throw new Exception($"Usuario {id} no encontrado");
@@ -78,6 +80,8 @@ namespace GramVetCRM.Service
             usuario.Apellido = dto.Apellido;
             usuario.Email = dto.Email;
             usuario.RolId = dto.RolId;
+            usuario.Userup = actorUsuarioId.ToString();
+            usuario.Fechaup = DateTime.Now;
 
             await _repository.Save();
 
@@ -85,22 +89,26 @@ namespace GramVetCRM.Service
             return ToDto(actualizado);
         }
 
-        public async Task Eliminar(int id)
+        public async Task Eliminar(int id, int actorUsuarioId)
         {
             var usuario = await _repository.GetById(id)
                 ?? throw new Exception($"Usuario {id} no encontrado");
 
+            usuario.Userup = actorUsuarioId.ToString();
+            usuario.Fechaup = DateTime.Now;
             await _repository.Delete(usuario);
             await _repository.Save();
         }
 
-        public async Task ResetPassword(int id)
+        public async Task ResetPassword(int id, int actorUsuarioId)
         {
             var usuario = await _repository.GetById(id)
                 ?? throw new Exception($"Usuario {id} no encontrado");
 
             var passwordPlano = RandomPasswordHelper.Generar();
             usuario.PasswordHash = PasswordHelper.Hash(passwordPlano);
+            usuario.Userup = actorUsuarioId.ToString();
+            usuario.Fechaup = DateTime.Now;
 
             await _repository.Save();
 
@@ -116,6 +124,8 @@ namespace GramVetCRM.Service
                 return false;
 
             usuario.PasswordHash = PasswordHelper.Hash(dto.PasswordNueva);
+            usuario.Userup = usuarioId.ToString();
+            usuario.Fechaup = DateTime.Now;
             await _repository.Save();
             return true;
         }

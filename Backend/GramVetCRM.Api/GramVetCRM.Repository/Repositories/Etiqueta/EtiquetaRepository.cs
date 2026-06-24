@@ -21,10 +21,58 @@ namespace GramVetCRM.Repository.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<Etiqueta>> GetAllForVeterinario(int usuarioId)
+        {
+            return await _context.Etiqueta
+                .Where(e => e.Active && _context.EtiquetaUsuario
+                    .Any(eu => eu.EtiquetaId == e.Id && eu.UsuarioId == usuarioId && eu.Active))
+                .OrderBy(e => e.Nombre)
+                .ToListAsync();
+        }
+
         public async Task<Etiqueta?> GetById(int id)
         {
             return await _context.Etiqueta
                 .FirstOrDefaultAsync(e => e.Id == id && e.Active);
+        }
+
+        // Visibilidad por veterinario (EtiquetaUsuario)
+
+        public async Task<List<EtiquetaUsuario>> GetAllVeterinarioLinks()
+        {
+            return await _context.EtiquetaUsuario
+                .Where(eu => eu.Active)
+                .ToListAsync();
+        }
+
+        public async Task SetVeterinarios(int etiquetaId, List<int> usuarioIds, int actorUsuarioId)
+        {
+            var nuevos = usuarioIds.Distinct().ToHashSet();
+            var existentes = await _context.EtiquetaUsuario
+                .Where(eu => eu.EtiquetaId == etiquetaId && eu.Active)
+                .ToListAsync();
+            var existentesIds = existentes.Select(eu => eu.UsuarioId).ToHashSet();
+
+            // Quitar los que ya no están
+            foreach (var link in existentes.Where(eu => !nuevos.Contains(eu.UsuarioId)))
+            {
+                link.Active = false;
+                link.Userup = actorUsuarioId.ToString();
+                link.Fechaup = DateTime.Now;
+            }
+
+            // Agregar los nuevos
+            foreach (var uid in nuevos.Where(id => !existentesIds.Contains(id)))
+            {
+                await _context.EtiquetaUsuario.AddAsync(new EtiquetaUsuario
+                {
+                    EtiquetaId = etiquetaId,
+                    UsuarioId = uid,
+                    Usercr = actorUsuarioId.ToString(),
+                    Fechacr = DateTime.Now,
+                    Active = true
+                });
+            }
         }
 
         public async Task Add(Etiqueta etiqueta)
