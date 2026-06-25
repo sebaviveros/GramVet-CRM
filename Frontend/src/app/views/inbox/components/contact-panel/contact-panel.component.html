@@ -27,7 +27,9 @@
           <div class="dato-campo"><span class="campo-label">Referencia:</span> {{ contacto()?.referenciaDireccion }}</div>
         }
         <div class="canal"><span class="campo-label">Canal:</span> {{ state.selectedConversation()?.canal }}</div>
-        <button class="btn-editar-contacto" (click)="startEditContacto()">✏ Editar contacto</button>
+        @if (puedeEditarContacto) {
+          <button class="btn-editar-contacto" (click)="startEditContacto()">✏ Editar contacto</button>
+        }
       } @else {
         <div class="edit-contacto-form">
           <input class="edit-input" placeholder="Nombre *"
@@ -76,8 +78,10 @@
                   [style.color]="etiqueta.color ?? '#235347'"
                   [style.border-color]="(etiqueta.color ?? '#235347') + '55'">
               {{ etiqueta.nombre }}
-              <button class="etiqueta-remove" (click)="quitar(etiqueta.id)"
-                      [style.color]="etiqueta.color ?? '#235347'">✕</button>
+              @if (puedeQuitarEtiqueta) {
+                <button class="etiqueta-remove" (click)="quitar(etiqueta.id)"
+                        [style.color]="etiqueta.color ?? '#235347'">✕</button>
+              }
             </span>
           }
           @if (etiquetasContacto().length === 0) {

@@ -38,6 +38,12 @@ export class ContactPanelComponent {
     return rol.includes('admin') || rol.includes('secretario');
   })();
 
+  // El veterinario NO puede editar datos del contacto ni quitar etiquetas
+  // (solo asignar las que tiene habilitadas). Admin/Secretario sí.
+  esVeterinario = this.auth.getRolNombre().toLowerCase().includes('veterinario');
+  puedeEditarContacto = !this.esVeterinario;
+  puedeQuitarEtiqueta = !this.esVeterinario;
+
   // Datos del contacto
   contacto = signal<ContactoDto | null>(null);
   editandoContacto = signal(false);
