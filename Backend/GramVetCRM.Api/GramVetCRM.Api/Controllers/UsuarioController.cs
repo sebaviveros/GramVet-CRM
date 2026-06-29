@@ -32,6 +32,33 @@ namespace GramVetCRM.Api.Controllers
             return Ok(result);
         }
 
+        // GET api/Usuario/me — datos del usuario logueado (incluye foto)
+        [HttpGet("me")]
+        public async Task<IActionResult> Me()
+        {
+            var usuarioId = GetUsuarioId();
+            if (usuarioId == null) return Unauthorized();
+            var result = await _service.GetById(usuarioId.Value);
+            if (result == null) return NotFound();
+            return Ok(result);
+        }
+
+        // POST api/Usuario/foto — el usuario logueado cambia su propia foto de perfil
+        [HttpPost("foto")]
+        public async Task<IActionResult> SubirFoto(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("Archivo inválido");
+
+            var usuarioId = GetUsuarioId();
+            if (usuarioId == null) return Unauthorized();
+
+            using var stream = file.OpenReadStream();
+            var url = await _service.ActualizarFoto(usuarioId.Value, stream, file.FileName, file.ContentType);
+            if (url == null) return StatusCode(500, "Error subiendo la foto");
+            return Ok(new { fotoUrl = url });
+        }
+
         [HttpPost]
         public async Task<IActionResult> Crear([FromBody] CrearUsuarioDto dto)
         {

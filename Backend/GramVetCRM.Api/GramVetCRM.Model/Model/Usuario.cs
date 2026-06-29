@@ -9,6 +9,7 @@
         public string Username { get; set; }
         public string PasswordHash { get; set; }
         public int RolId { get; set; }
+        public string? FotoUrl { get; set; }
 
         public string? Usercr { get; set; }
         public string? Userup { get; set; }

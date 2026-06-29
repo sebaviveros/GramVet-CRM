@@ -52,9 +52,16 @@ namespace GramVetCRM.Service
                     .GetProperty("changes")[0]
                     .GetProperty("value");
 
+                // Estados de entrega (visto): sent / delivered / read / failed
+                if (entry.TryGetProperty("statuses", out var statuses))
+                {
+                    await ProcesarEstados(statuses);
+                    return;
+                }
+
                 if (!entry.TryGetProperty("messages", out var messages))
                 {
-                    _logger.LogInformation("Webhook recibido sin mensajes — posiblemente status update");
+                    _logger.LogInformation("Webhook recibido sin mensajes ni estados");
                     return;
                 }
 
@@ -100,6 +107,11 @@ namespace GramVetCRM.Service
                     mediaUrl = await DescargarMedia(mediaId!, "video");
                     if (message.GetProperty("video").TryGetProperty("caption", out var caption))
                         contenido = caption.GetString();
+                }
+                else if (tipo == "sticker")
+                {
+                    var mediaId = message.GetProperty("sticker").GetProperty("id").GetString();
+                    mediaUrl = await DescargarMedia(mediaId!, "sticker");
                 }
                 else if (tipo == "location")
                 {
@@ -257,6 +269,55 @@ namespace GramVetCRM.Service
                 _logger.LogError(ex, "Error procesando mensaje de WhatsApp");
             }
         }
+
+        // Procesa los estados de entrega (visto) de mensajes salientes.
+        // value.statuses[] = { id (wamid), status, recipient_id, timestamp }
+        private async Task ProcesarEstados(JsonElement statuses)
+        {
+            foreach (var st in statuses.EnumerateArray())
+            {
+                try
+                {
+                    var wamid = st.TryGetProperty("id", out var idEl) ? idEl.GetString() : null;
+                    var estado = st.TryGetProperty("status", out var stEl) ? stEl.GetString() : null;
+                    if (string.IsNullOrEmpty(wamid) || string.IsNullOrEmpty(estado)) continue;
+
+                    var mensaje = await _mensajeRepo.GetByExternalId(wamid);
+                    if (mensaje == null) continue;
+
+                    // Solo avanzar el estado (sent < delivered < read); "failed" siempre se aplica
+                    if (estado != "failed" && RankEstado(estado) <= RankEstado(mensaje.EstadoEntrega))
+                        continue;
+
+                    mensaje.EstadoEntrega = estado;
+                    await _mensajeRepo.Save();
+
+                    var conv = await _conversacionRepo.GetById(mensaje.ConversacionId);
+                    var grupos = new List<string> { ChatGroups.Staff };
+                    if (conv?.UsuarioAsignadoId.HasValue == true)
+                        grupos.Add(ChatGroups.Usuario(conv.UsuarioAsignadoId.Value));
+
+                    await _hubContext.Clients.Groups(grupos).SendAsync("MensajeEstado", new
+                    {
+                        MensajeId = mensaje.Id,
+                        EstadoEntrega = estado,
+                        ConversacionId = mensaje.ConversacionId
+                    });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error procesando estado de mensaje");
+                }
+            }
+        }
+
+        private static int RankEstado(string? e) => e switch
+        {
+            "sent" => 1,
+            "delivered" => 2,
+            "read" => 3,
+            _ => 0
+        };
 
         // Procesa una reacción entrante: ubica el mensaje por su wamid y guarda el emoji
         private async Task ProcesarReaccion(JsonElement message)
@@ -532,6 +593,7 @@ namespace GramVetCRM.Service
             "image" => "📷 Imagen",
             "audio" => "🎵 Audio",
             "video" => "🎬 Video",
+            "sticker" => "Sticker",
             _ => $"[{tipo}]"
         };
 
@@ -562,6 +624,7 @@ namespace GramVetCRM.Service
                     "image" => ".jpg",
                     "audio" => ".ogg",
                     "video" => ".mp4",
+                    "sticker" => ".webp",
                     _ => ".bin"
                 };
 

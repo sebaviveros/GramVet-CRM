@@ -145,7 +145,13 @@
               <tr>
                 <td>
                   <div class="name-cell">
-                    <div class="avatar av-green">{{ iniciales(u) }}</div>
+                    <div class="avatar av-green">
+                      @if (u.fotoUrl) {
+                        <img [src]="u.fotoUrl" class="avatar-img" alt="foto" />
+                      } @else {
+                        {{ iniciales(u) }}
+                      }
+                    </div>
                     <span class="name-text">{{ u.nombre }} {{ u.apellido }}</span>
                   </div>
                 </td>

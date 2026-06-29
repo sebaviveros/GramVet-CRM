@@ -9,6 +9,7 @@ namespace GramVetCRM.Model.DTOs.Usuario
         public string Username { get; set; }
         public int RolId { get; set; }
         public string? RolNombre { get; set; }
+        public string? FotoUrl { get; set; }
     }
 
     public class CrearUsuarioDto

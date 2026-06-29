@@ -34,6 +34,7 @@ export interface MensajeDto {
   fechaEnvio: Date;
   usuarioId?: number;
   reaccion?: string;
+  estadoEntrega?: string;
 }
 
 export interface EnviarMensajeDto {

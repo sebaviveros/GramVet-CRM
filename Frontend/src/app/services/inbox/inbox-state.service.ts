@@ -26,6 +26,7 @@ export interface Message {
   fechaEnvio: Date;
   usuarioId?: number;
   reaccion?: string;
+  estadoEntrega?: string; // sent / delivered / read / failed (outbound WhatsApp)
 }
 
 @Injectable({
@@ -160,6 +161,20 @@ export class InboxStateService {
     });
   }
 
+  // Actualiza el estado de entrega (visto) de un mensaje (evento SignalR MensajeEstado)
+  updateEstadoMensaje(mensajeId: number, conversacionId: number, estado: string) {
+    this._messages.update(current => {
+      const msgs = current[conversacionId];
+      if (!msgs) return current;
+      return {
+        ...current,
+        [conversacionId]: msgs.map(m =>
+          m.id === mensajeId ? { ...m, estadoEntrega: estado } : m
+        )
+      };
+    });
+  }
+
   // Dispara scroll al fondo en el chat-window activo
   triggerScrollToBottom() {
     this._scrollToBottomCounter.update(n => n + 1);
@@ -186,6 +201,10 @@ export class InboxStateService {
   }
 
   upsertConversacion(conversacion: Conversation) {
+    // Si es la conversación que está abierta, no acumular "no leídos"
+    if (conversacion.id === this._selectedConversationId()) {
+      conversacion = { ...conversacion, cantidadNoLeidos: 0 };
+    }
     this._conversations.update(convs => {
       const index = convs.findIndex(c => c.id === conversacion.id);
       if (index >= 0) {

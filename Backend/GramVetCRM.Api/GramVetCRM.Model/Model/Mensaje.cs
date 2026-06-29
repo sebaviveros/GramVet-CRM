@@ -11,6 +11,7 @@
         public int? UsuarioId { get; set; }
         public string? MediaUrl { get; set; }
         public string? Reaccion { get; set; } // emoji de reacción al mensaje
+        public string? EstadoEntrega { get; set; } // sent / delivered / read / failed
         public DateTime FechaEnvio { get; set; }
         public string Usercr { get; set; }
         public string? Userup { get; set; }

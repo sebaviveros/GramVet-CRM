@@ -1,5 +1,5 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input, signal, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 
 import {
@@ -32,13 +32,40 @@ import Swal from 'sweetalert2';
   templateUrl: './default-header.component.html',
   imports: [ContainerComponent, HeaderTogglerDirective, SidebarToggleDirective, IconDirective, HeaderNavComponent, NavItemComponent, NavLinkDirective, RouterLink, RouterLinkActive, NgTemplateOutlet, BreadcrumbRouterComponent, DropdownComponent, DropdownToggleDirective, AvatarComponent, DropdownMenuDirective, DropdownHeaderDirective, DropdownItemDirective, BadgeComponent, DropdownDividerDirective]
 })
-export class DefaultHeaderComponent extends HeaderComponent {
+export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
 
   readonly #colorModeService = inject(ColorModeService);
   readonly colorMode = this.#colorModeService.colorMode;
   readonly #authService = inject(AuthService);
   readonly #usuarioService = inject(UsuarioService);
   readonly #router = inject(Router);
+
+  // Foto de perfil del usuario logueado (fallback al avatar por defecto)
+  fotoPerfil = signal<string>('./assets/images/avatars/8.jpg');
+
+  ngOnInit(): void {
+    this.#usuarioService.getMe().subscribe({
+      next: (u) => { if (u.fotoUrl) this.fotoPerfil.set(u.fotoUrl); },
+      error: () => { /* deja el avatar por defecto */ }
+    });
+  }
+
+  onFotoSeleccionada(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const file = input.files[0];
+    input.value = '';
+
+    this.#usuarioService.subirFotoPerfil(file).subscribe({
+      next: (r) => {
+        this.fotoPerfil.set(r.fotoUrl);
+        Swal.fire({ icon: 'success', title: 'Foto actualizada', timer: 1800, showConfirmButton: false });
+      },
+      error: () => {
+        Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo actualizar la foto' });
+      }
+    });
+  }
 
   readonly colorModes = [
     { name: 'light', text: 'Light', icon: 'cilSun' },

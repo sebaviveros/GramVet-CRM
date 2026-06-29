@@ -10,6 +10,7 @@ export interface UsuarioDto {
   username: string;
   rolId: number;
   rolNombre?: string;
+  fotoUrl?: string;
 }
 
 export interface CrearUsuarioDto {
@@ -74,5 +75,15 @@ export class UsuarioService {
 
   getVeterinarios(): Observable<UsuarioDto[]> {
     return this.#http.get<UsuarioDto[]>(`${this.#base}/veterinarios`);
+  }
+
+  getMe(): Observable<UsuarioDto> {
+    return this.#http.get<UsuarioDto>(`${this.#base}/me`);
+  }
+
+  subirFotoPerfil(file: File): Observable<{ fotoUrl: string }> {
+    const fd = new FormData();
+    fd.append('file', file);
+    return this.#http.post<{ fotoUrl: string }>(`${this.#base}/foto`, fd);
   }
 }

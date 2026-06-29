@@ -11,6 +11,7 @@ CREATE TABLE Mensaje (
 	UsuarioId INT NULL, -- quien envia el msj (solo outbound)
 	MediaUrl NVARCHAR(500) NULL,
 	Reaccion NVARCHAR(20) NULL, -- emoji de reacción al mensaje (WhatsApp/Meta)
+	EstadoEntrega NVARCHAR(20) NULL, -- visto: sent / delivered / read / failed (solo outbound WhatsApp)
     FechaEnvio DATETIME NOT NULL,
 	
     usercr NVARCHAR(100),

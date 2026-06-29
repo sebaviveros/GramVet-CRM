@@ -256,6 +256,32 @@ c-card-footer {
   display: block;
 }
 
+/* Sticker: sin burbuja */
+.message.sticker-msg {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+
+  .message-time { color: #999 !important; }
+}
+
+.message-sticker {
+  width: 120px;
+  height: auto;
+  display: block;
+}
+
+/* ===== VISTO (ticks) ===== */
+.ticks {
+  margin-left: 3px;
+  font-size: 11px;
+  letter-spacing: -1px;
+
+  &.read { color: #53bdeb; }   // azul WhatsApp (leído)
+  &.failed { color: #ffb3b3; letter-spacing: 0; }
+}
+
 /* ===== REACCIONES ===== */
 .reaccion-badge {
   position: absolute;

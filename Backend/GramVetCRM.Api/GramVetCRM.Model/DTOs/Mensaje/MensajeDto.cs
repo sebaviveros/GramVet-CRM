@@ -9,6 +9,7 @@
         public string Direccion { get; set; }
         public string? MediaUrl { get; set; }
         public string? Reaccion { get; set; }
+        public string? EstadoEntrega { get; set; }
         public DateTime FechaEnvio { get; set; }
         public int? UsuarioId { get; set; }
     }

@@ -56,7 +56,7 @@
       <c-avatar
         shape="rounded-1"
         size="md"
-        src="./assets/images/avatars/8.jpg"
+        [src]="fotoPerfil()"
         status="success"
         textColor="primary"
         alt="User avatar"
@@ -67,6 +67,13 @@
         <h6 cDropdownHeader class="bg-body-secondary text-body-secondary fw-semibold py-2 rounded-top">
           Mi cuenta
         </h6>
+      </li>
+      <li>
+        <a cDropdownItem (click)="fotoInput.click()" style="cursor: pointer;">
+          <svg cIcon class="me-2" name="cilImage"></svg>
+          Cambiar foto de perfil
+        </a>
+        <input #fotoInput type="file" accept="image/*" hidden (change)="onFotoSeleccionada($event)" />
       </li>
       <li>
         <a cDropdownItem (click)="onCambiarPassword()" style="cursor: pointer;">

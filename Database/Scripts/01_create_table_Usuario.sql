@@ -7,6 +7,7 @@ CREATE TABLE Usuario (
     Username NVARCHAR(150),
     PasswordHash NVARCHAR(500),
     RolId INT NOT NULL,
+    FotoUrl NVARCHAR(500) NULL,
     usercr NVARCHAR(100),
     userup NVARCHAR(100),
     fechacr DATETIME DEFAULT GETDATE(),

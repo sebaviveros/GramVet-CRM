@@ -224,8 +224,8 @@
 .conversation-item.selected .vet-chip-nombre { color: rgba(255, 255, 255, 0.9); }
 .conversation-item.selected .vet-chip-avatar { background: rgba(255, 255, 255, 0.25); }
 
-//Estilo conversaciones no leidas
-.conversation-item.unread {
+//Estilo conversaciones no leidas (no aplica si está seleccionada: el verde gana)
+.conversation-item.unread:not(.selected) {
   background: rgba(35, 83, 71, 0.06);
   border-left: 3px solid #235347;
 }

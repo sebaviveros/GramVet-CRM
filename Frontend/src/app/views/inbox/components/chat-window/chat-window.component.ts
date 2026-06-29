@@ -9,7 +9,8 @@ import {
   AfterViewChecked,
   OnDestroy,
   afterNextRender,
-  Injector
+  Injector,
+  HostListener
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CardModule } from '@coreui/angular';
@@ -170,7 +171,26 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
   }
 
   agregarEmoji(emoji: string) {
+    // No se cierra al elegir (como WhatsApp): se pueden agregar varios
     this.messageInput.update(t => t + emoji);
+  }
+
+  // Cierra el panel de emojis al hacer click fuera de él.
+  // Los clicks en el botón y dentro del panel hacen stopPropagation, así que no llegan acá.
+  @HostListener('document:click')
+  cerrarEmojisAfuera() {
+    if (this.mostrarEmojis()) this.mostrarEmojis.set(false);
+  }
+
+  // Símbolo de "visto" según el estado de entrega
+  tickSymbol(estado?: string): string {
+    switch (estado) {
+      case 'read':
+      case 'delivered': return '✓✓';
+      case 'sent': return '✓';
+      case 'failed': return '⚠';
+      default: return '';
+    }
   }
 
   // ── Reacciones ───────────────────────────────────────────────────

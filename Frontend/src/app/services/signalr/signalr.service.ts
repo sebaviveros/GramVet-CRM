@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { InboxStateService, Message, Conversation } from '../inbox/inbox-state.service';
 import { AuthService } from '../auth/auth.service';
+import { ConversacionService } from '../conversacion/conversacion.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,11 @@ export class SignalRService {
   private hubConnection: signalR.HubConnection | null = null;
   private readonly hubUrl = 'https://localhost:7101/hubs/chat';
 
-  constructor(private state: InboxStateService, private auth: AuthService) {}
+  constructor(
+    private state: InboxStateService,
+    private auth: AuthService,
+    private conversacionService: ConversacionService
+  ) {}
 
   startConnection(): void {
     this.hubConnection = new signalR.HubConnectionBuilder()
@@ -40,10 +45,13 @@ export class SignalRService {
       console.log('Mensaje recibido via SignalR:', mensaje);
       this.state.addMessage(mensaje);
 
-      // Si el mensaje es de la conversación activa, scrollear al fondo
+      // Si el mensaje es de la conversación activa: scrollear al fondo y
+      // marcarlo como leído (no debe acumularse como no leído estando abierta)
       const convActiva = this.state.selectedConversation();
       if (convActiva && mensaje.conversacionId === convActiva.id) {
         this.state.triggerScrollToBottom();
+        this.state.resetearNoLeidos(convActiva.id);
+        this.conversacionService.marcarLeida(convActiva.id).subscribe();
       }
     });
 
@@ -63,6 +71,12 @@ export class SignalRService {
     this.hubConnection.on('MensajeReaccionado',
       (data: { mensajeId: number; reaccion: string | null; conversacionId: number }) => {
         this.state.updateReaccion(data.mensajeId, data.conversacionId, data.reaccion);
+      });
+
+    // Estado de entrega (visto) de un mensaje saliente
+    this.hubConnection.on('MensajeEstado',
+      (data: { mensajeId: number; estadoEntrega: string; conversacionId: number }) => {
+        this.state.updateEstadoMensaje(data.mensajeId, data.conversacionId, data.estadoEntrega);
       });
   }
 

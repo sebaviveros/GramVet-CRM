@@ -76,18 +76,27 @@
       @if (state.selectedConversation()) {
         @for (message of state.selectedMessages(); track message.id) {
           <div class="message" [class.sent]="message.direccion === 'outbound'"
-               [class.received]="message.direccion === 'inbound'">
+               [class.received]="message.direccion === 'inbound'"
+               [class.sticker-msg]="message.tipoMensaje === 'sticker'">
 
             @if (message.tipoMensaje === 'text' || !message.tipoMensaje) {
               <span>{{ message.contenido }}</span>
-              <span class="message-time">{{ message.fechaEnvio | date:'h:mm a' }}</span>
+              <span class="message-time">{{ message.fechaEnvio | date:'h:mm a' }}
+                @if (message.direccion === 'outbound' && message.estadoEntrega) {
+                  <span class="ticks" [class.read]="message.estadoEntrega === 'read'" [class.failed]="message.estadoEntrega === 'failed'">{{ tickSymbol(message.estadoEntrega) }}</span>
+                }
+              </span>
             }
 
             @if (message.tipoMensaje === 'image' && message.mediaUrl) {
               <div class="image-wrapper">
                 <img class="message-image" [src]="message.mediaUrl" alt="imagen"
                      (click)="abrirImagen(message.mediaUrl)" />
-                <span class="image-time">{{ message.fechaEnvio | date:'h:mm a' }}</span>
+                <span class="image-time">{{ message.fechaEnvio | date:'h:mm a' }}
+                  @if (message.direccion === 'outbound' && message.estadoEntrega) {
+                    <span class="ticks" [class.read]="message.estadoEntrega === 'read'" [class.failed]="message.estadoEntrega === 'failed'">{{ tickSymbol(message.estadoEntrega) }}</span>
+                  }
+                </span>
               </div>
               @if (message.contenido) {
                 <span style="margin-top: 4px; font-size: 14px;">{{ message.contenido }}</span>
@@ -112,6 +121,11 @@
               </div>
             }
 
+            @if (message.tipoMensaje === 'sticker' && message.mediaUrl) {
+              <img class="message-sticker" [src]="message.mediaUrl" alt="sticker" />
+              <span class="message-time">{{ message.fechaEnvio | date:'h:mm a' }}</span>
+            }
+
             @if (message.tipoMensaje === 'location' && message.mediaUrl) {
               <a class="location-bubble" [href]="message.mediaUrl" target="_blank" rel="noopener">
                 <svg class="location-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
@@ -123,7 +137,11 @@
                   <span class="location-link">Ver en el mapa</span>
                 </span>
               </a>
-              <span class="message-time">{{ message.fechaEnvio | date:'h:mm a' }}</span>
+              <span class="message-time">{{ message.fechaEnvio | date:'h:mm a' }}
+                @if (message.direccion === 'outbound' && message.estadoEntrega) {
+                  <span class="ticks" [class.read]="message.estadoEntrega === 'read'" [class.failed]="message.estadoEntrega === 'failed'">{{ tickSymbol(message.estadoEntrega) }}</span>
+                }
+              </span>
             }
 
             @if (message.reaccion) {
@@ -168,7 +186,7 @@
 
     <!-- Panel de emojis -->
     @if (mostrarEmojis()) {
-      <div class="emoji-panel">
+      <div class="emoji-panel" (click)="$event.stopPropagation()">
         @for (e of emojis; track e) {
           <button class="emoji-btn" type="button" (click)="agregarEmoji(e)">{{ e }}</button>
         }
@@ -193,7 +211,7 @@
       </button>
 
       <button class="btn btn-outline-secondary mb-0 d-flex align-items-center" type="button"
-              title="Emojis" [class.active]="mostrarEmojis()" (click)="toggleEmojis()">
+              title="Emojis" [class.active]="mostrarEmojis()" (click)="$event.stopPropagation(); toggleEmojis()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
           <circle cx="12" cy="12" r="10"/>
           <path d="M8 14s1.5 2 4 2 4-2 4-2"/>

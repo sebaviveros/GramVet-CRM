@@ -137,7 +137,8 @@ namespace GramVetCRM.Service
                 Direccion = m.Direccion,
                 FechaEnvio = m.FechaEnvio,
                 UsuarioId = m.UsuarioId,
-                Reaccion = m.Reaccion
+                Reaccion = m.Reaccion,
+                EstadoEntrega = m.EstadoEntrega
             }).ToList();
         }
 
@@ -186,8 +187,9 @@ namespace GramVetCRM.Service
             var canalNombre = (conversacion.Canal?.Nombre ?? "").ToLower();
 
             string? externalId = null;
+            var esMeta = canalNombre.Contains("messenger") || canalNombre.Contains("instagram");
 
-            if (canalNombre.Contains("messenger") || canalNombre.Contains("instagram"))
+            if (esMeta)
             {
                 // Messenger / Instagram: el id del destinatario va en Telefono con prefijo (FB:/IG:)
                 var destinatarioId = telefono;
@@ -222,10 +224,12 @@ namespace GramVetCRM.Service
                 }
             }
 
-            // Guardar el id externo (wamid / message_id) para poder mapear reacciones
+            // Guardar el id externo (wamid / message_id) para poder mapear reacciones y estados.
+            // WhatsApp: arranca en "sent" (luego avanza a delivered/read por webhook).
             if (!string.IsNullOrEmpty(externalId))
             {
                 mensaje.ExternalId = externalId;
+                if (!esMeta) mensaje.EstadoEntrega = "sent";
                 await _mensajeRepo.Save();
             }
 
@@ -239,7 +243,8 @@ namespace GramVetCRM.Service
                 Direccion = mensaje.Direccion,
                 FechaEnvio = mensaje.FechaEnvio,
                 UsuarioId = mensaje.UsuarioId,
-                Reaccion = mensaje.Reaccion
+                Reaccion = mensaje.Reaccion,
+                EstadoEntrega = mensaje.EstadoEntrega
             };
 
             // Notificar via SignalR (dirigido por rol: staff + veterinario asignado)

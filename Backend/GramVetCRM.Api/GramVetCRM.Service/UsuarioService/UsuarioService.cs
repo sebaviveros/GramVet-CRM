@@ -9,11 +9,50 @@ namespace GramVetCRM.Service
     {
         private readonly IUsuarioRepository _repository;
         private readonly IEmailService _emailService;
+        private readonly IR2StorageService _r2;
 
-        public UsuarioService(IUsuarioRepository repository, IEmailService emailService)
+        public UsuarioService(IUsuarioRepository repository, IEmailService emailService, IR2StorageService r2)
         {
             _repository = repository;
             _emailService = emailService;
+            _r2 = r2;
+        }
+
+        public async Task<UsuarioDto?> GetById(int id)
+        {
+            var usuario = await _repository.GetById(id);
+            return usuario == null ? null : ToDto(usuario);
+        }
+
+        public async Task<string?> ActualizarFoto(int usuarioId, Stream archivo, string nombreOriginal, string contentType)
+        {
+            var usuario = await _repository.GetById(usuarioId)
+                ?? throw new Exception($"Usuario {usuarioId} no encontrado");
+
+            var ext = Path.GetExtension(nombreOriginal);
+            if (string.IsNullOrWhiteSpace(ext)) ext = ".jpg";
+            var fileName = $"usuario/{Guid.NewGuid()}{ext}";
+
+            var url = await _r2.SubirArchivo(archivo, fileName, contentType);
+            if (url == null) return null;
+
+            // Borrar la foto anterior en R2 (si tenía)
+            if (!string.IsNullOrEmpty(usuario.FotoUrl))
+            {
+                try
+                {
+                    var key = new Uri(usuario.FotoUrl).AbsolutePath.TrimStart('/');
+                    await _r2.EliminarArchivo(key);
+                }
+                catch { /* si falla, igual seguimos */ }
+            }
+
+            usuario.FotoUrl = url;
+            usuario.Userup = usuarioId.ToString();
+            usuario.Fechaup = DateTime.Now;
+            await _repository.Save();
+
+            return url;
         }
 
         public async Task<List<UsuarioDto>> GetAll()
@@ -161,7 +200,8 @@ namespace GramVetCRM.Service
             Email = u.Email,
             Username = u.Username,
             RolId = u.RolId,
-            RolNombre = u.Rol?.Nombre
+            RolNombre = u.Rol?.Nombre,
+            FotoUrl = u.FotoUrl
         };
     }
 }
