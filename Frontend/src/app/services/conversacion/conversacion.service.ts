@@ -93,6 +93,11 @@ export interface CrearCitaDto {
   descripcionEvento: string;
   ubicacion?: string;
   mascotas: MascotaCita[];
+  // Datos para completar el perfil del cliente si está vacío
+  nombreCliente?: string;
+  direccion?: string;
+  referenciasDireccion?: string;
+  correo?: string;
 }
 
 export interface CitaCreadaDto {
@@ -101,6 +106,7 @@ export interface CitaCreadaDto {
   inicio: string;
   fin: string;
   mascotasCreadas: number;
+  camposPerfilActualizados: number;
   simulada: boolean;
 }
 

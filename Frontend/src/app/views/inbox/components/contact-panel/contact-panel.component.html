@@ -78,7 +78,9 @@
               <input class="edit-input"
                 [value]="cita()?.comunaSector ?? ''" (input)="actualizarCita('comunaSector', $any($event.target).value)" />
 
-              <label class="cita-label">Nombre cliente</label>
+              <label class="cita-label">Nombre cliente
+                @if (seGuardaraEnPerfil('nombreCliente')) { <span class="cita-perfil-badge">se guardará en el perfil</span> }
+              </label>
               <input class="edit-input"
                 [value]="cita()?.nombreCliente ?? ''" (input)="actualizarCita('nombreCliente', $any($event.target).value)" />
 
@@ -86,11 +88,15 @@
               <input class="edit-input"
                 [value]="cita()?.telefono ?? ''" (input)="actualizarCita('telefono', $any($event.target).value)" />
 
-              <label class="cita-label">Dirección</label>
+              <label class="cita-label">Dirección
+                @if (seGuardaraEnPerfil('direccion')) { <span class="cita-perfil-badge">se guardará en el perfil</span> }
+              </label>
               <input class="edit-input"
                 [value]="cita()?.direccion ?? ''" (input)="actualizarCita('direccion', $any($event.target).value)" />
 
-              <label class="cita-label">Referencias del domicilio</label>
+              <label class="cita-label">Referencias del domicilio
+                @if (seGuardaraEnPerfil('referenciasDireccion')) { <span class="cita-perfil-badge">se guardará en el perfil</span> }
+              </label>
               <input class="edit-input"
                 [value]="cita()?.referenciasDireccion ?? ''" (input)="actualizarCita('referenciasDireccion', $any($event.target).value)" />
 
@@ -110,7 +116,9 @@
               <input class="edit-input"
                 [value]="cita()?.observaciones ?? ''" (input)="actualizarCita('observaciones', $any($event.target).value)" />
 
-              <label class="cita-label">Correo</label>
+              <label class="cita-label">Correo
+                @if (seGuardaraEnPerfil('correo')) { <span class="cita-perfil-badge">se guardará en el perfil</span> }
+              </label>
               <input class="edit-input"
                 [value]="cita()?.correo ?? ''" (input)="actualizarCita('correo', $any($event.target).value)" />
 

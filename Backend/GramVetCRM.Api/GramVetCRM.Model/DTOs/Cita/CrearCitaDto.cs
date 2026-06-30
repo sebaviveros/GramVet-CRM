@@ -13,6 +13,12 @@ namespace GramVetCRM.Model.DTOs.Cita
 
         // Mascotas a crear y asociar al cliente
         public List<MascotaCitaDto> Mascotas { get; set; } = new();
+
+        // Datos confirmados que se usan para completar el perfil del cliente si está vacío
+        public string? NombreCliente { get; set; }
+        public string? Direccion { get; set; }
+        public string? ReferenciasDireccion { get; set; }
+        public string? Correo { get; set; }
     }
 
     // Resultado de crear la cita.
@@ -23,6 +29,7 @@ namespace GramVetCRM.Model.DTOs.Cita
         public DateTime Inicio { get; set; }
         public DateTime Fin { get; set; }
         public int MascotasCreadas { get; set; }
+        public int CamposPerfilActualizados { get; set; } // cuántos datos vacíos del cliente se completaron
         public bool Simulada { get; set; }               // true si el calendar no está configurado
     }
 }

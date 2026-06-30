@@ -139,6 +139,23 @@ export class ContactPanelComponent {
     return null;
   }
 
+  // ¿Este dato se va a GUARDAR en el perfil del cliente? (perfil vacío + la cita tiene valor)
+  seGuardaraEnPerfil(campo: 'direccion' | 'referenciasDireccion' | 'correo' | 'nombreCliente'): boolean {
+    const c = this.cita();
+    const ct = this.contacto();
+    if (!c) return false;
+    switch (campo) {
+      case 'direccion':            return !ct?.direccion?.trim() && !!c.direccion?.trim();
+      case 'referenciasDireccion': return !ct?.referenciaDireccion?.trim() && !!c.referenciasDireccion?.trim();
+      case 'correo':               return !ct?.email?.trim() && !!c.correo?.trim();
+      case 'nombreCliente': {
+        const nom = ct?.nombre?.trim() ?? '';
+        const sinNombre = !nom || nom === ct?.telefono?.trim() || /^\+?[\d\s]+$/.test(nom);
+        return sinNombre && !!c.nombreCliente?.trim();
+      }
+    }
+  }
+
   private normalizar(s?: string): string {
     return (s ?? '').trim().toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
   }
@@ -612,7 +629,11 @@ export class ContactPanelComponent {
       tituloEvento: this.tituloPreview(),
       descripcionEvento: this.descripcionPreview(),
       ubicacion: c.ubicacionGps?.trim() || c.direccion?.trim() || undefined,
-      mascotas: (c.mascotas ?? []).filter(m => m.nombre?.trim())
+      mascotas: (c.mascotas ?? []).filter(m => m.nombre?.trim()),
+      nombreCliente: c.nombreCliente?.trim() || undefined,
+      direccion: c.direccion?.trim() || undefined,
+      referenciasDireccion: c.referenciasDireccion?.trim() || undefined,
+      correo: c.correo?.trim() || undefined
     };
 
     this.creandoCita.set(true);
@@ -625,6 +646,7 @@ export class ContactPanelComponent {
           icon: 'success',
           title: r.simulada ? 'Cita creada (simulada)' : 'Cita agendada',
           html: `${r.mascotasCreadas > 0 ? `Se crearon ${r.mascotasCreadas} mascota(s).<br>` : ''}` +
+                `${r.camposPerfilActualizados > 0 ? `Se completaron ${r.camposPerfilActualizados} dato(s) del perfil del cliente.<br>` : ''}` +
                 `Bloque: <b>${cuando}</b>` +
                 `${r.eventoLink ? `<br><a href="${r.eventoLink}" target="_blank">Ver en el calendario</a>` : ''}`,
           confirmButtonColor: '#235347'

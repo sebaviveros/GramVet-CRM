@@ -130,11 +130,45 @@ namespace GramVetCRM.Service
             if (creadas > 0)
                 await _mascotaRepo.Save();
 
-            // 3. Crear el evento en el Google Calendar madre (o simulado si no está configurado).
+            // 3. Completar los campos VACÍOS del perfil del cliente (no pisar los existentes).
+            var camposPerfil = 0;
+            var contacto = await _contactoRepo.GetById(conversacion.ContactoId);
+            if (contacto != null)
+            {
+                if (string.IsNullOrWhiteSpace(contacto.Direccion) && !string.IsNullOrWhiteSpace(dto.Direccion))
+                { contacto.Direccion = dto.Direccion.Trim(); camposPerfil++; }
+
+                if (string.IsNullOrWhiteSpace(contacto.ReferenciaDireccion) && !string.IsNullOrWhiteSpace(dto.ReferenciasDireccion))
+                { contacto.ReferenciaDireccion = dto.ReferenciasDireccion.Trim(); camposPerfil++; }
+
+                if (string.IsNullOrWhiteSpace(contacto.Email) && !string.IsNullOrWhiteSpace(dto.Correo))
+                { contacto.Email = dto.Correo.Trim(); camposPerfil++; }
+
+                // Nombre: solo si el contacto entró sin nombre o como su número de teléfono.
+                var sinNombre = string.IsNullOrWhiteSpace(contacto.Nombre) || contacto.Nombre == contacto.Telefono;
+                if (sinNombre && !string.IsNullOrWhiteSpace(dto.NombreCliente))
+                {
+                    var partes = dto.NombreCliente.Trim().Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                    contacto.Nombre = partes[0];
+                    if (partes.Length > 1) contacto.Apellido = partes[1];
+                    contacto.EsNuevo = false;
+                    camposPerfil++;
+                }
+
+                if (camposPerfil > 0)
+                {
+                    contacto.Userup = actorUsuarioId.ToString();
+                    contacto.Fechaup = DateTime.Now;
+                    await _contactoRepo.Save();
+                }
+            }
+
+            // 4. Crear el evento en el Google Calendar madre (o simulado si no está configurado).
             var resultado = await _googleCalendar.CrearEvento(
                 dto.TituloEvento, dto.DescripcionEvento, dto.Ubicacion, inicio, fin);
 
             resultado.MascotasCreadas = creadas;
+            resultado.CamposPerfilActualizados = camposPerfil;
             return resultado;
         }
 

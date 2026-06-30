@@ -891,6 +891,20 @@ c-card {
   color: #E8C97A;
 }
 
+.cita-perfil-badge {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+  padding: 1px 7px;
+  border-radius: 20px;
+  background: rgba(110, 207, 171, 0.18);
+  color: #6ECFAB;
+  vertical-align: middle;
+}
+
 .cita-movil {
   display: flex;
   gap: 6px;
