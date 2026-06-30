@@ -5,7 +5,7 @@ import { CardModule } from '@coreui/angular';
 import { InboxStateService } from '../../../../services/inbox/inbox-state.service';
 import { EtiquetaService, EtiquetaDto } from '../../../../services/etiqueta/etiqueta.service';
 import { ContactoService, MascotaDto, ContactoDto, BitacoraEntradaDto, MascotaFotoDto } from '../../../../services/contacto/contacto.service';
-import { ConversacionService } from '../../../../services/conversacion/conversacion.service';
+import { ConversacionService, CitaExtraidaDto, CrearCitaDto, MascotaCita, SLOTS_AGENDA } from '../../../../services/conversacion/conversacion.service';
 import { UsuarioService, UsuarioDto } from '../../../../services/usuario/usuario.service';
 import { AuthService } from '../../../../services/auth/auth.service';
 import Swal from 'sweetalert2';
@@ -43,6 +43,119 @@ export class ContactPanelComponent {
   esVeterinario = this.auth.getRolNombre().toLowerCase().includes('veterinario');
   puedeEditarContacto = !this.esVeterinario;
   puedeQuitarEtiqueta = !this.esVeterinario;
+
+  // Agendar cita (IA) — solo staff (admin/secretario)
+  puedeAgendarIa = this.puedeAsignar;
+  cargandoCita = signal(false);
+  cita = signal<CitaExtraidaDto | null>(null);
+
+  // Confirmación de la cita (Fase 2)
+  slots = SLOTS_AGENDA;
+  movilCita = signal<number>(1);
+  fechaCita = signal<string>('');        // yyyy-MM-dd
+  slotCita = signal<number | null>(null);
+  creandoCita = signal(false);
+
+  // Título y descripción del evento, generados EN VIVO a partir de los campos editables.
+  tituloPreview = computed(() => {
+    const c = this.cita();
+    if (!c) return '';
+    const partes: string[] = [];
+    const hora = this.slotHoraTitulo();
+    if (hora) partes.push(hora);
+    if (c.comunaSector?.trim()) partes.push(c.comunaSector.trim() + ':');
+    if (c.direccion?.trim()) partes.push(c.direccion.trim());
+    if (c.telefono?.trim()) partes.push(this.fmtTel(c.telefono));
+    if (c.nombreCliente?.trim()) partes.push(c.nombreCliente.trim());
+    return partes.join(' ').trim();
+  });
+
+  descripcionPreview = computed(() => {
+    const c = this.cita();
+    if (!c) return '';
+    return [
+      `Paciente(s): ${this.pacientesAuto()}`,
+      `Cliente solicitó: ${c.clienteSolicito ?? ''}`,
+      `Se cobró: ${c.cobros ?? ''}`,
+      `Total mínimo a cobrar: ${c.totalMinimo ?? ''}`,
+      `Referencias para encontrar el domicilio: ${c.referenciasDireccion ?? ''}`,
+      `Observaciones: ${c.observaciones ?? ''}`,
+      `Correo: ${c.correo ?? ''}`
+    ].join('\n');
+  });
+
+  // Hora real para el título: la del slot elegido (sin la aclaración del paréntesis),
+  // o el texto sugerido por la IA si todavía no se eligió slot.
+  private slotHoraTitulo(): string {
+    const i = this.slotCita();
+    if (i === null || i === undefined) return this.cita()?.fechaHoraSugerida?.trim() ?? '';
+    const label = this.slots.find(s => s.index === i)?.label ?? '';
+    return label.split('(')[0].split('—')[0].trim();
+  }
+
+  private fmtTel(t: string): string {
+    const x = t.trim();
+    return x.startsWith('+') ? x : '+' + x;
+  }
+
+  // Texto "Pacientes" auto-generado desde la lista estructurada de mascotas.
+  // Ej: "1 gato (roberto), 2 perros (marcelo, luna)". Si no hay lista, usa el texto de la IA.
+  pacientesAuto(): string {
+    const ms = (this.cita()?.mascotas ?? []).filter(m => m.nombre?.trim());
+    if (ms.length === 0) return this.cita()?.pacientes?.trim() ?? '';
+    const grupos = new Map<string, string[]>();
+    for (const m of ms) {
+      const esp = (m.especie?.trim() || 'mascota').toLowerCase();
+      if (!grupos.has(esp)) grupos.set(esp, []);
+      grupos.get(esp)!.push(m.nombre!.trim());
+    }
+    const partes: string[] = [];
+    for (const [esp, nombres] of grupos) {
+      const n = nombres.length;
+      const label = n === 1 ? esp : esp + 's';
+      partes.push(`${n} ${label} (${nombres.join(', ')})`);
+    }
+    return partes.join(', ');
+  }
+
+  // Estado de una mascota de la cita: 'registrada' (coincide exacto con una del cliente) o 'nueva'.
+  mascotaEstado(m: MascotaCita): 'registrada' | 'nueva' {
+    const n = m.nombre?.trim().toLowerCase();
+    if (!n) return 'nueva';
+    const existe = this.mascotas().some(x => x.nombre?.trim().toLowerCase() === n);
+    return existe ? 'registrada' : 'nueva';
+  }
+
+  // Si el nombre es NUEVO pero se parece mucho a una mascota existente, devuelve ese nombre (aviso).
+  mascotaSimilar(m: MascotaCita): string | null {
+    if (this.mascotaEstado(m) !== 'nueva') return null;
+    const n = this.normalizar(m.nombre);
+    if (n.length < 3) return null;
+    for (const x of this.mascotas()) {
+      const xn = this.normalizar(x.nombre);
+      if (xn.length < 3) continue;
+      if (this.levenshtein(n, xn) <= 2) return x.nombre ?? null;
+    }
+    return null;
+  }
+
+  private normalizar(s?: string): string {
+    return (s ?? '').trim().toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '');
+  }
+
+  private levenshtein(a: string, b: string): number {
+    const m = a.length, n = b.length;
+    const d = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)]);
+    for (let j = 0; j <= n; j++) d[0][j] = j;
+    for (let i = 1; i <= m; i++)
+      for (let j = 1; j <= n; j++)
+        d[i][j] = Math.min(
+          d[i - 1][j] + 1,
+          d[i][j - 1] + 1,
+          d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+        );
+    return d[m][n];
+  }
 
   // Datos del contacto
   contacto = signal<ContactoDto | null>(null);
@@ -104,6 +217,12 @@ export class ContactPanelComponent {
         this.fotosAbiertaMascotaId.set(null);
         this.fotos.set([]);
         this.lightboxFotoUrl.set(null);
+        this.cita.set(null);
+        this.cargandoCita.set(false);
+        this.movilCita.set(1);
+        this.fechaCita.set('');
+        this.slotCita.set(null);
+        this.creandoCita.set(false);
       } else {
         this.etiquetasContacto.set([]);
         this.contacto.set(null);
@@ -418,6 +537,105 @@ export class ContactPanelComponent {
 
   abrirFoto(url: string) { this.lightboxFotoUrl.set(url); }
   cerrarFoto() { this.lightboxFotoUrl.set(null); }
+
+  // ── Agendar cita (IA) ─────────────────────────────────────────────
+
+  extraerCitaIa() {
+    const conv = this.state.selectedConversation();
+    if (!conv) return;
+    this.cargandoCita.set(true);
+    this.conversacionService.extraerCita(conv.id).subscribe({
+      next: c => {
+        if (!c.mascotas) c.mascotas = [];
+        // Se muestran todas las mascotas detectadas por la IA; cada fila se marca
+        // como "nueva" o "ya registrada" (las registradas no se duplican al crear).
+        this.cita.set(c);
+        if (c.slotSugerido !== null && c.slotSugerido !== undefined) this.slotCita.set(c.slotSugerido);
+        this.cargandoCita.set(false);
+      },
+      error: err => {
+        this.cargandoCita.set(false);
+        Swal.fire({
+          icon: 'error',
+          title: 'No se pudo extraer la cita',
+          text: err?.error?.mensaje ?? 'Ocurrió un error inesperado',
+          confirmButtonColor: '#235347'
+        });
+      }
+    });
+  }
+
+  cerrarCita() {
+    this.cita.set(null);
+  }
+
+  actualizarCita(campo: keyof CitaExtraidaDto, valor: string | boolean) {
+    this.cita.update(c => c ? { ...c, [campo]: valor } : c);
+  }
+
+  // ── Mascotas dentro del formulario de cita ──
+  agregarMascotaCita() {
+    this.cita.update(c => c ? { ...c, mascotas: [...(c.mascotas ?? []), { nombre: '', especie: '' }] } : c);
+  }
+
+  quitarMascotaCita(i: number) {
+    this.cita.update(c => c ? { ...c, mascotas: (c.mascotas ?? []).filter((_, idx) => idx !== i) } : c);
+  }
+
+  actualizarMascotaCita(i: number, campo: keyof MascotaCita, valor: string) {
+    this.cita.update(c => {
+      if (!c) return c;
+      const mascotas = [...(c.mascotas ?? [])];
+      mascotas[i] = { ...mascotas[i], [campo]: valor };
+      return { ...c, mascotas };
+    });
+  }
+
+  // ── Confirmar y crear la cita en el calendar ──
+  crearCitaConfirmada() {
+    const conv = this.state.selectedConversation();
+    const c = this.cita();
+    if (!conv || !c) return;
+    if (!this.fechaCita()) {
+      Swal.fire({ icon: 'warning', title: 'Falta la fecha', text: 'Elegí el día de la cita.', confirmButtonColor: '#235347' });
+      return;
+    }
+    if (this.slotCita() === null) {
+      Swal.fire({ icon: 'warning', title: 'Falta el horario', text: 'Elegí un horario de la lista.', confirmButtonColor: '#235347' });
+      return;
+    }
+
+    const dto: CrearCitaDto = {
+      fecha: this.fechaCita(),
+      movil: this.movilCita(),
+      slotIndex: this.slotCita()!,
+      tituloEvento: this.tituloPreview(),
+      descripcionEvento: this.descripcionPreview(),
+      ubicacion: c.ubicacionGps?.trim() || c.direccion?.trim() || undefined,
+      mascotas: (c.mascotas ?? []).filter(m => m.nombre?.trim())
+    };
+
+    this.creandoCita.set(true);
+    this.conversacionService.crearCita(conv.id, dto).subscribe({
+      next: r => {
+        this.creandoCita.set(false);
+        this.cita.set(null);
+        const cuando = new Date(r.inicio).toLocaleString('es-CL');
+        Swal.fire({
+          icon: 'success',
+          title: r.simulada ? 'Cita creada (simulada)' : 'Cita agendada',
+          html: `${r.mascotasCreadas > 0 ? `Se crearon ${r.mascotasCreadas} mascota(s).<br>` : ''}` +
+                `Bloque: <b>${cuando}</b>` +
+                `${r.eventoLink ? `<br><a href="${r.eventoLink}" target="_blank">Ver en el calendario</a>` : ''}`,
+          confirmButtonColor: '#235347'
+        });
+      },
+      error: err => {
+        this.creandoCita.set(false);
+        Swal.fire({ icon: 'error', title: 'No se pudo agendar', text: err?.error?.mensaje ?? 'Error inesperado', confirmButtonColor: '#235347' });
+      }
+    });
+  }
 
   goBackToChat() {
     this.state.setMobileView('chat');

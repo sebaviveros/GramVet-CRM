@@ -31,6 +31,10 @@ export class AppComponent implements OnInit {
     this.#iconSetService.icons = { ...iconSubset };
     this.#colorModeService.localStorageItemName.set('coreui-free-angular-admin-template-theme-default');
     this.#colorModeService.eventName.set('ColorSchemeChange');
+    // Modo de color fijo en "light" (el toggle está oculto). La identidad oscura de
+    // la app viene del shell verde GramVet (body/sidebar/header) y del tema oscuro
+    // del buzón; los módulos de gestión usan cards claras a propósito.
+    this.#colorModeService.colorMode.set('light');
   }
 
   ngOnInit(): void {

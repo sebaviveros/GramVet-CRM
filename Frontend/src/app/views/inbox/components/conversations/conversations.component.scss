@@ -9,16 +9,16 @@
   display: flex;
   flex-direction: column;
   border-radius: 14px !important;
-  border: 1px solid rgba(0,0,0,0.07) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
   overflow: hidden;
 }
 
 .card-header {
   font-size: 15px;
   font-weight: 600;
-  color: #1a2e25;
-  background: #ffffff !important;
-  border-bottom: 1px solid rgba(0,0,0,0.06) !important;
+  color: #E7F2EE;
+  background: #0E302B !important;
+  border-bottom: 1px solid rgba(255,255,255,0.06) !important;
   padding: 18px 16px;
 }
 
@@ -42,14 +42,14 @@
   gap: 6px;
   height: 30px;
   padding: 0 10px;
-  border: 1px solid rgba(0,0,0,0.12);
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 8px;
-  background: #fff;
-  color: #6c8a7a;
+  background: #17413A;
+  color: #8FB3A8;
   cursor: pointer;
   transition: all 0.15s;
 
-  &:hover { background: rgba(35,83,71,0.06); color: #235347; }
+  &:hover { background: rgba(110,207,171,0.10); color: #6ECFAB; }
   &.activo { background: #235347; border-color: #235347; color: #fff; }
 }
 
@@ -63,22 +63,22 @@
   flex-direction: column;
   gap: 8px;
   padding: 12px 14px;
-  background: #f8faf9;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  background: #0A2420;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
 .filtro-input,
 .filtro-select {
   width: 100%;
   padding: 7px 10px;
-  border: 1px solid rgba(0,0,0,0.12);
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 8px;
   font-size: 13px;
-  color: #1a2e25;
-  background: #fff;
+  color: #E7F2EE;
+  background: #17413A;
   outline: none;
 
-  &:focus { border-color: #235347; }
+  &:focus { border-color: #6ECFAB; }
 }
 
 .filtro-row {
@@ -100,7 +100,7 @@
   align-items: center;
   gap: 5px;
   font-size: 12px;
-  color: #4a6357;
+  color: #B7D2C8;
   cursor: pointer;
   user-select: none;
 }
@@ -109,7 +109,7 @@
   margin-left: auto;
   background: none;
   border: none;
-  color: #235347;
+  color: #6ECFAB;
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -117,7 +117,7 @@
 }
 
 .sin-resultados {
-  color: #9ab5aa;
+  color: #6E9387;
   font-size: 13px;
 }
 
@@ -132,13 +132,13 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  border-bottom: 1px solid rgba(0,0,0,0.04);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
   border-left: 3px solid transparent;
   transition: all 0.15s ease;
 }
 
 .conversation-item:hover {
-  background-color: rgba(35, 83, 71, 0.07);
+  background-color: rgba(110, 207, 171, 0.07);
   padding-left: 18px;
 }
 
@@ -151,12 +151,12 @@
 .conversation-name {
   font-weight: 600;
   font-size: 14px;
-  color: #1a2e25;
+  color: #E7F2EE;
 }
 
 .conversation-phone {
   font-size: 12px;
-  color: #6c8a7a;
+  color: #8FB3A8;
 }
 
 .conversation-item.selected .conversation-name {
@@ -190,8 +190,8 @@
   max-width: 110px;
   padding: 2px 8px 2px 2px;
   border-radius: 20px;
-  background: rgba(35, 83, 71, 0.08);
-  border: 1px solid rgba(35, 83, 71, 0.15);
+  background: rgba(110, 207, 171, 0.10);
+  border: 1px solid rgba(110, 207, 171, 0.20);
 }
 
 .vet-chip-avatar {
@@ -210,7 +210,7 @@
 
 .vet-chip-nombre {
   font-size: 11px;
-  color: #4a6357;
+  color: #B7D2C8;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -226,8 +226,8 @@
 
 //Estilo conversaciones no leidas (no aplica si está seleccionada: el verde gana)
 .conversation-item.unread:not(.selected) {
-  background: rgba(35, 83, 71, 0.06);
-  border-left: 3px solid #235347;
+  background: rgba(110, 207, 171, 0.08);
+  border-left: 3px solid #6ECFAB;
 }
 
 .badge-unread {
@@ -290,6 +290,14 @@
   gap: 2px;
   flex: 1;
   min-width: 0; // permite que el texto se recorte con ellipsis en vez de estirar el item
+}
+
+.last-message {
+  color: #9FBFB4;
+}
+
+.conversation-item.selected .last-message {
+  color: rgba(255,255,255,0.8);
 }
 
 /* Truncar a una sola línea con "…" */

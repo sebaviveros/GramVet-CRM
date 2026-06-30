@@ -18,6 +18,9 @@
       </c-nav-item>
     </c-header-nav>
 
+    <!-- Íconos ocultos por pedido del cliente (notificaciones, filtros, mensajería).
+         Se dejan comentados por si se reactivan a futuro. -->
+    <!--
     <c-header-nav class="d-none d-md-flex ms-auto">
       <a cNavLink>
         <svg cIcon class="my-1" name="cilBell" size="lg"></svg>
@@ -29,7 +32,11 @@
         <svg cIcon class="my-1" name="cilEnvelopeOpen" size="lg"></svg>
       </a>
     </c-header-nav>
+    -->
 
+    <!-- Selector de tema oculto: la app va siempre en modo oscuro.
+         Se deja comentado por si se reactiva el toggle a futuro. -->
+    <!--
     <c-header-nav class="ms-auto ms-md-0">
       <div class="nav-item py-1">
         <div class="vr h-100 mx-2 text-body text-opacity-75"></div>
@@ -41,8 +48,9 @@
         <div class="vr h-100 mx-2 text-body text-opacity-75"></div>
       </div>
     </c-header-nav>
+    -->
 
-    <c-header-nav class="mx-0">
+    <c-header-nav class="mx-0 ms-auto">
       <ng-container *ngTemplateOutlet="userDropdown" />
     </c-header-nav>
 

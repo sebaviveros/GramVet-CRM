@@ -54,6 +54,70 @@ export interface SubirImagenResponse {
   mediaUrl: string | null;
 }
 
+export interface MascotaCita {
+  nombre: string;
+  especie?: string;
+  fechaNacimiento?: string;
+}
+
+export interface CitaExtraidaDto {
+  nombreCliente?: string;
+  telefono?: string;
+  direccion?: string;
+  comunaSector?: string;
+  referenciasDireccion?: string;
+  correo?: string;
+  pacientes?: string;
+  clienteSolicito?: string;
+  cobros?: string;
+  totalMinimo?: string;
+  observaciones?: string;
+  fechaHoraSugerida?: string;
+  ubicacionGps?: string;
+  seguroMascota?: boolean;
+  seguroNota?: string;
+  estacionamientoVisita?: boolean;
+  estacionamientoNota?: string;
+  mascotas?: MascotaCita[];
+  slotSugerido?: number | null;
+  tituloEvento: string;
+  descripcionEvento: string;
+  simulada: boolean;
+}
+
+export interface CrearCitaDto {
+  fecha: string;            // ISO date (día elegido)
+  movil: number;           // 1 | 2
+  slotIndex: number;
+  tituloEvento: string;
+  descripcionEvento: string;
+  ubicacion?: string;
+  mascotas: MascotaCita[];
+}
+
+export interface CitaCreadaDto {
+  eventoId: string;
+  eventoLink?: string;
+  inicio: string;
+  fin: string;
+  mascotasCreadas: number;
+  simulada: boolean;
+}
+
+// Catálogo fijo de horarios (debe coincidir con AgendaSlots del backend).
+export const SLOTS_AGENDA: { index: number; label: string }[] = [
+  { index: 0, label: '10 - 11:30' },
+  { index: 1, label: '11 - 1' },
+  { index: 2, label: '12 - 2' },
+  { index: 3, label: '1 - 3' },
+  { index: 4, label: '2 - 4' },
+  { index: 5, label: '3 - 5' },
+  { index: 6, label: '4 - 6' },
+  { index: 7, label: '5 - 7' },
+  { index: 8, label: '6 - 7:30' },
+  { index: 9, label: '6 - 7:30 (2º) — solo Móvil 1, miér a sáb' }
+];
+
 @Injectable({
   providedIn: 'root'
 })
@@ -93,5 +157,13 @@ export class ConversacionService {
 
   reaccionar(mensajeId: number, emoji: string): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/mensaje/${mensajeId}/reaccion`, { emoji });
+  }
+
+  extraerCita(conversacionId: number): Observable<CitaExtraidaDto> {
+    return this.http.post<CitaExtraidaDto>(`${this.apiUrl}/${conversacionId}/extraer-cita`, {});
+  }
+
+  crearCita(conversacionId: number, dto: CrearCitaDto): Observable<CitaCreadaDto> {
+    return this.http.post<CitaCreadaDto>(`${this.apiUrl}/${conversacionId}/crear-cita`, dto);
   }
 }

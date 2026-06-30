@@ -8,7 +8,7 @@ c-card {
   width: 100%;
   height: 100%;
   border-radius: 14px !important;
-  border: 1px solid rgba(0,0,0,0.07) !important;
+  border: 1px solid rgba(255,255,255,0.07) !important;
   overflow: hidden;
 }
 
@@ -16,7 +16,7 @@ c-card {
   margin: 12px 16px 0;
   border: none;
   background: transparent;
-  color: #235347;
+  color: #6ECFAB;
   font-size: 14px;
   cursor: pointer;
   font-weight: 500;
@@ -30,7 +30,7 @@ c-card {
   height: 100%;
   text-align: center;
   padding: 28px 16px 20px;
-  background: #ffffff;
+  background: #0F332E;
   gap: 4px;
   overflow-y: auto;
 }
@@ -53,29 +53,29 @@ c-card {
 .name {
   font-weight: 600;
   font-size: 16px;
-  color: #1a2e25;
+  color: #E7F2EE;
   margin-bottom: 4px;
 }
 
 .phone {
   font-size: 13px;
-  color: #4a7060;
+  color: #9FBFB4;
   margin-bottom: 2px;
 }
 
 .canal, .estado {
   font-size: 12px;
-  color: #6c8a7a;
+  color: #8FB3A8;
 }
 
 .campo-label {
   font-weight: 600;
-  color: #235347;
+  color: #6ECFAB;
 }
 
 .dato-campo {
   font-size: 13px;
-  color: #4a7060;
+  color: #9FBFB4;
   margin-bottom: 2px;
 }
 
@@ -95,11 +95,11 @@ c-card {
 .vet-select {
   width: 100%;
   padding: 7px 12px;
-  border: 1px solid rgba(35, 83, 71, 0.25);
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 8px;
   font-size: 13px;
-  color: #1a2e25;
-  background: #f8faf9;
+  color: #E7F2EE;
+  background: #17413A;
   outline: none;
   cursor: pointer;
 
@@ -108,9 +108,9 @@ c-card {
 
 .vet-readonly {
   font-size: 13px;
-  color: #1a2e25;
+  color: #E7F2EE;
   padding: 7px 12px;
-  background: #f4f7f5;
+  background: #17413A;
   border-radius: 8px;
 }
 
@@ -168,17 +168,17 @@ c-card {
 
 .btn-agregar-etiqueta {
   background: none;
-  border: 1px dashed rgba(35, 83, 71, 0.35);
+  border: 1px dashed rgba(110, 207, 171, 0.30);
   border-radius: 20px;
-  color: #235347;
+  color: #6ECFAB;
   font-size: 12px;
   padding: 4px 14px;
   cursor: pointer;
   transition: all 0.15s;
 
   &:hover {
-    background: rgba(35, 83, 71, 0.06);
-    border-color: #235347;
+    background: rgba(110, 207, 171, 0.08);
+    border-color: #6ECFAB;
   }
 }
 
@@ -204,14 +204,14 @@ c-card {
   padding: 6px 10px;
   border: 1px solid;
   border-radius: 8px;
-  background: #fff;
+  background: #15403A;
   font-size: 12px;
-  color: #1a2e25;
+  color: #E7F2EE;
   cursor: pointer;
   text-align: left;
   transition: background 0.12s;
 
-  &:hover { background: rgba(35, 83, 71, 0.04); }
+  &:hover { background: rgba(110, 207, 171, 0.06); }
 }
 
 .etiqueta-dot {
@@ -231,24 +231,24 @@ c-card {
 /* ===== EDICIÓN CONTACTO ===== */
 .email {
   font-size: 13px;
-  color: #4a7060;
+  color: #9FBFB4;
   margin-bottom: 2px;
 }
 
 .btn-editar-contacto {
   margin-top: 8px;
   background: none;
-  border: 1px dashed rgba(35, 83, 71, 0.35);
+  border: 1px dashed rgba(110, 207, 171, 0.30);
   border-radius: 20px;
-  color: #235347;
+  color: #6ECFAB;
   font-size: 12px;
   padding: 4px 14px;
   cursor: pointer;
   transition: all 0.15s;
 
   &:hover {
-    background: rgba(35, 83, 71, 0.06);
-    border-color: #235347;
+    background: rgba(110, 207, 171, 0.08);
+    border-color: #6ECFAB;
   }
 }
 
@@ -263,11 +263,11 @@ c-card {
 .edit-input {
   width: 100%;
   padding: 6px 10px;
-  border: 1px solid rgba(35, 83, 71, 0.25);
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 8px;
   font-size: 13px;
-  color: #1a2e25;
-  background: #f8faf9;
+  color: #E7F2EE;
+  background: #17413A;
   outline: none;
 
   &:focus { border-color: #235347; }
@@ -344,9 +344,9 @@ c-card {
   gap: 6px;
   margin-bottom: 10px;
   padding: 10px;
-  background: rgba(35, 83, 71, 0.04);
+  background: rgba(110, 207, 171, 0.06);
   border-radius: 10px;
-  border: 1px dashed rgba(35, 83, 71, 0.2);
+  border: 1px dashed rgba(110, 207, 171, 0.22);
 }
 
 .sin-mascotas {
@@ -363,13 +363,13 @@ c-card {
   padding: 8px 10px;
   border-radius: 10px;
   border: 1px solid rgba(0,0,0,0.07);
-  background: #f8faf9;
+  background: #17413A;
   margin-bottom: 6px;
 
   &.editing {
     flex-direction: column;
-    background: rgba(35, 83, 71, 0.04);
-    border-color: rgba(35, 83, 71, 0.2);
+    background: rgba(110, 207, 171, 0.06);
+    border-color: rgba(110, 207, 171, 0.22);
   }
 }
 
@@ -389,17 +389,17 @@ c-card {
 .mascota-nombre {
   font-size: 13px;
   font-weight: 600;
-  color: #1a2e25;
+  color: #E7F2EE;
 }
 
 .especie-icon {
-  color: #235347;
+  color: #6ECFAB;
   flex-shrink: 0;
 }
 
 .mascota-detalle {
   font-size: 11px;
-  color: #6c8a7a;
+  color: #8FB3A8;
 }
 
 .mascota-actions {
@@ -413,7 +413,7 @@ c-card {
   border: none;
   padding: 3px;
   cursor: pointer;
-  color: #6c8a7a;
+  color: #8FB3A8;
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -423,15 +423,15 @@ c-card {
 
   &--danger:hover { background: rgba(220,53,69,0.08); color: #dc3545; }
 
-  &.activo { background: rgba(35,83,71,0.12); color: #235347; }
+  &.activo { background: rgba(110,207,171,0.14); color: #235347; }
 }
 
 /* ===== BITÁCORA ===== */
 .bitacora-panel {
   margin: -2px 0 8px;
   padding: 10px;
-  background: rgba(35, 83, 71, 0.04);
-  border: 1px solid rgba(35, 83, 71, 0.15);
+  background: rgba(110, 207, 171, 0.06);
+  border: 1px solid rgba(110, 207, 171, 0.18);
   border-radius: 10px;
 }
 
@@ -445,11 +445,11 @@ c-card {
 .bitacora-textarea {
   width: 100%;
   padding: 8px 10px;
-  border: 1px solid rgba(35, 83, 71, 0.25);
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 8px;
   font-size: 13px;
-  color: #1a2e25;
-  background: #fff;
+  color: #E7F2EE;
+  background: #15403A;
   outline: none;
   resize: vertical;
   font-family: inherit;
@@ -481,7 +481,7 @@ c-card {
 }
 
 .bitacora-entrada {
-  background: #fff;
+  background: #15403A;
   border: 1px solid rgba(0, 0, 0, 0.07);
   border-radius: 8px;
   padding: 8px 10px;
@@ -497,12 +497,12 @@ c-card {
 .bitacora-fecha {
   font-size: 11px;
   font-weight: 600;
-  color: #235347;
+  color: #6ECFAB;
 }
 
 .bitacora-autor {
   font-size: 11px;
-  color: #6c8a7a;
+  color: #8FB3A8;
 
   &::before { content: '· '; }
 }
@@ -522,7 +522,7 @@ c-card {
 
 .bitacora-contenido {
   font-size: 13px;
-  color: #1a2e25;
+  color: #E7F2EE;
   line-height: 1.45;
   white-space: pre-wrap;
   word-break: break-word;
@@ -532,8 +532,8 @@ c-card {
 .fotos-panel {
   margin: -2px 0 8px;
   padding: 10px;
-  background: rgba(35, 83, 71, 0.04);
-  border: 1px solid rgba(35, 83, 71, 0.15);
+  background: rgba(110, 207, 171, 0.06);
+  border: 1px solid rgba(110, 207, 171, 0.18);
   border-radius: 10px;
 }
 
@@ -542,16 +542,16 @@ c-card {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  border: 1px dashed rgba(35, 83, 71, 0.35);
+  border: 1px dashed rgba(110, 207, 171, 0.30);
   border-radius: 20px;
-  color: #235347;
+  color: #6ECFAB;
   font-size: 12px;
   padding: 5px 14px;
   cursor: pointer;
   margin-bottom: 10px;
   transition: all 0.15s;
 
-  &:hover { background: rgba(35, 83, 71, 0.06); border-color: #235347; }
+  &:hover { background: rgba(110, 207, 171, 0.08); border-color: #235347; }
   &.subiendo { opacity: 0.6; cursor: default; }
 }
 
@@ -667,4 +667,264 @@ c-card {
   margin-top: 4px;
 
   &:hover { background: rgba(0,0,0,0.04); }
+}
+
+/* ===== Agendar cita (IA) ===== */
+.agenda-ia-section {
+  width: 100%;
+  margin: 14px 0 6px;
+}
+
+.btn-agendar-ia {
+  width: 100%;
+  background: #1A4A3C;
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 14px;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+
+  &:hover:not(:disabled) { background: #235347; }
+  &:disabled { opacity: 0.7; cursor: default; }
+}
+
+.cita-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid rgba(110, 207, 171, 0.22);
+  border-radius: 12px;
+  background: #11392F;
+  text-align: left;
+}
+
+.cita-form-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.cita-form-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #E7F2EE;
+}
+
+.cita-badge-sim {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: #FFE9C2;
+  color: #8a5a00;
+}
+
+.cita-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #9FBFB4;
+  font-size: 14px;
+  cursor: pointer;
+  line-height: 1;
+
+  &:hover { color: #1a2e25; }
+}
+
+.cita-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9FBFB4;
+  margin-top: 4px;
+}
+
+.cita-sep {
+  margin: 10px 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6ECFAB;
+  border-top: 1px solid rgba(255,255,255,0.10);
+  padding-top: 8px;
+}
+
+.cita-textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  font-size: 12px;
+  font-family: 'DM Mono', monospace;
+  color: #E7F2EE;
+  background: #17413A;
+  outline: none;
+  resize: vertical;
+
+  &:focus { border-color: #235347; }
+}
+
+.cita-nota {
+  margin: 8px 0 0;
+  font-size: 11px;
+  color: #9FBFB4;
+  font-style: italic;
+}
+
+.cita-preview {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid rgba(110, 207, 171, 0.20);
+  border-radius: 8px;
+  background: #0A2420;
+  color: #E7F2EE;
+  font-size: 12px;
+  word-break: break-word;
+}
+
+.cita-preview-title {
+  font-weight: 600;
+}
+
+.cita-preview-desc {
+  margin: 0;
+  white-space: pre-wrap;
+  font-family: 'DM Mono', monospace;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #C9DED7;
+}
+
+.cita-check {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: #B7D2C8;
+  margin-top: 6px;
+  cursor: pointer;
+
+  input[type="checkbox"] { accent-color: #6ECFAB; }
+}
+
+.cita-mascotas-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.cita-hint {
+  margin: 2px 0 0;
+  font-size: 10px;
+  color: #8FB3A8;
+  font-style: italic;
+}
+
+.cita-mascota-add {
+  background: none;
+  border: 1px dashed rgba(110, 207, 171, 0.35);
+  border-radius: 20px;
+  color: #6ECFAB;
+  font-size: 11px;
+  padding: 3px 10px;
+  cursor: pointer;
+
+  &:hover { background: rgba(110, 207, 171, 0.10); }
+}
+
+.cita-mascota-row {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.cita-mascota-especie {
+  max-width: 90px;
+  flex-shrink: 0;
+}
+
+.cita-mascota-del {
+  background: none;
+  border: none;
+  color: #9FBFB4;
+  font-size: 13px;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  &:hover { color: #ff8a8a; }
+}
+
+.cita-mascota-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 2px 0 2px 2px;
+}
+
+.cita-mascota-badge {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 1px 7px;
+  border-radius: 20px;
+  background: rgba(110, 207, 171, 0.18);
+  color: #6ECFAB;
+
+  &.reg {
+    background: rgba(255,255,255,0.10);
+    color: #9FBFB4;
+  }
+}
+
+.cita-mascota-warn {
+  font-size: 10.5px;
+  color: #E8C97A;
+}
+
+.cita-movil {
+  display: flex;
+  gap: 6px;
+}
+
+.cita-movil-btn {
+  flex: 1;
+  padding: 7px 0;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  background: #17413A;
+  color: #B7D2C8;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover { border-color: rgba(110,207,171,0.4); }
+  &.activo { background: #235347; border-color: #6ECFAB; color: #fff; }
+}
+
+.btn-crear-cita {
+  width: 100%;
+  margin-top: 12px;
+  background: #6ECFAB;
+  border: none;
+  border-radius: 10px;
+  color: #0B2B26;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+
+  &:hover:not(:disabled) { opacity: 0.9; }
+  &:disabled { opacity: 0.6; cursor: default; }
 }

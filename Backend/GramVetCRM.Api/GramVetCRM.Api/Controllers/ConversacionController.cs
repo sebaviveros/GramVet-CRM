@@ -15,15 +15,18 @@ namespace GramVetCRM.Api.Controllers
         private readonly IConversacionService _service;
         private readonly IWhatsAppService _whatsAppService;
         private readonly IR2StorageService _r2Storage;
+        private readonly IAgendaIaService _agendaIaService;
 
         public ConversacionController(
             IConversacionService service,
             IWhatsAppService whatsAppService,
-            IR2StorageService r2Storage)
+            IR2StorageService r2Storage,
+            IAgendaIaService agendaIaService)
         {
             _service = service;
             _whatsAppService = whatsAppService;
             _r2Storage = r2Storage;
+            _agendaIaService = agendaIaService;
         }
 
         // GET api/Conversacion
@@ -139,6 +142,53 @@ namespace GramVetCRM.Api.Controllers
         {
             await _service.MarcarComoLeida(id);
             return Ok();
+        }
+
+        // POST api/Conversacion/5/extraer-cita
+        // Extrae con IA los datos de una cita a partir de la conversación (Fase 1: solo devuelve el borrador).
+        [HttpPost("{id}/extraer-cita")]
+        public async Task<IActionResult> ExtraerCita(int id)
+        {
+            var rolNombre = User.FindFirst("rolNombre")?.Value ?? "";
+            var rolLower = rolNombre.ToLower();
+
+            // Solo Admin y Secretario pueden usar la extracción IA (control de costo).
+            if (!rolLower.Contains("admin") && !rolLower.Contains("secretario"))
+                return Forbid();
+
+            try
+            {
+                var result = await _agendaIaService.ExtraerCita(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+        }
+
+        // POST api/Conversacion/5/crear-cita
+        // Confirma la cita: crea las mascotas del cliente y el evento en el Google Calendar madre.
+        [HttpPost("{id}/crear-cita")]
+        public async Task<IActionResult> CrearCita(int id, [FromBody] GramVetCRM.Model.DTOs.Cita.CrearCitaDto dto)
+        {
+            var usuarioIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var rolNombre = User.FindFirst("rolNombre")?.Value ?? "";
+            var rolLower = rolNombre.ToLower();
+
+            if (!rolLower.Contains("admin") && !rolLower.Contains("secretario"))
+                return Forbid();
+            if (usuarioIdClaim == null) return Unauthorized();
+
+            try
+            {
+                var result = await _agendaIaService.CrearCita(id, dto, int.Parse(usuarioIdClaim));
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
         }
     }
 }

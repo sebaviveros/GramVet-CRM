@@ -49,6 +49,156 @@
         </div>
       }
 
+      <!-- ===== AGENDAR CITA (IA) ===== -->
+      @if (puedeAgendarIa) {
+        <div class="agenda-ia-section">
+          @if (!cita()) {
+            <button class="btn-agendar-ia" [disabled]="cargandoCita()" (click)="extraerCitaIa()">
+              @if (cargandoCita()) {
+                <span>Analizando conversación…</span>
+              } @else {
+                <span>🗓 Agendar cita (IA)</span>
+              }
+            </button>
+          } @else {
+            <div class="cita-form">
+              <div class="cita-form-header">
+                <span class="cita-form-title">Cita extraída</span>
+                @if (cita()?.simulada) {
+                  <span class="cita-badge-sim">IA simulada</span>
+                }
+                <button class="cita-close" title="Cerrar" (click)="cerrarCita()">✕</button>
+              </div>
+
+              <label class="cita-label">Fecha / horario</label>
+              <input class="edit-input" placeholder="ej. viernes 1 - 3"
+                [value]="cita()?.fechaHoraSugerida ?? ''" (input)="actualizarCita('fechaHoraSugerida', $any($event.target).value)" />
+
+              <label class="cita-label">Comuna / sector</label>
+              <input class="edit-input"
+                [value]="cita()?.comunaSector ?? ''" (input)="actualizarCita('comunaSector', $any($event.target).value)" />
+
+              <label class="cita-label">Nombre cliente</label>
+              <input class="edit-input"
+                [value]="cita()?.nombreCliente ?? ''" (input)="actualizarCita('nombreCliente', $any($event.target).value)" />
+
+              <label class="cita-label">Teléfono</label>
+              <input class="edit-input"
+                [value]="cita()?.telefono ?? ''" (input)="actualizarCita('telefono', $any($event.target).value)" />
+
+              <label class="cita-label">Dirección</label>
+              <input class="edit-input"
+                [value]="cita()?.direccion ?? ''" (input)="actualizarCita('direccion', $any($event.target).value)" />
+
+              <label class="cita-label">Referencias del domicilio</label>
+              <input class="edit-input"
+                [value]="cita()?.referenciasDireccion ?? ''" (input)="actualizarCita('referenciasDireccion', $any($event.target).value)" />
+
+              <label class="cita-label">Cliente solicitó</label>
+              <input class="edit-input"
+                [value]="cita()?.clienteSolicito ?? ''" (input)="actualizarCita('clienteSolicito', $any($event.target).value)" />
+
+              <label class="cita-label">Se cobró</label>
+              <input class="edit-input"
+                [value]="cita()?.cobros ?? ''" (input)="actualizarCita('cobros', $any($event.target).value)" />
+
+              <label class="cita-label">Total mínimo a cobrar</label>
+              <input class="edit-input"
+                [value]="cita()?.totalMinimo ?? ''" (input)="actualizarCita('totalMinimo', $any($event.target).value)" />
+
+              <label class="cita-label">Observaciones</label>
+              <input class="edit-input"
+                [value]="cita()?.observaciones ?? ''" (input)="actualizarCita('observaciones', $any($event.target).value)" />
+
+              <label class="cita-label">Correo</label>
+              <input class="edit-input"
+                [value]="cita()?.correo ?? ''" (input)="actualizarCita('correo', $any($event.target).value)" />
+
+              <label class="cita-label">Ubicación GPS (link de Maps)</label>
+              <input class="edit-input" placeholder="https://maps.google.com/?q=..."
+                [value]="cita()?.ubicacionGps ?? ''" (input)="actualizarCita('ubicacionGps', $any($event.target).value)" />
+
+              <label class="cita-check">
+                <input type="checkbox" [checked]="cita()?.seguroMascota"
+                  (change)="actualizarCita('seguroMascota', $any($event.target).checked)" />
+                Involucra seguro de mascota
+              </label>
+              <label class="cita-check">
+                <input type="checkbox" [checked]="cita()?.estacionamientoVisita"
+                  (change)="actualizarCita('estacionamientoVisita', $any($event.target).checked)" />
+                Condominio con estacionamiento de visita
+              </label>
+
+              <!-- Mascotas NUEVAS (las ya registradas se ven arriba y no se duplican) -->
+              <div class="cita-mascotas-head">
+                <span class="cita-label" style="margin:0">Mascotas nuevas</span>
+                <button class="cita-mascota-add" type="button" (click)="agregarMascotaCita()">+ Agregar</button>
+              </div>
+              <p class="cita-hint">Solo las que el cliente todavía no tiene. Las ya registradas no se duplican.</p>
+              @for (m of cita()?.mascotas ?? []; track $index) {
+                <div class="cita-mascota-row">
+                  <input class="edit-input" placeholder="Nombre"
+                    [value]="m.nombre" (input)="actualizarMascotaCita($index, 'nombre', $any($event.target).value)" />
+                  <select class="edit-input cita-mascota-especie"
+                    [value]="m.especie ?? ''" (change)="actualizarMascotaCita($index, 'especie', $any($event.target).value)">
+                    <option value="">Especie</option>
+                    <option value="perro">Perro</option>
+                    <option value="gato">Gato</option>
+                    <option value="otro">Otro</option>
+                  </select>
+                  <button class="cita-mascota-del" type="button" title="Quitar" (click)="quitarMascotaCita($index)">✕</button>
+                </div>
+                @if (m.nombre?.trim()) {
+                  <div class="cita-mascota-status">
+                    <span class="cita-mascota-badge" [class.reg]="mascotaEstado(m) === 'registrada'">
+                      {{ mascotaEstado(m) === 'registrada' ? 'ya registrada' : 'se creará' }}
+                    </span>
+                    @if (mascotaSimilar(m)) {
+                      <span class="cita-mascota-warn">⚠ parecida a "{{ mascotaSimilar(m) }}" — ¿es la misma?</span>
+                    }
+                  </div>
+                }
+              }
+
+              <div class="cita-sep">Agendamiento (interno)</div>
+
+              <label class="cita-label">Móvil</label>
+              <div class="cita-movil">
+                <button type="button" class="cita-movil-btn" [class.activo]="movilCita() === 1" (click)="movilCita.set(1)">Móvil 1</button>
+                <button type="button" class="cita-movil-btn" [class.activo]="movilCita() === 2" (click)="movilCita.set(2)">Móvil 2</button>
+              </div>
+
+              <label class="cita-label">Día</label>
+              <input class="edit-input" type="date"
+                [value]="fechaCita()" (input)="fechaCita.set($any($event.target).value)" />
+
+              <label class="cita-label">Horario (slot)</label>
+              <select class="edit-input"
+                [value]="slotCita() ?? ''" (change)="slotCita.set($any($event.target).value === '' ? null : +$any($event.target).value)">
+                <option value="">Elegir horario…</option>
+                @for (s of slots; track s.index) {
+                  <option [value]="s.index">{{ s.label }}</option>
+                }
+              </select>
+
+              <div class="cita-sep">Evento del calendario (vista previa en vivo)</div>
+
+              <label class="cita-label">Título</label>
+              <div class="cita-preview cita-preview-title">{{ tituloPreview() }}</div>
+
+              <label class="cita-label">Descripción</label>
+              <pre class="cita-preview cita-preview-desc">{{ descripcionPreview() }}</pre>
+
+              <button class="btn-crear-cita" [disabled]="creandoCita()" (click)="crearCitaConfirmada()">
+                @if (creandoCita()) { <span>Agendando…</span> }
+                @else { <span>✓ Crear cita en el calendario</span> }
+              </button>
+              <p class="cita-nota">Se crea el evento en el calendario madre en la posición del móvil + horario, y se registran las mascotas nuevas.</p>
+            </div>
+          }
+        </div>
+      }
+
       <!-- ===== ASIGNAR VETERINARIO ===== -->
       <div class="asignar-section">
         <div class="section-title">Veterinario asignado</div>

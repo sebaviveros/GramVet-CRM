@@ -74,6 +74,7 @@ builder.Services.AddControllers();
 
 //HttpClient
 builder.Services.AddHttpClient("WhatsApp");
+builder.Services.AddHttpClient("Anthropic");
 
 //signalR
 builder.Services.AddSignalR();
@@ -106,6 +107,8 @@ builder.Services.AddScoped<IMascotaBitacoraService, MascotaBitacoraService>();
 builder.Services.AddScoped<IMascotaFotoService, MascotaFotoService>();
 builder.Services.AddScoped<IRolService, RolService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IGoogleCalendarService, GoogleCalendarService>();
+builder.Services.AddScoped<IAgendaIaService, AgendaIaService>();
 
 builder.Services.AddScoped<JwtHelper>();
 

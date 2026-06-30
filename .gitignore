@@ -59,3 +59,11 @@ Thumbs.db
 .env.development.local
 .env.test.local
 .env.production.local
+
+############################
+# Secrets / Service accounts (NUNCA subir credenciales)
+############################
+gramvet-crm-calendar-test-*.json
+*-service-account*.json
+google-sa.json
+google-service-account*.json
