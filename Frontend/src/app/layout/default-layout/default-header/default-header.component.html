@@ -50,7 +50,12 @@
     </c-header-nav>
     -->
 
-    <c-header-nav class="mx-0 ms-auto">
+    <c-header-nav class="mx-0 ms-auto align-items-center">
+      @if (nombreUsuario()) {
+        <span class="user-identity d-none d-sm-inline">
+          {{ nombreUsuario() }} <span class="user-identity-sep">/</span> {{ rolUsuario() }}
+        </span>
+      }
       <ng-container *ngTemplateOutlet="userDropdown" />
     </c-header-nav>
 
@@ -75,6 +80,9 @@
         <h6 cDropdownHeader class="bg-body-secondary text-body-secondary fw-semibold py-2 rounded-top">
           Mi cuenta
         </h6>
+      </li>
+      <li>
+        <hr cDropdownDivider />
       </li>
       <li>
         <a cDropdownItem (click)="fotoInput.click()" style="cursor: pointer;">

@@ -76,35 +76,12 @@
   }
 }
 
-.row-options {
+/* Captcha de Cloudflare Turnstile */
+.captcha-wrap {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 4px 0 28px;
-}
-
-.remember-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #666;
-  font-size: 11px;
-  cursor: pointer;
-
-  input[type="checkbox"] {
-    accent-color: #5aad5a;
-  }
-}
-
-.forgot-btn {
-  color: #666 !important;
-  font-size: 11px !important;
-  padding: 0 !important;
-  text-decoration: none !important;
-
-  &:hover {
-    color: #aaa !important;
-  }
+  justify-content: center;
+  margin: 18px 0 14px;
+  min-height: 65px; // reserva el alto del widget para que el form no salte al montarlo
 }
 
 .login-btn {
@@ -121,6 +98,11 @@
 
   &:hover {
     background-color: #4d9e4d !important;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }
 
@@ -173,9 +155,7 @@
   flex: 1;
   position: relative;
   background-color: #1a2e1a;
-  background-image:
-    linear-gradient(to bottom, rgba(0,0,0,0.25), rgba(10,25,10,0.55)),
-    url(/assets/images/loginGramVet.png);
+  background-image: url(/assets/images/loginGramVet.png);
   background-size: cover;
   background-position: center;
   min-height: 400px;

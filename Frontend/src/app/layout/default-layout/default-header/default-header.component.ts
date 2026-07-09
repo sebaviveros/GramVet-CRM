@@ -43,9 +43,17 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
   // Foto de perfil del usuario logueado (fallback al avatar por defecto)
   fotoPerfil = signal<string>('./assets/images/avatars/8.jpg');
 
+  // Nombre y rol mostrados junto al botón de perfil
+  nombreUsuario = signal<string>('');
+  rolUsuario = signal<string>(this.#authService.getRolNombre());
+
   ngOnInit(): void {
     this.#usuarioService.getMe().subscribe({
-      next: (u) => { if (u.fotoUrl) this.fotoPerfil.set(u.fotoUrl); },
+      next: (u) => {
+        if (u.fotoUrl) this.fotoPerfil.set(u.fotoUrl);
+        this.nombreUsuario.set(`${u.nombre} ${u.apellido}`.trim());
+        if (u.rolNombre) this.rolUsuario.set(u.rolNombre);
+      },
       error: () => { /* deja el avatar por defecto */ }
     });
   }

@@ -1,37 +1,52 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
 
-  private apiUrl = 'https://localhost:7101/api/Auth';
+  private apiUrl = `${environment.apiUrl}/Auth`;
 
   constructor(private http: HttpClient) { }
 
-  login(username: string, password: string): Observable<any> {
+  login(username: string, password: string, captchaToken?: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/login`, {
       username,
-      password
+      password,
+      captchaToken
     });
   }
 
+  // localStorage y no sessionStorage: en el celular el navegador descarta la
+  // pestaña cuando el veterinario pasa un rato en otra app, y con sessionStorage
+  // volvía deslogueado aunque el token siguiera vigente.
   saveToken(token: string) {
-    sessionStorage.setItem('token', token);
+    localStorage.setItem('token', token);
   }
 
   getToken(): string | null {
-    return sessionStorage.getItem('token');
+    return localStorage.getItem('token');
   }
 
   logout() {
-    sessionStorage.removeItem('token');
+    localStorage.removeItem('token');
   }
 
   isLoggedIn(): boolean {
-    return !!sessionStorage.getItem('token');
+    return !!this.getToken() && !this.isTokenExpirado();
+  }
+
+  /**
+   * Como el token ahora persiste, hay que mirar el claim `exp`: si no,
+   * un token vencido dejaría entrar al buzón y todas las llamadas fallarían.
+   */
+  isTokenExpirado(): boolean {
+    const exp = this.decodeToken()?.['exp'];
+    if (!exp) return true;
+    return Date.now() >= exp * 1000;
   }
 
   // ── Decodificación del JWT ──────────────────────────────────────

@@ -193,6 +193,41 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
     }
   }
 
+  // ── Separadores de fecha (estilo WhatsApp) ───────────────────────
+
+  /** Medianoche local de una fecha, para comparar días sin que influya la hora. */
+  #inicioDelDia(fecha: string | Date): Date {
+    const d = new Date(fecha);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+
+  /** True si el mensaje en `i` abre un día distinto al del mensaje anterior. */
+  esInicioDeDia(i: number): boolean {
+    const mensajes = this.state.selectedMessages();
+    if (i === 0) return true;
+    const actual = this.#inicioDelDia(mensajes[i].fechaEnvio);
+    const previo = this.#inicioDelDia(mensajes[i - 1].fechaEnvio);
+    return actual.getTime() !== previo.getTime();
+  }
+
+  /**
+   * "Hoy" / "Ayer" / nombre del día (hasta 6 días atrás) / fecha d/m/aaaa.
+   * A partir de una semana el nombre del día deja de ser útil porque se repite.
+   */
+  etiquetaDia(fecha: string | Date): string {
+    const dia = this.#inicioDelDia(fecha);
+    const hoy = this.#inicioDelDia(new Date());
+    const diffDias = Math.round((hoy.getTime() - dia.getTime()) / 86_400_000);
+
+    if (diffDias === 0) return 'Hoy';
+    if (diffDias === 1) return 'Ayer';
+    if (diffDias > 1 && diffDias < 7) {
+      const nombre = dia.toLocaleDateString('es-CL', { weekday: 'long' });
+      return nombre.charAt(0).toUpperCase() + nombre.slice(1);
+    }
+    return dia.toLocaleDateString('es-CL');
+  }
+
   // ── Reacciones ───────────────────────────────────────────────────
 
   toggleReaccionPicker(mensajeId: number) {

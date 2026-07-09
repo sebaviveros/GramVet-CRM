@@ -29,17 +29,10 @@
         />
       </div>
 
-      <div class="row-options">
-        <label class="remember-label">
-          <input type="checkbox" /> Recuérdame
-        </label>
-        <button cButton class="forgot-btn" color="link" type="button">
-          ¿Olvidaste tu constraseña?
-        </button>
-      </div>
+      <div #captcha class="captcha-wrap"></div>
 
-      <button cButton class="login-btn" type="submit">
-        INICIAR SESIÓN 
+      <button cButton class="login-btn" type="submit" [disabled]="!captchaToken() || enviando()">
+        {{ enviando() ? 'INGRESANDO...' : 'INICIAR SESIÓN' }}
       </button>
 
       

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface EtiquetaDto {
   id: number;
@@ -22,7 +23,7 @@ export interface CrearEtiquetaDto {
 })
 export class EtiquetaService {
 
-  private apiUrl = 'https://localhost:7101/api/Etiqueta';
+  private apiUrl = `${environment.apiUrl}/Etiqueta`;
 
   constructor(private http: HttpClient) {}
 

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface EtiquetaResumen {
   id: number;
@@ -129,7 +130,7 @@ export const SLOTS_AGENDA: { index: number; label: string }[] = [
 })
 export class ConversacionService {
 
-  private apiUrl = 'https://localhost:7101/api/Conversacion';
+  private apiUrl = `${environment.apiUrl}/Conversacion`;
 
   constructor(private http: HttpClient) { }
 

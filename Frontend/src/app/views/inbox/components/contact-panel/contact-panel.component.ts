@@ -8,6 +8,7 @@ import { ContactoService, MascotaDto, ContactoDto, BitacoraEntradaDto, MascotaFo
 import { ConversacionService, CitaExtraidaDto, CrearCitaDto, MascotaCita, SLOTS_AGENDA } from '../../../../services/conversacion/conversacion.service';
 import { UsuarioService, UsuarioDto } from '../../../../services/usuario/usuario.service';
 import { AuthService } from '../../../../services/auth/auth.service';
+import { LoaderService } from '../../../../services/loader/loader.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -25,6 +26,7 @@ export class ContactPanelComponent {
   conversacionService = inject(ConversacionService);
   usuarioService = inject(UsuarioService);
   auth = inject(AuthService);
+  loader = inject(LoaderService);
 
   todasEtiquetas = signal<EtiquetaDto[]>([]);
   etiquetasContacto = signal<EtiquetaDto[]>([]);
@@ -561,6 +563,9 @@ export class ContactPanelComponent {
     const conv = this.state.selectedConversation();
     if (!conv) return;
     this.cargandoCita.set(true);
+    // El interceptor excluye /api/Conversacion del loader global, así que este
+    // se levanta a mano. La extracción tarda varios segundos (llamada a la IA).
+    this.loader.show('Recopilando información (IA)');
     this.conversacionService.extraerCita(conv.id).subscribe({
       next: c => {
         if (!c.mascotas) c.mascotas = [];
@@ -569,9 +574,11 @@ export class ContactPanelComponent {
         this.cita.set(c);
         if (c.slotSugerido !== null && c.slotSugerido !== undefined) this.slotCita.set(c.slotSugerido);
         this.cargandoCita.set(false);
+        this.loader.hide();
       },
       error: err => {
         this.cargandoCita.set(false);
+        this.loader.hide();
         Swal.fire({
           icon: 'error',
           title: 'No se pudo extraer la cita',

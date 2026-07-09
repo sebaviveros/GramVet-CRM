@@ -15,7 +15,7 @@ c-card {
 
 /* ===== HEADER ===== */
 .chat-header {
-  background: #0E302B !important;
+  background: #232323 !important;
   border-bottom: 1px solid rgba(255,255,255,0.06) !important;
   padding: 14px 18px !important;
 }
@@ -203,6 +203,30 @@ c-card {
   justify-content: center;
 }
 
+/* ===== SEPARADOR DE FECHA (Hoy / Ayer / Martes / 2/7/2026) ===== */
+.date-separator {
+  display: flex;
+  justify-content: center;
+  align-self: stretch;
+  margin: 6px 0;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+.date-separator-chip {
+  background: #232323;
+  color: rgba(255,255,255,0.75);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+  text-transform: capitalize;
+  user-select: none;
+}
+
 .chat-empty-msg {
   background: rgba(0, 0, 0, 0.5);
   color: #fff;
@@ -216,7 +240,7 @@ c-card {
 /* ===== FOOTER ===== */
 c-card-footer {
   flex-shrink: 0;
-  background: #0E302B !important;
+  background: #232323 !important;
   border-top: 1px solid rgba(255,255,255,0.06) !important;
   padding: 12px 16px !important;
 }
@@ -250,7 +274,7 @@ c-card-footer {
   position: relative;
 
   &.sent {
-    background: #608439 !important;
+    background: #235347 !important;
     color: white !important;
     align-self: flex-end;
     border-bottom-right-radius: 4px;
@@ -259,13 +283,13 @@ c-card-footer {
   }
 
   &.received {
-    background-color: #EAEAEA;
-    color: #1f2937;
+    background-color: #3C3C3C;
+    color: #E7F2EE;
     align-self: flex-start;
     border-bottom-left-radius: 4px;
-    border: 1px solid rgba(0,0,0,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
 
-    .message-time { color: #8a8a8a; }
+    .message-time { color: rgba(255,255,255,0.55); }
   }
 }
 
@@ -457,6 +481,7 @@ video {
   padding: 8px 22px !important;
   font-size: 13px;
   font-weight: 500;
+  color: #fff !important;
 }
 
 .btn-primary:hover { opacity: 0.88; }
@@ -540,6 +565,18 @@ video {
   border-radius: 6px;
 
   &:hover { background: rgba(110,207,171,0.10); }
+}
+
+/* Adjuntar / ubicación / emojis: contorno verde de la paleta */
+.btn-outline-secondary {
+  border-color: #6ECFAB !important;
+  color: #6ECFAB !important;
+}
+
+.btn-outline-secondary:hover {
+  background: rgba(110,207,171,0.12) !important;
+  border-color: #6ECFAB !important;
+  color: #6ECFAB !important;
 }
 
 .btn-outline-secondary.active {

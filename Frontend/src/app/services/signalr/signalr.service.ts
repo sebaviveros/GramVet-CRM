@@ -3,6 +3,7 @@ import * as signalR from '@microsoft/signalr';
 import { InboxStateService, Message, Conversation } from '../inbox/inbox-state.service';
 import { AuthService } from '../auth/auth.service';
 import { ConversacionService } from '../conversacion/conversacion.service';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ import { ConversacionService } from '../conversacion/conversacion.service';
 export class SignalRService {
 
   private hubConnection: signalR.HubConnection | null = null;
-  private readonly hubUrl = 'https://localhost:7101/hubs/chat';
+  private readonly hubUrl = environment.hubUrl;
 
   constructor(
     private state: InboxStateService,

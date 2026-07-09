@@ -17,7 +17,7 @@
   font-size: 15px;
   font-weight: 600;
   color: #E7F2EE;
-  background: #0E302B !important;
+  background: #232323 !important;
   border-bottom: 1px solid rgba(255,255,255,0.06) !important;
   padding: 18px 16px;
 }
@@ -206,6 +206,13 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+/* Foto del veterinario asignado: reemplaza las iniciales cuando existe */
+.vet-chip-foto {
+  object-fit: cover;
+  display: block;
+  background: none;
 }
 
 .vet-chip-nombre {

@@ -30,7 +30,7 @@ c-card {
   height: 100%;
   text-align: center;
   padding: 28px 16px 20px;
-  background: #0F332E;
+  background: #2B2B2B;
   gap: 4px;
   overflow-y: auto;
 }
@@ -677,7 +677,7 @@ c-card {
 
 .btn-agendar-ia {
   width: 100%;
-  background: #1A4A3C;
+  background: #55456F;
   border: none;
   border-radius: 10px;
   color: #fff;
@@ -687,7 +687,7 @@ c-card {
   cursor: pointer;
   transition: background 0.15s, opacity 0.15s;
 
-  &:hover:not(:disabled) { background: #235347; }
+  &:hover:not(:disabled) { background: #63517F; }
   &:disabled { opacity: 0.7; cursor: default; }
 }
 

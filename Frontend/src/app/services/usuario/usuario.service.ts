@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface UsuarioDto {
   id: number;
@@ -42,8 +43,8 @@ export interface CambiarPasswordDto {
 @Injectable({ providedIn: 'root' })
 export class UsuarioService {
   #http = inject(HttpClient);
-  #base = 'https://localhost:7101/api/Usuario';
-  #rolBase = 'https://localhost:7101/api/Rol';
+  #base = `${environment.apiUrl}/Usuario`;
+  #rolBase = `${environment.apiUrl}/Rol`;
 
   getAll(): Observable<UsuarioDto[]> {
     return this.#http.get<UsuarioDto[]>(this.#base);

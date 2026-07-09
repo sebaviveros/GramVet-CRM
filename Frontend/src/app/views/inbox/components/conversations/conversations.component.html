@@ -105,7 +105,11 @@
             }
             @if (conversation.usuarioAsignado) {
               <span class="vet-chip" [title]="'Asignado a ' + conversation.usuarioAsignado">
-                <span class="vet-chip-avatar">{{ vetIniciales(conversation.usuarioAsignado) }}</span>
+                @if (vetFoto(conversation.usuarioAsignadoId); as foto) {
+                  <img class="vet-chip-avatar vet-chip-foto" [src]="foto" [alt]="conversation.usuarioAsignado" />
+                } @else {
+                  <span class="vet-chip-avatar">{{ vetIniciales(conversation.usuarioAsignado) }}</span>
+                }
                 <span class="vet-chip-nombre">{{ conversation.usuarioAsignado }}</span>
               </span>
             }

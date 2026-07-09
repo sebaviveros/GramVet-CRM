@@ -74,7 +74,14 @@
       }
 
       @if (state.selectedConversation()) {
-        @for (message of state.selectedMessages(); track message.id) {
+        @for (message of state.selectedMessages(); track message.id; let i = $index) {
+
+          @if (esInicioDeDia(i)) {
+            <div class="date-separator">
+              <span class="date-separator-chip">{{ etiquetaDia(message.fechaEnvio) }}</span>
+            </div>
+          }
+
           <div class="message" [class.sent]="message.direccion === 'outbound'"
                [class.received]="message.direccion === 'inbound'"
                [class.sticker-msg]="message.tipoMensaje === 'sticker'">

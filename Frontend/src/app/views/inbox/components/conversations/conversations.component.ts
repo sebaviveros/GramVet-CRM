@@ -74,11 +74,25 @@ export class ConversationsComponent {
     return list;
   });
 
+  // Foto de perfil del veterinario asignado, por id (vacío si no tiene)
+  fotosVeterinarios = computed(() => {
+    const mapa = new Map<number, string>();
+    for (const v of this.veterinarios()) {
+      if (v.fotoUrl) mapa.set(v.id, v.fotoUrl);
+    }
+    return mapa;
+  });
+
   ngOnInit() {
     this.etiquetaService.getAll().subscribe(e => this.etiquetas.set(e));
-    if (this.esStaff) {
-      this.usuarioService.getVeterinarios().subscribe(v => this.veterinarios.set(v));
-    }
+    // Se cargan siempre: el filtro por veterinario es solo para staff, pero la
+    // foto del chip de asignado la ve cualquier rol.
+    this.usuarioService.getVeterinarios().subscribe(v => this.veterinarios.set(v));
+  }
+
+  vetFoto(usuarioAsignadoId?: number | null): string | undefined {
+    if (!usuarioAsignadoId) return undefined;
+    return this.fotosVeterinarios().get(usuarioAsignadoId);
   }
 
   // Formatea el resumen del último mensaje: convierte [image]/[audio]/etc. a texto con ícono

@@ -19,6 +19,9 @@ import { LoaderService } from '../../services/loader/loader.service';
           </div>
           <div class="gv-spinner"></div>
           <div class="gv-loader-text">GramVet<span>CRM</span></div>
+          @if (loader.mensaje(); as mensaje) {
+            <div class="gv-loader-mensaje">{{ mensaje }}</div>
+          }
         </div>
       </div>
     }
@@ -74,6 +77,14 @@ import { LoaderService } from '../../services/loader/loader.service';
     .gv-loader-text span {
       color: #8aaa98;
       margin-left: 3px;
+    }
+
+    .gv-loader-mensaje {
+      margin-top: -6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #6c7f77;
+      text-align: center;
     }
 
     @keyframes gv-spin {

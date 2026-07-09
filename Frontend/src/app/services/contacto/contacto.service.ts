@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface ContactoDto {
   id: number;
@@ -67,8 +68,8 @@ export interface MascotaFotoDto {
 @Injectable({ providedIn: 'root' })
 export class ContactoService {
   #http = inject(HttpClient);
-  #base = 'https://localhost:7101/api/Contacto';
-  #mascotaBase = 'https://localhost:7101/api/Mascota';
+  #base = `${environment.apiUrl}/Contacto`;
+  #mascotaBase = `${environment.apiUrl}/Mascota`;
 
   getById(id: number): Observable<ContactoDto> {
     return this.#http.get<ContactoDto>(`${this.#base}/${id}`);
