@@ -86,4 +86,11 @@ export class UsuarioService {
     fd.append('file', file);
     return this.#http.post<{ fotoUrl: string }>(`${this.#base}/foto`, fd);
   }
+
+  // Sube/cambia la foto de un usuario específico (gestión de usuarios)
+  subirFotoUsuario(id: number, file: File): Observable<{ fotoUrl: string }> {
+    const fd = new FormData();
+    fd.append('file', file);
+    return this.#http.post<{ fotoUrl: string }>(`${this.#base}/${id}/foto`, fd);
+  }
 }

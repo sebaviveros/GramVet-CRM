@@ -1,7 +1,6 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { InboxSidebarComponent } from './components/inbox-sidebar/inbox-sidebar.component';
 import { ConversationsComponent } from './components/conversations/conversations.component';
 import { ChatWindowComponent } from './components/chat-window/chat-window.component';
 import { ContactPanelComponent } from './components/contact-panel/contact-panel.component';
@@ -16,7 +15,6 @@ import { SignalRService } from '../../services/signalr/signalr.service';
   standalone: true,
   imports: [
     CommonModule,
-    InboxSidebarComponent,
     ConversationsComponent,
     ChatWindowComponent,
     ContactPanelComponent,

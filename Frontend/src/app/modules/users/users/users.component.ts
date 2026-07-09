@@ -29,6 +29,9 @@ export class UsersComponent {
   newEmail = signal('');
   newUsername = signal('');
   newRolId = signal<number | null>(null);
+  newFotoFile = signal<File | null>(null);       // imagen opcional al crear
+  newFotoPreview = signal<string | null>(null);
+  subiendoFoto = signal<number | null>(null);     // id del usuario cuya foto se está subiendo
 
   // Edición inline
   editingId = signal<number | null>(null);
@@ -77,7 +80,16 @@ export class UsersComponent {
       rolId: this.newRolId()!
     }).subscribe({
       next: (nuevo) => {
-        this.usuarios.update(list => [...list, nuevo]);
+        const foto = this.newFotoFile();
+        if (foto) {
+          // Si eligió imagen, la sube para el usuario recién creado antes de agregarlo a la lista.
+          this.#svc.subirFotoUsuario(nuevo.id, foto).subscribe({
+            next: (r) => this.usuarios.update(list => [...list, { ...nuevo, fotoUrl: r.fotoUrl }]),
+            error: () => this.usuarios.update(list => [...list, nuevo])
+          });
+        } else {
+          this.usuarios.update(list => [...list, nuevo]);
+        }
         this.limpiarForm();
         Swal.fire({
           icon: 'success',
@@ -99,6 +111,45 @@ export class UsersComponent {
     this.newEmail.set('');
     this.newUsername.set('');
     this.newRolId.set(null);
+    this.quitarNewFoto();
+  }
+
+  // ── Foto ──────────────────────────────────────────────────────────
+
+  onNewFotoSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const file = input.files[0];
+    input.value = '';
+    this.newFotoFile.set(file);
+    const reader = new FileReader();
+    reader.onload = () => this.newFotoPreview.set(reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  quitarNewFoto() {
+    this.newFotoFile.set(null);
+    this.newFotoPreview.set(null);
+  }
+
+  // Cambiar la foto de un usuario existente desde la lista
+  onFotoUsuarioSelected(event: Event, userId: number) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const file = input.files[0];
+    input.value = '';
+    this.subiendoFoto.set(userId);
+    this.#svc.subirFotoUsuario(userId, file).subscribe({
+      next: (r) => {
+        this.usuarios.update(list => list.map(u => u.id === userId ? { ...u, fotoUrl: r.fotoUrl } : u));
+        this.subiendoFoto.set(null);
+        Swal.fire({ icon: 'success', title: 'Foto actualizada', timer: 1500, showConfirmButton: false });
+      },
+      error: () => {
+        this.subiendoFoto.set(null);
+        Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo subir la foto' });
+      }
+    });
   }
 
   // ── Editar inline ─────────────────────────────────────────────────

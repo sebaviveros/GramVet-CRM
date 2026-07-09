@@ -13,6 +13,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 18px 24px;
+  background: transparent;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .header-left {
@@ -170,15 +172,36 @@
   }
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, #235347, #163832) !important;
-  border: none !important;
+// Botón de crear — mismo diseño que "Crear usuario" (módulo Usuarios)
+.btn-create {
+  height: 36px;
+  padding: 0 20px;
+  background: #1A4A3C;
+  border: none;
+  border-radius: 8px;
   font-size: 13px;
-  border-radius: 10px !important;
-  padding: 8px 18px !important;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: background 0.15s ease, transform 0.1s ease;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    stroke: #6ECFAB;
+  }
 
   &:hover {
-    opacity: 0.9;
+    background: #235347;
+  }
+
+  &:active {
+    transform: scale(0.98);
   }
 }
 
@@ -223,11 +246,28 @@
 // TABLE
 // ========================
 
+.component-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.macro-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
 .table-container {
   background: rgba(255, 255, 255, 0.85);
   border-radius: 14px;
   padding: 4px 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 table {
@@ -257,7 +297,15 @@ tbody tr {
   }
 
   &:hover {
-    background: rgba(35, 83, 71, 0.04);
+    background: #55456F;
+  }
+
+  &:hover td { color: #fff; }
+  &:hover .td-text { color: rgba(255, 255, 255, 0.8); }
+  &:hover .icon-btn { color: #fff; }
+  &:hover .macro-tag {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
   }
 }
 

@@ -13,7 +13,7 @@
         </svg>
       </div>
       <div class="header-text">
-        <span class="header-title">Gestión de usuarios</span>
+        <span class="header-title">Gestión de Usuarios</span>
         <span class="header-subtitle">GramVet CRM</span>
       </div>
     </div>
@@ -27,6 +27,30 @@
     <p class="section-label">Nuevo usuario</p>
 
     <div class="user-form">
+
+      <!-- Imagen opcional -->
+      <div class="foto-field">
+        <div class="foto-preview">
+          @if (newFotoPreview()) {
+            <img [src]="newFotoPreview()" alt="preview" />
+          } @else {
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+          }
+        </div>
+        <div class="foto-actions">
+          <label class="btn-foto">
+            {{ newFotoPreview() ? 'Cambiar imagen' : 'Elegir imagen (opcional)' }}
+            <input type="file" accept="image/*" hidden (change)="onNewFotoSelected($event)" />
+          </label>
+          @if (newFotoPreview()) {
+            <button type="button" class="btn-foto-quitar" (click)="quitarNewFoto()">Quitar</button>
+          }
+        </div>
+      </div>
+
       <div class="form-grid">
 
         <div class="field-wrap">
@@ -145,13 +169,24 @@
               <tr>
                 <td>
                   <div class="name-cell">
-                    <div class="avatar av-green">
+                    <label class="avatar av-green avatar-editable" title="Cambiar foto">
                       @if (u.fotoUrl) {
                         <img [src]="u.fotoUrl" class="avatar-img" alt="foto" />
                       } @else {
                         {{ iniciales(u) }}
                       }
-                    </div>
+                      <span class="avatar-overlay">
+                        @if (subiendoFoto() === u.id) {
+                          <span class="avatar-spinner">…</span>
+                        } @else {
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                            <circle cx="12" cy="13" r="4"/>
+                          </svg>
+                        }
+                      </span>
+                      <input type="file" accept="image/*" hidden (change)="onFotoUsuarioSelected($event, u.id)" />
+                    </label>
                     <span class="name-text">{{ u.nombre }} {{ u.apellido }}</span>
                   </div>
                 </td>

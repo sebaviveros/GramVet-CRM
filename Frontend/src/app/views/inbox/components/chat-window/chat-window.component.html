@@ -2,10 +2,10 @@
 
   <!-- ================= HEADER ================= -->
 
+  @if (state.selectedConversation()) {
   <c-card-header class="chat-header clickable" (click)="openContactPanel()"
                  title="Ver u ocultar el panel de contacto">
 
-    @if (state.selectedConversation()) {
     <div class="chat-header-container">
 
       <div class="chat-user">
@@ -55,13 +55,13 @@
       </div>
 
     </div>
-    }
 
   </c-card-header>
+  }
 
   <!-- ================= BODY ================= -->
   <c-card-body class="chat-body-wrapper">
-    <div #scrollContainer class="scroll-container" (scroll)="onScroll()">
+    <div #scrollContainer class="scroll-container" [class.is-empty]="!state.selectedConversation()" (scroll)="onScroll()">
 
       @if (state.loadingMoreMessages()) {
         <div class="loading-more">
@@ -163,13 +163,14 @@
           </div>
         }
       } @else {
-        <p>Seleccione una conversación</p>
+        <div class="chat-empty-msg">Seleccione una conversación</div>
       }
 
     </div>
   </c-card-body>
 
   <!-- ================= FOOTER ================= -->
+  @if (state.selectedConversation()) {
   <c-card-footer>
 
     <!-- Panel de sugerencias de respuestas rápidas -->
@@ -237,6 +238,7 @@
 
     </div>
   </c-card-footer>
+  }
 
   @if (lightboxUrl()) {
     <div class="lightbox-overlay" (click)="cerrarLightbox()">

@@ -16,7 +16,7 @@
     <span class="tag-count-badge">{{ etiquetas().length }} etiquetas</span>
   </c-card-header>
 
-  <c-card-body>
+  <c-card-body class="component-body">
 
     <!-- ================= FORM CREAR ================= -->
     <p class="section-label">Nueva etiqueta</p>
@@ -65,8 +65,12 @@
                 (click)="nuevoNombre.set(''); nuevoDesc.set(''); nuevoColor.set('#235347'); nuevoVets.set([])">
           Cancelar
         </button>
-        <button class="btn btn-primary" (click)="crear()">
-          + Crear etiqueta
+        <button class="btn-create" (click)="crear()">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Crear etiqueta
         </button>
       </div>
     </div>

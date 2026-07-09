@@ -39,7 +39,8 @@ $amber-text:    #633806;
   align-items: center;
   justify-content: space-between;
   padding: 18px 24px;
-  background: var(--cui-card-cap-bg, rgba(0,0,0,.03));
+  background: transparent;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .header-left {
@@ -74,13 +75,14 @@ $amber-text:    #633806;
 .header-title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--cui-body-color);
+  color: #1a2e25;
+  line-height: 1.2;
   letter-spacing: -0.01em;
 }
 
 .header-subtitle {
   font-size: 12px;
-  color: var(--cui-secondary-color, #6c757d);
+  color: #6c757d;
 }
 
 .badge-count {
@@ -99,6 +101,10 @@ $amber-text:    #633806;
 
 .card-body-custom {
   padding: 24px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;      // permite que el scroll interno de la lista funcione
+  overflow: hidden;
 }
 
 // =============================================
@@ -120,6 +126,68 @@ $amber-text:    #633806;
 
 .user-form {
   margin-bottom: 0;
+}
+
+// ── Selector de imagen (crear) ──
+.foto-field {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.foto-preview {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  svg {
+    width: 22px;
+    height: 22px;
+    stroke: #9ab5aa;
+  }
+}
+
+.foto-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-foto {
+  font-size: 12px;
+  font-weight: 500;
+  color: $green-text;
+  background: $green-light;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+
+  &:hover { opacity: 0.85; }
+}
+
+.btn-foto-quitar {
+  font-size: 12px;
+  color: #999;
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  &:hover { color: #dc3545; }
 }
 
 .form-grid {
@@ -146,24 +214,23 @@ $amber-text:    #633806;
 .field-input {
   height: 38px;
   width: 100%;
-  background: var(--cui-secondary-bg, #f8f9fa);
-  border: 0.5px solid var(--cui-border-color, #dee2e6);
-  border-radius: 8px;
-  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.85);
+  border: none;
+  border-radius: 12px;
+  padding: 0 14px;
   font-size: 13px;
   font-family: 'DM Sans', sans-serif;
   color: var(--cui-body-color);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: box-shadow 0.15s ease;
   outline: none;
   appearance: none;
 
   &::placeholder {
-    color: var(--cui-tertiary-color, #adb5bd);
+    color: #aaa;
   }
 
   &:focus {
-    border-color: $green-dark;
-    box-shadow: 0 0 0 3px rgba(26, 74, 60, 0.12);
+    box-shadow: 0 0 0 2px rgba(35, 83, 71, 0.25);
   }
 }
 
@@ -262,10 +329,10 @@ $amber-text:    #633806;
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--cui-secondary-bg, #f8f9fa);
-  border: 0.5px solid var(--cui-border-color, #dee2e6);
-  border-radius: 8px;
-  padding: 0 10px;
+  background: rgba(255, 255, 255, 0.85);
+  border: none;
+  border-radius: 20px;
+  padding: 0 12px;
   height: 32px;
 
   svg {
@@ -296,6 +363,12 @@ $amber-text:    #633806;
 
 .table-container {
   overflow-x: auto;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 14px;
+  padding: 4px 0;
 }
 
 .user-table {
@@ -304,7 +377,7 @@ $amber-text:    #633806;
   margin-bottom: 0;
 
   thead tr {
-    border-bottom: 0.5px solid var(--cui-border-color, #dee2e6);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   }
 
   th {
@@ -312,8 +385,8 @@ $amber-text:    #633806;
     font-weight: 600;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--cui-tertiary-color, #adb5bd);
-    padding: 0 12px 10px;
+    color: #999;
+    padding: 10px 16px;
     text-align: left;
   }
 
@@ -322,10 +395,10 @@ $amber-text:    #633806;
   }
 
   td {
-    padding: 12px;
+    padding: 11px 16px;
     font-size: 13px;
     color: var(--cui-body-color);
-    border-bottom: 0.5px solid var(--cui-border-color, #dee2e6);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
     vertical-align: middle;
   }
 
@@ -337,7 +410,14 @@ $amber-text:    #633806;
     }
 
     &:hover td {
-      background: var(--cui-secondary-bg, #f8f9fa);
+      background: #55456F;
+      color: #fff;
+    }
+
+    &:hover .mono-text { color: rgba(255, 255, 255, 0.85); }
+    &:hover .action-btn {
+      border-color: rgba(255, 255, 255, 0.4);
+      svg { stroke: #fff; }
     }
   }
 }
@@ -370,6 +450,40 @@ $amber-text:    #633806;
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+// Avatar editable en la lista (click para cambiar foto)
+.avatar-editable {
+  position: relative;
+  cursor: pointer;
+}
+
+.avatar-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+
+  svg {
+    width: 13px;
+    height: 13px;
+    color: #fff;
+  }
+}
+
+.avatar-spinner {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.avatar-editable:hover .avatar-overlay {
+  opacity: 1;
 }
 
 .av-green { background: $green-light;  color: $green-text; }
