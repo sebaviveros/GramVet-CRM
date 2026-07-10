@@ -30,7 +30,7 @@
             <div class="user-info-tags">
               <span class="header-etiqueta"
                     [style.background]="(etiquetasContacto()[0].color ?? '#235347') + '22'"
-                    [style.color]="etiquetasContacto()[0].color ?? '#235347'"
+                    [style.color]="colorTexto(etiquetasContacto()[0].color)"
                     [style.border-color]="(etiquetasContacto()[0].color ?? '#235347') + '66'"
                     [title]="etiquetasContacto()[0].nombre">
                 {{ etiquetasContacto()[0].nombre }}
@@ -39,7 +39,7 @@
                 <div class="tags-second-row">
                   <span class="header-etiqueta"
                         [style.background]="(etiquetasContacto()[1].color ?? '#235347') + '22'"
-                        [style.color]="etiquetasContacto()[1].color ?? '#235347'"
+                        [style.color]="colorTexto(etiquetasContacto()[1].color)"
                         [style.border-color]="(etiquetasContacto()[1].color ?? '#235347') + '66'"
                         [title]="etiquetasContacto()[1].nombre">
                     {{ etiquetasContacto()[1].nombre }}

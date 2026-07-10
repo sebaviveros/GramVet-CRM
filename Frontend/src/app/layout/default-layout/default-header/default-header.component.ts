@@ -40,12 +40,19 @@ export class DefaultHeaderComponent extends HeaderComponent implements OnInit {
   readonly #usuarioService = inject(UsuarioService);
   readonly #router = inject(Router);
 
-  // Foto de perfil del usuario logueado (fallback al avatar por defecto)
-  fotoPerfil = signal<string>('./assets/images/avatars/8.jpg');
+  // Foto de perfil del usuario logueado. null = no tiene, se muestran las iniciales.
+  fotoPerfil = signal<string | null>(null);
 
   // Nombre y rol mostrados junto al botón de perfil
   nombreUsuario = signal<string>('');
   rolUsuario = signal<string>(this.#authService.getRolNombre());
+
+  /** Iniciales del nombre y apellido, para el avatar sin foto. */
+  iniciales = computed(() => {
+    const partes = this.nombreUsuario().trim().split(/\s+/).filter(p => p);
+    if (partes.length === 0) return '?';
+    return ((partes[0][0] ?? '') + (partes[1]?.[0] ?? '')).toUpperCase();
+  });
 
   ngOnInit(): void {
     this.#usuarioService.getMe().subscribe({

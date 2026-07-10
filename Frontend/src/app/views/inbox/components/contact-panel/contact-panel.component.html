@@ -113,9 +113,10 @@
               <input class="edit-input"
                 [value]="cita()?.clienteSolicito ?? ''" (input)="actualizarCita('clienteSolicito', $any($event.target).value)" />
 
-              <label class="cita-label">Se cobró</label>
-              <input class="edit-input"
-                [value]="cita()?.cobros ?? ''" (input)="actualizarCita('cobros', $any($event.target).value)" />
+              <label class="cita-label">Desglose de lo cobrado</label>
+              <textarea class="edit-input cita-cobros" rows="3"
+                placeholder="Ej. Vacuna Séxtuple $16.000 / Vacuna Antirrábica $16.000 / Ida a domicilio $6.000"
+                [value]="cita()?.cobros ?? ''" (input)="actualizarCita('cobros', $any($event.target).value)"></textarea>
 
               <label class="cita-label">Total mínimo a cobrar</label>
               <input class="edit-input"
@@ -153,17 +154,31 @@
               <p class="cita-hint">Solo las que el cliente todavía no tiene. Las ya registradas no se duplican.</p>
               @for (m of cita()?.mascotas ?? []; track $index) {
                 <div class="cita-mascota-row">
-                  <input class="edit-input" placeholder="Nombre"
-                    [value]="m.nombre" (input)="actualizarMascotaCita($index, 'nombre', $any($event.target).value)" />
-                  <select class="edit-input cita-mascota-especie"
-                    [value]="m.especie ?? ''" (change)="actualizarMascotaCita($index, 'especie', $any($event.target).value)">
-                    <option value="">Especie</option>
-                    <option value="perro">Perro</option>
-                    <option value="gato">Gato</option>
-                    <option value="otro">Otro</option>
-                  </select>
-                  <input class="edit-input cita-mascota-edad" type="number" min="0" max="40" placeholder="Edad"
-                    [value]="m.edadAnios ?? ''" (input)="actualizarMascotaCita($index, 'edadAnios', $any($event.target).value)" />
+                  <!-- Cada campo con su rótulo: un "2" suelto al lado de "perro"
+                       se lee como cantidad, no como edad. -->
+                  <div class="cita-mascota-campo">
+                    <span class="cita-mascota-label">Nombre</span>
+                    <input class="edit-input" placeholder="Sin nombre"
+                      [value]="m.nombre" (input)="actualizarMascotaCita($index, 'nombre', $any($event.target).value)" />
+                  </div>
+
+                  <div class="cita-mascota-campo cita-mascota-campo--especie">
+                    <span class="cita-mascota-label">Especie</span>
+                    <select class="edit-input"
+                      [value]="m.especie ?? ''" (change)="actualizarMascotaCita($index, 'especie', $any($event.target).value)">
+                      <option value="">—</option>
+                      <option value="perro">Perro</option>
+                      <option value="gato">Gato</option>
+                      <option value="otro">Otro</option>
+                    </select>
+                  </div>
+
+                  <div class="cita-mascota-campo cita-mascota-campo--edad">
+                    <span class="cita-mascota-label">Edad (años)</span>
+                    <input class="edit-input" type="number" min="0" max="40" placeholder="—"
+                      [value]="m.edadAnios ?? ''" (input)="actualizarMascotaCita($index, 'edadAnios', $any($event.target).value)" />
+                  </div>
+
                   <button class="cita-mascota-del" type="button" title="Quitar" (click)="quitarMascotaCita($index)">✕</button>
                 </div>
                 @if (m.nombre?.trim() || m.especie?.trim()) {
@@ -261,14 +276,16 @@
         <div class="section-title">Etiquetas</div>
         <div class="etiquetas-list">
           @for (etiqueta of etiquetasContacto(); track etiqueta.id) {
+            <!-- El texto usa el color aclarado: un color oscuro sobre el panel
+                 oscuro quedaba ilegible (ver colorEtiquetaTexto). -->
             <span class="etiqueta-chip"
                   [style.background]="(etiqueta.color ?? '#235347') + '22'"
-                  [style.color]="etiqueta.color ?? '#235347'"
+                  [style.color]="colorTexto(etiqueta.color)"
                   [style.border-color]="(etiqueta.color ?? '#235347') + '55'">
               {{ etiqueta.nombre }}
               @if (puedeQuitarEtiqueta) {
                 <button class="etiqueta-remove" (click)="quitar(etiqueta.id)"
-                        [style.color]="etiqueta.color ?? '#235347'">✕</button>
+                        [style.color]="colorTexto(etiqueta.color)">✕</button>
               }
             </span>
           }
@@ -393,14 +410,8 @@
                 }
               </div>
               <div class="mascota-actions">
-                <button class="mascota-btn" [class.activo]="fotosAbiertaMascotaId() === m.id"
-                        title="Fotos" (click)="toggleFotos(m.id)">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                    <circle cx="8.5" cy="8.5" r="1.5"/>
-                    <path d="M21 15l-5-5L5 21"/>
-                  </svg>
-                </button>
+                <!-- El botón de fotos se eliminó: las imágenes viven dentro de
+                     cada anotación de la bitácora. -->
                 <button class="mascota-btn" [class.activo]="bitacoraAbiertaMascotaId() === m.id"
                         title="Bitácora" (click)="toggleBitacora(m.id)">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
@@ -432,10 +443,33 @@
                 <textarea class="bitacora-textarea" rows="3"
                   placeholder="Escribir una anotación (atención, tip, observación)..."
                   [value]="nuevaBitacora()" (input)="nuevaBitacora.set($any($event.target).value)"></textarea>
-                <button class="btn-guardar-sm bitacora-btn-add"
-                        [disabled]="!nuevaBitacora().trim()" (click)="agregarBitacora(m.id)">
-                  Agregar anotación
-                </button>
+
+                <!-- Imágenes elegidas antes de guardar: se suben cuando la
+                     anotación existe y tiene id. -->
+                @if (nuevasFotos().length > 0) {
+                  <div class="bitacora-adjuntos">
+                    @for (f of nuevasFotos(); track $index) {
+                      <span class="bitacora-adjunto">
+                        {{ f.name }}
+                        <button type="button" title="Quitar" (click)="quitarNuevaFoto($index)">✕</button>
+                      </span>
+                    }
+                  </div>
+                }
+
+                <div class="bitacora-add-actions">
+                  <label class="bitacora-adjuntar">
+                    📎 Adjuntar imágenes
+                    <input type="file" accept="image/*" multiple style="display:none"
+                           (change)="onSeleccionarNuevasFotos($event)" />
+                  </label>
+                  <button class="btn-guardar-sm bitacora-btn-add"
+                          [disabled]="!puedeGuardarBitacora() || subiendoFoto()"
+                          (click)="agregarBitacora(m.id)">
+                    {{ subiendoFoto() ? 'Guardando…' : 'Agregar anotación' }}
+                  </button>
+                </div>
+                <p class="bitacora-hint">Puedes guardar solo imágenes, sin texto.</p>
               </div>
 
               @if (cargandoBitacora()) {
@@ -451,41 +485,51 @@
                         @if (e.autor) {
                           <span class="bitacora-autor">{{ e.autor }}</span>
                         }
+                        <button class="bitacora-edit" title="Editar texto" (click)="startEditBitacora(e)">✎</button>
                         <button class="bitacora-remove" title="Eliminar" (click)="eliminarBitacora(e.id)">✕</button>
                       </div>
-                      <div class="bitacora-contenido">{{ e.contenido }}</div>
-                    </div>
-                  }
-                </div>
-              }
-            </div>
-          }
 
-          <!-- Panel de fotos de la mascota -->
-          @if (fotosAbiertaMascotaId() === m.id) {
-            <div class="fotos-panel">
-              <label class="fotos-add" [class.subiendo]="subiendoFoto()">
-                @if (subiendoFoto()) {
-                  <span>Subiendo...</span>
-                } @else {
-                  <span>+ Agregar foto</span>
-                }
-                <input type="file" accept="image/*" style="display: none;"
-                       [disabled]="subiendoFoto()"
-                       (change)="onSeleccionarFoto($event, m.id)" />
-              </label>
+                      <!-- El texto se edita aparte de las imágenes: una anotación
+                           puede hablar de la imagen y de otras cosas a la vez. -->
+                      @if (editandoBitacoraId() === e.id) {
+                        <textarea class="bitacora-textarea" rows="4"
+                          placeholder="Escribir una anotación..."
+                          [value]="editBitacoraTexto()"
+                          (input)="editBitacoraTexto.set($any($event.target).value)"
+                          (keyup.escape)="cancelEditBitacora()"></textarea>
+                        <div class="bitacora-edit-actions">
+                          <button class="btn-cancelar-sm" (click)="cancelEditBitacora()">Cancelar</button>
+                          <button class="btn-guardar-sm" [disabled]="guardandoBitacora()"
+                                  (click)="guardarEditBitacora(e)">
+                            {{ guardandoBitacora() ? 'Guardando…' : 'Guardar' }}
+                          </button>
+                        </div>
+                      } @else if (e.contenido?.trim()) {
+                        <div class="bitacora-contenido">{{ e.contenido }}</div>
+                      } @else {
+                        <button class="bitacora-agregar-texto" (click)="startEditBitacora(e)">
+                          + Agregar texto a esta anotación
+                        </button>
+                      }
 
-              @if (cargandoFotos()) {
-                <div class="fotos-loading">Cargando fotos...</div>
-              } @else if (fotos().length === 0) {
-                <div class="fotos-vacia">Sin fotos todavía</div>
-              } @else {
-                <div class="fotos-grid">
-                  @for (f of fotos(); track f.id) {
-                    <div class="foto-item">
-                      <img [src]="f.url" [alt]="f.descripcion ?? 'foto'"
-                           (click)="abrirFoto(f.url)" />
-                      <button class="foto-remove" title="Eliminar" (click)="eliminarFoto(f.id)">✕</button>
+                      @if (e.fotos.length > 0) {
+                        <div class="fotos-grid">
+                          @for (f of e.fotos; track f.id) {
+                            <div class="foto-item">
+                              <img [src]="f.url" [alt]="f.descripcion ?? 'imagen'"
+                                   (click)="abrirFoto(f.url)" />
+                              <button class="foto-remove" title="Eliminar" (click)="eliminarFoto(f.id, m.id)">✕</button>
+                            </div>
+                          }
+                        </div>
+                      }
+
+                      <label class="bitacora-adjuntar bitacora-adjuntar--entrada">
+                        + Agregar imagen
+                        <input type="file" accept="image/*" multiple style="display:none"
+                               [disabled]="subiendoFoto()"
+                               (change)="onAgregarFotosAEntrada($event, e.id, m.id)" />
+                      </label>
                     </div>
                   }
                 </div>

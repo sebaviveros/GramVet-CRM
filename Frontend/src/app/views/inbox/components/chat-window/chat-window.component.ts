@@ -19,6 +19,7 @@ import { ConversacionService } from '../../../../services/conversacion/conversac
 import { EtiquetaService, EtiquetaDto } from '../../../../services/etiqueta/etiqueta.service';
 import { RespuestaRapidaService, RespuestaRapidaDto } from '../../../../services/respuesta-rapida/respuesta-rapida.service';
 import { ChannelBadgeComponent } from '../../../../shared/channel-badge/channel-badge.component';
+import { colorEtiquetaTexto } from '../../../../shared/color.util';
 import Swal from 'sweetalert2';
 
 const PAGE_SIZE = 15;
@@ -246,6 +247,9 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
     }
   }
 
+  /** Color legible del texto del chip de etiqueta (aclara los colores oscuros). */
+  colorTexto = (color?: string | null) => colorEtiquetaTexto(color);
+
   // ── Separadores de fecha (estilo WhatsApp) ───────────────────────
 
   /** Medianoche local de una fecha, para comparar días sin que influya la hora. */
@@ -397,7 +401,7 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
         Swal.fire({
           icon: 'warning',
           title: 'No se pudo obtener tu ubicación',
-          text: 'Revisá que el navegador tenga permiso de ubicación.'
+          text: 'Revisa que el navegador tenga permiso de ubicación.'
         });
       },
       { enableHighAccuracy: true, timeout: 10000 }

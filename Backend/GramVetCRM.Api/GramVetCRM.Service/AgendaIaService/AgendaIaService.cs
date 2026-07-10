@@ -378,7 +378,13 @@ namespace GramVetCRM.Service
             "dice un día de la semana, usa la próxima ocurrencia futura de ese día. Si no se acordó un " +
             "día, deja 'fechaSugerida' vacío.\n\n" +
 
-            "Para 'cobros' y 'totalMinimo' usa montos en pesos chilenos si se mencionan. " +
+            "'cobros' es el DESGLOSE, ítem por ítem, de lo que se le va a cobrar, NO el total. " +
+            "Escribe un ítem por línea, con su monto en pesos chilenos, usando los precios que " +
+            "quedaron ACORDADOS al final (si hubo una promoción o un descuento, usa el precio final, " +
+            "no el precio de lista). Ejemplo: si el cliente acepta 2 vacunas anuales que con promoción " +
+            "quedan en 16.000 cada una más 6.000 de ida a domicilio, el desglose es:\n" +
+            "Vacuna Séxtuple: $16.000\nVacuna Antirrábica: $16.000\nIda a domicilio: $6.000\n" +
+            "'totalMinimo' SÍ es el total (en ese ejemplo, $38.000). Nunca pongas el total en 'cobros'. " +
             "Para 'mascotas' lista cada mascota mencionada con su nombre, especie ('perro' o 'gato') y " +
             "edad. Si no se menciona el nombre, la especie o la edad, deja ESE campo vacío (una mascota " +
             "sin nombre es válida). 'edadAnios' es la edad en años como número entero en texto " +

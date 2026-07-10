@@ -13,11 +13,22 @@ namespace GramVetCRM.Repository.Repositories
             _context = context;
         }
 
-        public async Task<List<MascotaFoto>> GetByMascota(int mascotaId)
+        public async Task<List<MascotaFoto>> GetByBitacora(int bitacoraId)
         {
             return await _context.MascotaFoto
-                .Where(f => f.MascotaId == mascotaId && f.Active)
-                .OrderByDescending(f => f.Fechacr)
+                .Where(f => f.BitacoraId == bitacoraId && f.Active)
+                .OrderBy(f => f.Fechacr)
+                .ToListAsync();
+        }
+
+        // En lote: sin esto habría una consulta por anotación al abrir la bitácora
+        public async Task<List<MascotaFoto>> GetByBitacoras(List<int> bitacoraIds)
+        {
+            if (bitacoraIds.Count == 0) return new List<MascotaFoto>();
+
+            return await _context.MascotaFoto
+                .Where(f => bitacoraIds.Contains(f.BitacoraId) && f.Active)
+                .OrderBy(f => f.Fechacr)
                 .ToListAsync();
         }
 

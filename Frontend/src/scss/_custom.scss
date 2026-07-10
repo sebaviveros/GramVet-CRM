@@ -108,6 +108,20 @@ body {
   color: white !important;
 }
 
+/* Avatar del header sin foto propia: iniciales sobre el verde GramVet */
+.header .avatar-iniciales {
+  background: #1A4A3C;
+  color: #6ECFAB !important;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  border-radius: 50% !important;
+}
+
 /* Nombre / rol del usuario logueado: burbuja morada junto al botón de perfil */
 .header .user-identity {
   margin-right: 12px;

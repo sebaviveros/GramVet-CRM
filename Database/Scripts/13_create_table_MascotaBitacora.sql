@@ -1,7 +1,7 @@
 CREATE TABLE MascotaBitacora (
     Id INT IDENTITY PRIMARY KEY,
     MascotaId INT NOT NULL,
-    Contenido NVARCHAR(MAX) NOT NULL,  -- una anotación de la bitácora
+    Contenido NVARCHAR(MAX) NULL,      -- anotación (opcional: puede ser solo imágenes)
 
     usercr NVARCHAR(100),              -- quién escribió la anotación
     userup NVARCHAR(100),

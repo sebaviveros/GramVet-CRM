@@ -9,6 +9,7 @@ import { ConversacionService, CitaExtraidaDto, CrearCitaDto, MascotaCita, SLOTS_
 import { UsuarioService, UsuarioDto } from '../../../../services/usuario/usuario.service';
 import { AuthService } from '../../../../services/auth/auth.service';
 import { LoaderService } from '../../../../services/loader/loader.service';
+import { colorEtiquetaTexto } from '../../../../shared/color.util';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -245,10 +246,14 @@ export class ContactPanelComponent {
   cargandoBitacora = signal(false);
   nuevaBitacora = signal('');
 
-  // Fotos de mascota
-  fotosAbiertaMascotaId = signal<number | null>(null);
-  fotos = signal<MascotaFotoDto[]>([]);
-  cargandoFotos = signal(false);
+  // Edición del TEXTO de una anotación (las imágenes se manejan aparte)
+  editandoBitacoraId = signal<number | null>(null);
+  editBitacoraTexto = signal('');
+  guardandoBitacora = signal(false);
+
+  // Imágenes: viven dentro de cada anotación de bitácora (ya no por mascota).
+  // `nuevasFotos` son las elegidas para la anotación que todavía no se creó.
+  nuevasFotos = signal<File[]>([]);
   subiendoFoto = signal(false);
   lightboxFotoUrl = signal<string | null>(null);
 
@@ -272,8 +277,7 @@ export class ContactPanelComponent {
         this.bitacoraAbiertaMascotaId.set(null);
         this.bitacoraEntradas.set([]);
         this.nuevaBitacora.set('');
-        this.fotosAbiertaMascotaId.set(null);
-        this.fotos.set([]);
+        this.nuevasFotos.set([]);
         this.lightboxFotoUrl.set(null);
         this.cita.set(null);
         this.cargandoCita.set(false);
@@ -534,10 +538,14 @@ export class ContactPanelComponent {
       this.bitacoraAbiertaMascotaId.set(null);
       this.bitacoraEntradas.set([]);
       this.nuevaBitacora.set('');
+      this.nuevasFotos.set([]);
+      this.cancelEditBitacora();
       return;
     }
     this.bitacoraAbiertaMascotaId.set(mascotaId);
     this.nuevaBitacora.set('');
+    this.nuevasFotos.set([]);
+    this.cancelEditBitacora();
     this.cargandoBitacora.set(true);
     this.contactoService.getBitacora(mascotaId).subscribe({
       next: entradas => {
@@ -548,12 +556,127 @@ export class ContactPanelComponent {
     });
   }
 
+  /** Se puede guardar con solo texto, con solo imágenes, o con ambos. */
+  puedeGuardarBitacora(): boolean {
+    return !!this.nuevaBitacora().trim() || this.nuevasFotos().length > 0;
+  }
+
+  onSeleccionarNuevasFotos(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    this.nuevasFotos.update(list => [...list, ...Array.from(input.files!)]);
+    input.value = ''; // permite volver a elegir el mismo archivo
+  }
+
+  quitarNuevaFoto(i: number) {
+    this.nuevasFotos.update(list => list.filter((_, idx) => idx !== i));
+  }
+
   agregarBitacora(mascotaId: number) {
-    const contenido = this.nuevaBitacora().trim();
-    if (!contenido) return;
-    this.contactoService.crearBitacora({ mascotaId, contenido }).subscribe(entrada => {
-      this.bitacoraEntradas.update(list => [entrada, ...list]);
-      this.nuevaBitacora.set('');
+    if (!this.puedeGuardarBitacora()) return;
+
+    const contenido = this.nuevaBitacora().trim() || undefined;
+    const archivos = this.nuevasFotos();
+
+    this.subiendoFoto.set(true);
+    // La anotación se crea primero: las fotos necesitan su id para colgar de ella.
+    this.contactoService.crearBitacora({ mascotaId, contenido }).subscribe({
+      next: entrada => {
+        this.nuevaBitacora.set('');
+        this.nuevasFotos.set([]);
+
+        if (archivos.length === 0) {
+          this.bitacoraEntradas.update(list => [entrada, ...list]);
+          this.subiendoFoto.set(false);
+          return;
+        }
+
+        this.#subirFotos(entrada.id, archivos, () => {
+          // Se recarga la bitácora para traer las fotos ya persistidas
+          this.#recargarBitacora(mascotaId);
+          this.subiendoFoto.set(false);
+        });
+      },
+      error: () => {
+        this.subiendoFoto.set(false);
+        Swal.fire({ icon: 'error', title: 'No se pudo guardar la anotación', confirmButtonColor: '#235347' });
+      }
+    });
+  }
+
+  onAgregarFotosAEntrada(event: Event, bitacoraId: number, mascotaId: number) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const archivos = Array.from(input.files);
+    input.value = '';
+
+    this.subiendoFoto.set(true);
+    this.#subirFotos(bitacoraId, archivos, () => {
+      this.#recargarBitacora(mascotaId);
+      this.subiendoFoto.set(false);
+    });
+  }
+
+  /** Sube las imágenes de a una y avisa al terminar (bien o mal). */
+  #subirFotos(bitacoraId: number, archivos: File[], alTerminar: () => void) {
+    let restantes = archivos.length;
+    const listo = () => { if (--restantes === 0) alTerminar(); };
+
+    for (const file of archivos) {
+      this.contactoService.subirFotoBitacora(bitacoraId, file).subscribe({
+        next: () => listo(),
+        error: () => {
+          Swal.fire({ icon: 'error', title: `No se pudo subir "${file.name}"`, confirmButtonColor: '#235347' });
+          listo();
+        }
+      });
+    }
+  }
+
+  #recargarBitacora(mascotaId: number) {
+    this.contactoService.getBitacora(mascotaId).subscribe(entradas => this.bitacoraEntradas.set(entradas));
+  }
+
+  startEditBitacora(e: BitacoraEntradaDto) {
+    this.editandoBitacoraId.set(e.id);
+    this.editBitacoraTexto.set(e.contenido ?? '');
+  }
+
+  cancelEditBitacora() {
+    this.editandoBitacoraId.set(null);
+    this.editBitacoraTexto.set('');
+  }
+
+  guardarEditBitacora(e: BitacoraEntradaDto) {
+    // Puede quedar sin texto si la anotación tiene imágenes; el backend valida
+    // que no quede vacía del todo.
+    const contenido = this.editBitacoraTexto().trim();
+    if (!contenido && e.fotos.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'La anotación quedaría vacía',
+        text: 'Escribe un texto o deja al menos una imagen.',
+        confirmButtonColor: '#235347'
+      });
+      return;
+    }
+
+    this.guardandoBitacora.set(true);
+    this.contactoService.editarBitacora(e.id, contenido || undefined).subscribe({
+      next: actualizada => {
+        this.bitacoraEntradas.update(list => list.map(x => x.id === e.id ? actualizada : x));
+        this.cancelEditBitacora();
+        this.guardandoBitacora.set(false);
+      },
+      error: err => {
+        this.guardandoBitacora.set(false);
+        Swal.fire({
+          icon: 'error',
+          title: 'No se pudo guardar',
+          text: err?.error?.mensaje ?? 'Error inesperado',
+          confirmButtonColor: '#235347'
+        });
+      }
     });
   }
 
@@ -574,45 +697,12 @@ export class ContactPanelComponent {
     });
   }
 
-  // ── Fotos de mascota ──────────────────────────────────────────────
+  // ── Imágenes de una anotación ─────────────────────────────────────
 
-  toggleFotos(mascotaId: number) {
-    if (this.fotosAbiertaMascotaId() === mascotaId) {
-      this.fotosAbiertaMascotaId.set(null);
-      this.fotos.set([]);
-      return;
-    }
-    this.fotosAbiertaMascotaId.set(mascotaId);
-    this.cargandoFotos.set(true);
-    this.contactoService.getFotos(mascotaId).subscribe({
-      next: fotos => {
-        this.fotos.set(fotos);
-        this.cargandoFotos.set(false);
-      },
-      error: () => this.cargandoFotos.set(false)
-    });
-  }
-
-  onSeleccionarFoto(event: Event, mascotaId: number) {
-    const input = event.target as HTMLInputElement;
-    if (!input.files?.length) return;
-    const file = input.files[0];
-    input.value = ''; // permite re-subir el mismo archivo
-
-    this.subiendoFoto.set(true);
-    this.contactoService.subirFoto(mascotaId, file).subscribe({
-      next: foto => {
-        this.fotos.update(list => [foto, ...list]);
-        this.subiendoFoto.set(false);
-      },
-      error: () => this.subiendoFoto.set(false)
-    });
-  }
-
-  eliminarFoto(id: number) {
+  eliminarFoto(id: number, mascotaId: number) {
     Swal.fire({
       icon: 'warning',
-      title: '¿Eliminar esta foto?',
+      title: '¿Eliminar esta imagen?',
       text: 'Esta acción no se puede deshacer',
       showCancelButton: true,
       confirmButtonText: 'Eliminar',
@@ -620,14 +710,15 @@ export class ContactPanelComponent {
       confirmButtonColor: '#dc3545'
     }).then(res => {
       if (!res.isConfirmed) return;
-      this.contactoService.eliminarFoto(id).subscribe(() => {
-        this.fotos.update(list => list.filter(f => f.id !== id));
-      });
+      this.contactoService.eliminarFoto(id).subscribe(() => this.#recargarBitacora(mascotaId));
     });
   }
 
   abrirFoto(url: string) { this.lightboxFotoUrl.set(url); }
   cerrarFoto() { this.lightboxFotoUrl.set(null); }
+
+  /** Color legible del texto del chip (aclara los colores oscuros). */
+  colorTexto = (color?: string | null) => colorEtiquetaTexto(color);
 
   // ── Teléfono principal ────────────────────────────────────────────
 
@@ -720,11 +811,11 @@ export class ContactPanelComponent {
     const c = this.cita();
     if (!conv || !c) return;
     if (!this.fechaCita()) {
-      Swal.fire({ icon: 'warning', title: 'Falta la fecha', text: 'Elegí el día de la cita.', confirmButtonColor: '#235347' });
+      Swal.fire({ icon: 'warning', title: 'Falta la fecha', text: 'Elige el día de la cita.', confirmButtonColor: '#235347' });
       return;
     }
     if (this.slotCita() === null) {
-      Swal.fire({ icon: 'warning', title: 'Falta el horario', text: 'Elegí un horario de la lista.', confirmButtonColor: '#235347' });
+      Swal.fire({ icon: 'warning', title: 'Falta el horario', text: 'Elige un horario de la lista.', confirmButtonColor: '#235347' });
       return;
     }
 

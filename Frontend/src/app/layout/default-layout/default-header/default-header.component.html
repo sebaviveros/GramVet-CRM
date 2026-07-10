@@ -66,14 +66,21 @@
 <ng-template #userDropdown>
   <c-dropdown [popperOptions]="{ placement: 'bottom-start' }" variant="nav-item">
     <button [caret]="false" cDropdownToggle class="py-0 pe-0" aria-label="Open user menu">
-      <c-avatar
-        shape="rounded-1"
-        size="md"
-        [src]="fotoPerfil()"
-        status="success"
-        textColor="primary"
-        alt="User avatar"
-      />
+      @if (fotoPerfil(); as foto) {
+        <c-avatar
+          shape="rounded-circle"
+          size="md"
+          [src]="foto"
+          status="success"
+          textColor="primary"
+          alt="Foto de perfil"
+        />
+      } @else {
+        <!-- Sin foto propia: iniciales, en vez del avatar de ejemplo del template -->
+        <c-avatar shape="rounded-circle" size="md" status="success" class="avatar-iniciales">
+          {{ iniciales() }}
+        </c-avatar>
+      }
     </button>
     <ul cDropdownMenu class="pt-0 w-auto">
       <li>

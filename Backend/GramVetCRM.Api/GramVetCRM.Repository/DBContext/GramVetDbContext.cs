@@ -42,11 +42,11 @@ namespace GramVetCRM.Repository.Context
                 .HasForeignKey(b => b.MascotaId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // MascotaFoto → Mascota
+            // MascotaFoto → MascotaBitacora (la foto cuelga de la anotación)
             modelBuilder.Entity<MascotaFoto>()
-                .HasOne(f => f.Mascota)
+                .HasOne(f => f.Bitacora)
                 .WithMany()
-                .HasForeignKey(f => f.MascotaId)
+                .HasForeignKey(f => f.BitacoraId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Conversacion → Contacto

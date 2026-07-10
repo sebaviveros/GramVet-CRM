@@ -70,6 +70,24 @@ namespace GramVetCRM.Api.Controllers
             return Ok(result);
         }
 
+        // PUT api/Mascota/bitacora/5  (body: { contenido: string|null })
+        [HttpPut("bitacora/{id}")]
+        public async Task<IActionResult> EditarBitacora(int id, [FromBody] EditarBitacoraDto dto)
+        {
+            var usuarioId = GetUsuarioId();
+            if (usuarioId == null) return Unauthorized();
+
+            try
+            {
+                var result = await _bitacoraService.Editar(id, dto, usuarioId.Value);
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+        }
+
         [HttpDelete("bitacora/{id}")]
         public async Task<IActionResult> EliminarBitacora(int id)
         {
@@ -79,17 +97,11 @@ namespace GramVetCRM.Api.Controllers
             return Ok();
         }
 
-        // ── Fotos ─────────────────────────────────────────────────────────
+        // ── Fotos (adjuntas a una anotación de bitácora) ──────────────────
 
-        [HttpGet("{id}/fotos")]
-        public async Task<IActionResult> GetFotos(int id)
-        {
-            var result = await _fotoService.GetByMascota(id);
-            return Ok(result);
-        }
-
-        [HttpPost("{id}/fotos")]
-        public async Task<IActionResult> SubirFoto(int id, IFormFile file, [FromForm] string? descripcion)
+        // POST api/Mascota/bitacora/5/fotos
+        [HttpPost("bitacora/{bitacoraId}/fotos")]
+        public async Task<IActionResult> SubirFoto(int bitacoraId, IFormFile file, [FromForm] string? descripcion)
         {
             if (file == null || file.Length == 0)
                 return BadRequest("Archivo inválido");
@@ -99,7 +111,7 @@ namespace GramVetCRM.Api.Controllers
 
             using var stream = file.OpenReadStream();
             var result = await _fotoService.Subir(
-                id, stream, file.FileName, file.ContentType, descripcion, usuarioId.Value);
+                bitacoraId, stream, file.FileName, file.ContentType, descripcion, usuarioId.Value);
 
             if (result == null) return StatusCode(500, "Error subiendo la foto");
             return Ok(result);

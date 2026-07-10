@@ -571,8 +571,22 @@ c-card {
   &::before { content: '· '; }
 }
 
+/* Editar el TEXTO de la anotación (las imágenes se manejan aparte) */
+.bitacora-edit {
+  margin-left: auto; // empuja los dos botones a la derecha
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  color: #b0c4bc;
+
+  &:hover { color: #6ECFAB; }
+}
+
 .bitacora-remove {
-  margin-left: auto;
+  margin-left: 8px;
   background: none;
   border: none;
   padding: 0;
@@ -584,6 +598,26 @@ c-card {
   &:hover { color: #dc3545; }
 }
 
+.bitacora-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+/* Anotación que hoy es solo imágenes: invita a sumarle texto */
+.bitacora-agregar-texto {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 11px;
+  font-style: italic;
+  color: #8FB3A8;
+
+  &:hover { color: #6ECFAB; text-decoration: underline; }
+}
+
 .bitacora-contenido {
   font-size: 13px;
   color: #E7F2EE;
@@ -592,43 +626,79 @@ c-card {
   word-break: break-word;
 }
 
-/* ===== FOTOS DE MASCOTA ===== */
-.fotos-panel {
-  margin: -2px 0 8px;
-  padding: 10px;
-  background: rgba(110, 207, 171, 0.06);
-  border: 1px solid rgba(110, 207, 171, 0.18);
-  border-radius: 10px;
-}
+/* ===== IMÁGENES DE UNA ANOTACIÓN DE BITÁCORA ===== */
 
-.fotos-add {
+/* Adjuntar imágenes (al crear la anotación y dentro de una ya creada) */
+.bitacora-adjuntar {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 6px;
   border: 1px dashed rgba(110, 207, 171, 0.30);
   border-radius: 20px;
   color: #6ECFAB;
   font-size: 12px;
-  padding: 5px 14px;
+  padding: 5px 12px;
   cursor: pointer;
-  margin-bottom: 10px;
   transition: all 0.15s;
 
   &:hover { background: rgba(110, 207, 171, 0.08); border-color: #235347; }
-  &.subiendo { opacity: 0.6; cursor: default; }
 }
 
-.fotos-loading,
-.fotos-vacia {
-  font-size: 12px;
-  color: #b0c4bc;
+.bitacora-adjuntar--entrada {
+  margin-top: 6px;
+  font-size: 11px;
+  padding: 3px 10px;
+}
+
+.bitacora-add-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.bitacora-hint {
+  margin: 4px 0 0;
+  font-size: 10px;
+  color: #8FB3A8;
   font-style: italic;
-  text-align: center;
-  padding: 4px 0;
+}
+
+/* Chips de los archivos elegidos, antes de guardar la anotación */
+.bitacora-adjuntos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.bitacora-adjunto {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  background: rgba(110, 207, 171, 0.12);
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 10px;
+  color: #B7D2C8;
+  word-break: break-all;
+
+  button {
+    background: none;
+    border: none;
+    color: #9FBFB4;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+
+    &:hover { color: #ff8a8a; }
+  }
 }
 
 .fotos-grid {
+  margin-top: 8px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
@@ -933,18 +1003,36 @@ c-card {
 .cita-mascota-row {
   display: flex;
   gap: 5px;
-  align-items: center;
-  margin-top: 5px;
+  // flex-end: los rótulos suman alto arriba, así el ✕ queda a la altura de los inputs
+  align-items: flex-end;
+  margin-top: 8px;
 }
 
-.cita-mascota-especie {
-  max-width: 90px;
-  flex-shrink: 0;
+/* Cada campo de la mascota con su rótulo encima */
+.cita-mascota-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
 }
 
-.cita-mascota-edad {
-  max-width: 62px;
-  flex-shrink: 0;
+.cita-mascota-campo--especie { flex: 0 0 90px; }
+.cita-mascota-campo--edad    { flex: 0 0 78px; }
+
+.cita-mascota-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #8FB3A8;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+/* Desglose de lo cobrado: una línea por ítem, así que va en textarea */
+.cita-cobros {
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.4;
 }
 
 .cita-mascota-del {
@@ -954,6 +1042,7 @@ c-card {
   font-size: 13px;
   cursor: pointer;
   flex-shrink: 0;
+  padding: 7px 4px; // alinea el ✕ con la altura de los inputs
 
   &:hover { color: #ff8a8a; }
 }

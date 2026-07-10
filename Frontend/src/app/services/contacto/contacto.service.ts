@@ -48,19 +48,21 @@ export interface EditarMascotaDto {
 export interface BitacoraEntradaDto {
   id: number;
   mascotaId: number;
-  contenido: string;
+  contenido?: string;          // opcional: la anotación puede ser solo imágenes
   fecha: string;
   autor?: string;
+  fotos: MascotaFotoDto[];
 }
 
 export interface CrearBitacoraDto {
   mascotaId: number;
-  contenido: string;
+  contenido?: string;
 }
 
+// Las fotos cuelgan de una anotación de bitácora, no de la mascota
 export interface MascotaFotoDto {
   id: number;
-  mascotaId: number;
+  bitacoraId: number;
   url: string;
   descripcion?: string;
 }
@@ -105,21 +107,22 @@ export class ContactoService {
     return this.#http.post<BitacoraEntradaDto>(`${this.#mascotaBase}/bitacora`, dto);
   }
 
+  editarBitacora(id: number, contenido?: string): Observable<BitacoraEntradaDto> {
+    return this.#http.put<BitacoraEntradaDto>(`${this.#mascotaBase}/bitacora/${id}`, { contenido });
+  }
+
   eliminarBitacora(id: number): Observable<void> {
     return this.#http.delete<void>(`${this.#mascotaBase}/bitacora/${id}`);
   }
 
-  // ── Fotos de mascota ───────────────────────────────────────────────
+  // ── Imágenes de una anotación de bitácora ──────────────────────────
+  // No hay `getFotos`: las fotos vienen dentro de cada entrada de la bitácora.
 
-  getFotos(mascotaId: number): Observable<MascotaFotoDto[]> {
-    return this.#http.get<MascotaFotoDto[]>(`${this.#mascotaBase}/${mascotaId}/fotos`);
-  }
-
-  subirFoto(mascotaId: number, file: File, descripcion?: string): Observable<MascotaFotoDto> {
+  subirFotoBitacora(bitacoraId: number, file: File, descripcion?: string): Observable<MascotaFotoDto> {
     const fd = new FormData();
     fd.append('file', file);
     if (descripcion) fd.append('descripcion', descripcion);
-    return this.#http.post<MascotaFotoDto>(`${this.#mascotaBase}/${mascotaId}/fotos`, fd);
+    return this.#http.post<MascotaFotoDto>(`${this.#mascotaBase}/bitacora/${bitacoraId}/fotos`, fd);
   }
 
   eliminarFoto(id: number): Observable<void> {
