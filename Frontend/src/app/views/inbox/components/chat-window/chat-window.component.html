@@ -87,7 +87,7 @@
                [class.sticker-msg]="message.tipoMensaje === 'sticker'">
 
             @if (message.tipoMensaje === 'text' || !message.tipoMensaje) {
-              <span>{{ message.contenido }}</span>
+              <span class="message-text">{{ message.contenido }}</span>
               <span class="message-time">{{ message.fechaEnvio | date:'h:mm a' }}
                 @if (message.direccion === 'outbound' && message.estadoEntrega) {
                   <span class="ticks" [class.read]="message.estadoEntrega === 'read'" [class.failed]="message.estadoEntrega === 'failed'">{{ tickSymbol(message.estadoEntrega) }}</span>
@@ -186,8 +186,11 @@
         @for (r of sugerencias(); track r.id) {
           <div class="quick-reply-item" (click)="seleccionarRespuesta(r)">
             <span class="quick-reply-comando">/{{ r.comando }}</span>
-            <span class="quick-reply-texto">{{ r.texto }}</span>
+            <span class="quick-reply-texto">{{ previewRespuesta(r.texto) }}</span>
           </div>
+        }
+        @if (sugerencias().length === 0) {
+          <div class="quick-reply-empty">Sin respuestas rápidas para ese comando</div>
         }
       </div>
     }
@@ -235,9 +238,14 @@
         </div>
       }
 
-      <input class="form-control" placeholder="Escribir mensaje..." [value]="messageInput()"
-        (input)="messageInput.set($any($event.target).value)" (keyup.enter)="sendMessage()"
-        [disabled]="!!imagenSeleccionada()">
+      <!-- textarea: crece con el texto (respuestas rápidas largas).
+           Enter envía; Shift+Enter inserta salto de línea. -->
+      <textarea #composer class="form-control composer-input" placeholder="Escribir mensaje..."
+        rows="1"
+        [value]="messageInput()"
+        (input)="onComposerInput($event)"
+        (keydown.enter)="onComposerEnter($event)"
+        [disabled]="!!imagenSeleccionada()"></textarea>
 
       <button class="btn btn-primary" (click)="sendMessage()" [disabled]="enviando()">
         {{ enviando() ? 'Enviando...' : 'Enviar' }}

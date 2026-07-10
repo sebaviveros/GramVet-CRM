@@ -51,16 +51,57 @@ c-card {
 }
 
 .name {
-  font-weight: 600;
-  font-size: 16px;
-  color: #E7F2EE;
+  font-size: 13px;
+  color: #9FBFB4;
   margin-bottom: 4px;
 }
 
-.phone {
-  font-size: 13px;
-  color: #9FBFB4;
+/* Teléfono principal, bajo el avatar: click para copiar (mouse o dedo) */
+.phone-principal {
+  position: relative;
+  background: none;
+  border: none;
+  padding: 4px 10px;
   margin-bottom: 2px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover,
+  &:focus-visible { background: rgba(110, 207, 171, 0.10); }
+  &:focus-visible { outline: 1px solid rgba(110, 207, 171, 0.5); }
+
+  &:hover .phone-tooltip,
+  &:focus-visible .phone-tooltip { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.phone-numero {
+  font-weight: 600;
+  font-size: 16px;
+  color: #E7F2EE;
+  letter-spacing: 0.3px;
+}
+
+.phone-tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  transform: translate(-50%, 4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s, transform 0.15s;
+
+  background: #1b1b1b;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  padding: 4px 9px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+
+  // Al copiar se muestra aunque el dedo ya no esté encima (celular)
+  &.copiado { opacity: 1; transform: translate(-50%, 0); color: #6ECFAB; }
 }
 
 .canal, .estado {
@@ -112,6 +153,23 @@ c-card {
   padding: 7px 12px;
   background: #17413A;
   border-radius: 8px;
+}
+
+/* Solo lo ve el veterinario asignado a esta conversación */
+.btn-desasignarme {
+  width: 100%;
+  margin-top: 6px;
+  padding: 7px 12px;
+  border: 1px solid rgba(220, 53, 69, 0.45);
+  border-radius: 8px;
+  background: transparent;
+  color: #ff8b95;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover { background: rgba(220, 53, 69, 0.12); }
 }
 
 /* ===== ETIQUETAS ===== */
@@ -419,11 +477,17 @@ c-card {
   align-items: center;
   justify-content: center;
 
-  &:hover { background: rgba(0,0,0,0.06); color: #235347; }
+  // El contorno va en blanco: el verde oscuro anterior (#235347) se perdía
+  // sobre el fondo gris del panel al hacer hover o dejar el botón activo.
+  &:hover { background: rgba(255,255,255,0.10); color: #fff; }
 
-  &--danger:hover { background: rgba(220,53,69,0.08); color: #dc3545; }
+  &:active,
+  &:focus-visible { background: rgba(255,255,255,0.16); color: #fff; outline: none; }
 
-  &.activo { background: rgba(110,207,171,0.14); color: #235347; }
+  &--danger:hover,
+  &--danger:active { background: rgba(220,53,69,0.18); color: #ff8b95; }
+
+  &.activo { background: rgba(110,207,171,0.18); color: #fff; }
 }
 
 /* ===== BITÁCORA ===== */
@@ -792,6 +856,33 @@ c-card {
   font-weight: 600;
 }
 
+/* Título del evento: autogenerado pero editable a mano */
+.cita-titulo-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.cita-titulo-reset {
+  background: none;
+  border: none;
+  color: #6ECFAB;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+
+  &:hover { text-decoration: underline; }
+}
+
+.cita-titulo-input {
+  font-weight: 600;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.4;
+}
+
 .cita-preview-desc {
   margin: 0;
   white-space: pre-wrap;
@@ -848,6 +939,11 @@ c-card {
 
 .cita-mascota-especie {
   max-width: 90px;
+  flex-shrink: 0;
+}
+
+.cita-mascota-edad {
+  max-width: 62px;
   flex-shrink: 0;
 }
 

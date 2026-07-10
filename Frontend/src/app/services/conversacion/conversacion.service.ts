@@ -58,6 +58,7 @@ export interface SubirImagenResponse {
 export interface MascotaCita {
   nombre: string;
   especie?: string;
+  edadAnios?: string;
   fechaNacimiento?: string;
 }
 
@@ -74,11 +75,11 @@ export interface CitaExtraidaDto {
   totalMinimo?: string;
   observaciones?: string;
   fechaHoraSugerida?: string;
+  fechaSugerida?: string;          // día resuelto por la IA (YYYY-MM-DD)
   ubicacionGps?: string;
   seguroMascota?: boolean;
   seguroNota?: string;
-  estacionamientoVisita?: boolean;
-  estacionamientoNota?: string;
+  indicacionesEstacionamiento?: string;
   mascotas?: MascotaCita[];
   slotSugerido?: number | null;
   tituloEvento: string;

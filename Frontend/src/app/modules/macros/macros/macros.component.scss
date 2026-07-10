@@ -94,6 +94,26 @@
   display: flex;
   gap: 12px;
   margin-bottom: 12px;
+  // flex-start: si no, el campo del comando se estira al alto del textarea
+  align-items: flex-start;
+}
+
+// El texto de la respuesta va DEBAJO del comando, no al lado
+.form-row--stacked {
+  flex-direction: column;
+  align-items: stretch;
+
+  // El comando es corto: no tiene sentido que ocupe todo el ancho
+  .macro-input { align-self: flex-start; width: 220px; }
+}
+
+// Respuestas de varios párrafos: textarea, no input (ver macros.component.html)
+.macro-textarea {
+  flex: 1;
+  min-height: 92px;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
 }
 
 .form-control {
@@ -316,8 +336,15 @@ tbody td {
   vertical-align: middle;
 }
 
+// El texto puede tener varios párrafos: se recorta a 2 líneas en la tabla.
 .td-text {
   color: #555;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: pre-wrap;
+  max-width: 520px;
 }
 
 .td-actions {

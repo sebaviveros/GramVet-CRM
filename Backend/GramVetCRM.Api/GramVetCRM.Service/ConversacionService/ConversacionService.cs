@@ -63,13 +63,25 @@ namespace GramVetCRM.Service
             return dtos;
         }
 
-        public async Task<ConversacionDto> AsignarUsuario(int conversacionId, int? usuarioAsignadoId, int actorUsuarioId)
+        public async Task<ConversacionDto> AsignarUsuario(int conversacionId, int? usuarioAsignadoId, int actorUsuarioId, bool esStaff)
         {
             var conversacion = await _conversacionRepo.GetById(conversacionId)
                 ?? throw new Exception($"Conversación {conversacionId} no encontrada");
 
             // Guardar el veterinario anterior antes de reasignar
             var asignadoAnterior = conversacion.UsuarioAsignadoId;
+
+            // Un veterinario NO puede asignar a nadie: solo quitarse a sí mismo.
+            // Va acá y no en el controller para no saltarse la capa de servicio
+            // (el controller no tiene acceso al repositorio para verificar quién
+            // está asignado hoy).
+            if (!esStaff)
+            {
+                var seDesasignaASiMismo = usuarioAsignadoId is null && asignadoAnterior == actorUsuarioId;
+                if (!seDesasignaASiMismo)
+                    throw new UnauthorizedAccessException(
+                        "Un veterinario solo puede desasignarse a sí mismo de una conversación.");
+            }
 
             conversacion.UsuarioAsignadoId = usuarioAsignadoId;
             conversacion.Userup = actorUsuarioId.ToString();

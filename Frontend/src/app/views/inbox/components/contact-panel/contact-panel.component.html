@@ -12,11 +12,20 @@
 
       <!-- ===== DATOS DEL CONTACTO ===== -->
       @if (!editandoContacto()) {
+        <button class="phone-principal" type="button"
+                (click)="copiarTelefono()"
+                [title]="telefonoCopiado() ? 'Copiado' : 'Copiar teléfono'">
+          <span class="phone-numero">{{ telefonoMostrado() }}</span>
+          <span class="phone-tooltip" [class.copiado]="telefonoCopiado()">
+            {{ telefonoCopiado() ? '✓ Copiado' : 'Copiar' }}
+          </span>
+        </button>
+
         <div class="name">
+          <span class="campo-label">Nombre Cliente:</span>
           {{ contacto()?.nombre ?? state.selectedConversation()?.nombreContacto }}
           {{ contacto()?.apellido ?? state.selectedConversation()?.apellidoContacto }}
         </div>
-        <div class="phone"><span class="campo-label">Teléfono:</span> {{ state.selectedConversation()?.telefono }}</div>
         @if (contacto()?.email) {
           <div class="email"><span class="campo-label">Email:</span> {{ contacto()?.email }}</div>
         }
@@ -131,11 +140,10 @@
                   (change)="actualizarCita('seguroMascota', $any($event.target).checked)" />
                 Involucra seguro de mascota
               </label>
-              <label class="cita-check">
-                <input type="checkbox" [checked]="cita()?.estacionamientoVisita"
-                  (change)="actualizarCita('estacionamientoVisita', $any($event.target).checked)" />
-                Condominio con estacionamiento de visita
-              </label>
+              <label class="cita-label">Indicaciones de estacionamiento</label>
+              <input class="edit-input" placeholder="Ej. se puede estacionar en la acera"
+                [value]="cita()?.indicacionesEstacionamiento ?? ''"
+                (input)="actualizarCita('indicacionesEstacionamiento', $any($event.target).value)" />
 
               <!-- Mascotas NUEVAS (las ya registradas se ven arriba y no se duplican) -->
               <div class="cita-mascotas-head">
@@ -154,12 +162,15 @@
                     <option value="gato">Gato</option>
                     <option value="otro">Otro</option>
                   </select>
+                  <input class="edit-input cita-mascota-edad" type="number" min="0" max="40" placeholder="Edad"
+                    [value]="m.edadAnios ?? ''" (input)="actualizarMascotaCita($index, 'edadAnios', $any($event.target).value)" />
                   <button class="cita-mascota-del" type="button" title="Quitar" (click)="quitarMascotaCita($index)">✕</button>
                 </div>
-                @if (m.nombre?.trim()) {
+                @if (m.nombre?.trim() || m.especie?.trim()) {
                   <div class="cita-mascota-status">
                     <span class="cita-mascota-badge" [class.reg]="mascotaEstado(m) === 'registrada'">
-                      {{ mascotaEstado(m) === 'registrada' ? 'ya registrada' : 'se creará' }}
+                      {{ mascotaEstado(m) === 'registrada' ? 'ya registrada'
+                         : (m.nombre?.trim() ? 'se creará' : 'se creará como "Sin nombre"') }}
                     </span>
                     @if (mascotaSimilar(m)) {
                       <span class="cita-mascota-warn">⚠ parecida a "{{ mascotaSimilar(m) }}" — ¿es la misma?</span>
@@ -191,8 +202,18 @@
 
               <div class="cita-sep">Evento del calendario (vista previa en vivo)</div>
 
-              <label class="cita-label">Título</label>
-              <div class="cita-preview cita-preview-title">{{ tituloPreview() }}</div>
+              <div class="cita-titulo-head">
+                <label class="cita-label" style="margin:0">Título</label>
+                @if (tituloEditado()) {
+                  <button class="cita-titulo-reset" type="button" (click)="restaurarTitulo()">
+                    ↺ Volver al automático
+                  </button>
+                }
+              </div>
+              <!-- Se autogenera desde los campos, pero el secretario puede escribirlo a mano -->
+              <textarea class="edit-input cita-titulo-input" rows="2"
+                [value]="tituloPreview()"
+                (input)="editarTitulo($any($event.target).value)"></textarea>
 
               <label class="cita-label">Descripción</label>
               <pre class="cita-preview cita-preview-desc">{{ descripcionPreview() }}</pre>
@@ -211,18 +232,27 @@
       <div class="asignar-section">
         <div class="section-title">Veterinario asignado</div>
         @if (puedeAsignar) {
-          <select class="vet-select"
-                  [value]="state.selectedConversation()?.usuarioAsignadoId ?? ''"
-                  (change)="asignarVeterinario($event)">
-            <option value="">Sin asignar</option>
+          <!-- El valor va en cada <option> con [selected], no en el <select>:
+               los option llegan async (getVeterinarios) y el navegador descarta
+               un value seteado antes de que existan, dejando "Sin asignar". -->
+          <select class="vet-select" (change)="asignarVeterinario($event)">
+            <option value="" [selected]="vetAsignadoId() === null">Sin asignar</option>
             @for (vet of veterinarios(); track vet.id) {
-              <option [value]="vet.id">{{ vet.nombre }} {{ vet.apellido }}</option>
+              <option [value]="vet.id" [selected]="vet.id === vetAsignadoId()">
+                {{ vet.nombre }} {{ vet.apellido }}
+              </option>
             }
           </select>
         } @else {
           <div class="vet-readonly">
             {{ state.selectedConversation()?.usuarioAsignado ?? 'Sin asignar' }}
           </div>
+          <!-- El veterinario no puede asignar a otro, pero sí quitarse él mismo -->
+          @if (puedeDesasignarse()) {
+            <button class="btn-desasignarme" type="button" (click)="desasignarme()">
+              Desasignarme de este cliente
+            </button>
+          }
         }
       </div>
 

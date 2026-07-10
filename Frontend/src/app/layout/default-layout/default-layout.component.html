@@ -12,12 +12,15 @@
     <c-sidebar-nav [navItems]="navItems" dropdownMode="close" compact />
   </ng-scrollbar>
 
+  <!-- Botón que colapsa el menú lateral a una franja angosta.
+       Oculto por pedido del cliente; se deja comentado por si se reactiva.
   @if (!sidebar1.narrow) {
   <c-sidebar-footer cSidebarToggle="sidebar1" class="d-none d-lg-flex"
     toggle="unfoldable" style="cursor: pointer;">
     <button cSidebarToggler aria-label="Toggle sidebar fold"></button>
   </c-sidebar-footer>
   }
+  -->
 
 </c-sidebar>
 

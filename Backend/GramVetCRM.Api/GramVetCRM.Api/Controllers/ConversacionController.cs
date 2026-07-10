@@ -53,15 +53,22 @@ namespace GramVetCRM.Api.Controllers
             var usuarioIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var rolNombre = User.FindFirst("rolNombre")?.Value ?? "";
 
-            // Solo Admin y Secretario pueden asignar
-            var rolLower = rolNombre.ToLower();
-            if (!rolLower.Contains("admin") && !rolLower.Contains("secretario"))
-                return Forbid();
-
             if (usuarioIdClaim == null) return Unauthorized();
 
-            var result = await _service.AsignarUsuario(id, dto.UsuarioAsignadoId, int.Parse(usuarioIdClaim));
-            return Ok(result);
+            // Admin y Secretario asignan a cualquiera. El veterinario solo puede
+            // desasignarse a sí mismo; el servicio valida ese caso puntual.
+            var rolLower = rolNombre.ToLower();
+            var esStaff = rolLower.Contains("admin") || rolLower.Contains("secretario");
+
+            try
+            {
+                var result = await _service.AsignarUsuario(id, dto.UsuarioAsignadoId, int.Parse(usuarioIdClaim), esStaff);
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
         }
 
         // GET api/Conversacion/5/mensajes?page=1&pageSize=15

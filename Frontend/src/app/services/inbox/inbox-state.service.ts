@@ -244,6 +244,17 @@ export class InboxStateService {
     }
   }
 
+  /** Al completar el perfil (ej. al agendar con IA) el nombre cambia en la lista. */
+  setNombreContacto(conversacionId: number, nombreContacto: string, apellidoContacto?: string) {
+    this._conversations.update(convs =>
+      convs.map(c =>
+        c.id === conversacionId
+          ? { ...c, nombreContacto, apellidoContacto }
+          : c
+      )
+    );
+  }
+
   setAssignedVet(conversacionId: number, usuarioAsignadoId: number | null, usuarioAsignado?: string) {
     this._conversations.update(convs =>
       convs.map(c =>

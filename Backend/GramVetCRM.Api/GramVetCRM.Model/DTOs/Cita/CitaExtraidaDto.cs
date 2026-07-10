@@ -19,13 +19,13 @@ namespace GramVetCRM.Model.DTOs.Cita
         public string? TotalMinimo { get; set; }        // ej. "$25.000"
         public string? Observaciones { get; set; }
         public string? FechaHoraSugerida { get; set; }  // texto libre, ej. "viernes 1-3 pm"
+        public string? FechaSugerida { get; set; }      // día resuelto por la IA, formato YYYY-MM-DD
 
         // Datos extra que pide el secretario
         public string? UbicacionGps { get; set; }            // link/coords de Google Maps
         public bool SeguroMascota { get; set; }              // ¿la atención involucra seguro?
         public string? SeguroNota { get; set; }
-        public bool EstacionamientoVisita { get; set; }      // condominio con estacionamiento de visita
-        public string? EstacionamientoNota { get; set; }
+        public string? IndicacionesEstacionamiento { get; set; }  // texto libre (antes era un checkbox)
 
         // Mascotas detectadas en la conversación (se crean al confirmar)
         public List<MascotaCitaDto> Mascotas { get; set; } = new();
@@ -41,11 +41,12 @@ namespace GramVetCRM.Model.DTOs.Cita
         public bool Simulada { get; set; }
     }
 
-    // Mascota detectada/ingresada al agendar (edad opcional)
+    // Mascota detectada/ingresada al agendar (nombre y edad opcionales)
     public class MascotaCitaDto
     {
         public string Nombre { get; set; } = "";
         public string? Especie { get; set; }            // "perro" | "gato" | otro
+        public string? EdadAnios { get; set; }          // ej. "2" (la IA solo extrae años enteros)
         public string? FechaNacimiento { get; set; }    // opcional (no siempre se sabe la edad)
     }
 }

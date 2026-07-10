@@ -40,6 +40,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
 
   captchaToken = signal<string | null>(null);
   enviando = signal(false);
+  verPassword = signal(false);
 
   #widgetId: string | null = null;
   #esperandoScript: number | null = null;

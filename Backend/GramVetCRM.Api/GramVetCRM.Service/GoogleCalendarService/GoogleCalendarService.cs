@@ -19,6 +19,17 @@ namespace GramVetCRM.Service
             _logger = logger;
         }
 
+        /// <summary>
+        /// Citas para hoy o mañana: sin colorId, o sea el color por defecto del
+        /// calendario (el verde que la veterinaria ya usa). De pasado mañana en
+        /// adelante: "7" = Peacock, el celeste de la paleta fija de Google.
+        /// </summary>
+        private static string? ColorSegunCercania(DateTime inicio)
+        {
+            var diasHasta = (inicio.Date - DateTime.Today).Days;
+            return diasHasta <= 1 ? null : "7";
+        }
+
         public async Task<CitaCreadaDto> CrearEvento(
             string titulo, string descripcion, string? ubicacion, DateTime inicio, DateTime fin)
         {
@@ -63,6 +74,7 @@ namespace GramVetCRM.Service
                 Summary = titulo,
                 Description = descripcion,
                 Location = ubicacion,
+                ColorId = ColorSegunCercania(inicio),
                 Start = new EventDateTime
                 {
                     DateTimeDateTimeOffset = new DateTimeOffset(inicio, TimeZoneInfo.Local.GetUtcOffset(inicio)),

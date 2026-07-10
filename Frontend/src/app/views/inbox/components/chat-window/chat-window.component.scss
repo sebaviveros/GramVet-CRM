@@ -1,7 +1,7 @@
 :host {
   display: block;
   height: 100%;
-  overflow: hidden;
+  // Sin overflow: recortaba la box-shadow del card (ver conversations.component.scss).
 }
 
 c-card {
@@ -254,6 +254,15 @@ c-card-footer {
   color: #E7F2EE;
 }
 
+/* Composer: textarea que crece con el texto (auto-resize desde el componente) */
+.composer-input {
+  resize: none;
+  overflow-y: auto;
+  max-height: 140px;
+  line-height: 1.45;
+  font-family: inherit;
+}
+
 .form-control::placeholder { color: #6E9387; }
 
 .form-control:focus {
@@ -291,6 +300,13 @@ c-card-footer {
 
     .message-time { color: rgba(255,255,255,0.55); }
   }
+}
+
+/* Las respuestas rápidas tienen varios párrafos: hay que respetar los saltos.
+   Va en el texto y no en `.message` (que es flex) para no renderizar la
+   indentación del template como espacios. */
+.message-text {
+  white-space: pre-wrap;
 }
 
 .message-time {
@@ -607,6 +623,7 @@ video {
 
   &:last-child { border-bottom: none; }
   &:hover { background: rgba(110, 207, 171, 0.08); }
+  min-width: 0;
 }
 
 .quick-reply-comando {
@@ -626,6 +643,14 @@ video {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0; // sin esto el flex item no se encoge y desborda el panel
+}
+
+.quick-reply-empty {
+  padding: 10px 12px;
+  font-size: 12px;
+  color: #8FA9A0;
+  font-style: italic;
 }
 
 /* ===== SCROLL INFINITO ===== */

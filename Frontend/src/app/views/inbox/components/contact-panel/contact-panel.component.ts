@@ -59,7 +59,7 @@ export class ContactPanelComponent {
   creandoCita = signal(false);
 
   // Título y descripción del evento, generados EN VIVO a partir de los campos editables.
-  tituloPreview = computed(() => {
+  tituloAuto = computed(() => {
     const c = this.cita();
     if (!c) return '';
     const partes: string[] = [];
@@ -72,18 +72,39 @@ export class ContactPanelComponent {
     return partes.join(' ').trim();
   });
 
+  // Si el secretario edita el título a mano, su texto manda y deja de regenerarse.
+  tituloManual = signal<string | null>(null);
+  tituloPreview = computed(() => this.tituloManual() ?? this.tituloAuto());
+  tituloEditado = computed(() => this.tituloManual() !== null);
+
+  editarTitulo(valor: string) { this.tituloManual.set(valor); }
+  restaurarTitulo() { this.tituloManual.set(null); }
+
+  // Una línea en blanco entre cada campo (pedido del cliente).
+  // Mantener alineado con ArmarTituloYDescripcion del backend.
   descripcionPreview = computed(() => {
     const c = this.cita();
     if (!c) return '';
-    return [
+
+    // Las secciones fijas van siempre, aunque estén vacías: es el formato que la
+    // veterinaria lee. Las dos opcionales solo aparecen cuando hay algo que decir.
+    const lineas = [
       `Paciente(s): ${this.pacientesAuto()}`,
       `Cliente solicitó: ${c.clienteSolicito ?? ''}`,
-      `Se cobró: ${c.cobros ?? ''}`,
+      `Desglose de lo cobrado: ${c.cobros ?? ''}`,
       `Total mínimo a cobrar: ${c.totalMinimo ?? ''}`,
-      `Referencias para encontrar el domicilio: ${c.referenciasDireccion ?? ''}`,
-      `Observaciones: ${c.observaciones ?? ''}`,
-      `Correo: ${c.correo ?? ''}`
-    ].join('\n');
+      `Referencias para encontrar el domicilio: ${c.referenciasDireccion ?? ''}`
+    ];
+
+    if (c.indicacionesEstacionamiento?.trim())
+      lineas.push(`Indicaciones de estacionamiento: ${c.indicacionesEstacionamiento.trim()}`);
+
+    if (c.seguroMascota) lineas.push('Seguro de mascota: Sí');
+
+    lineas.push(`Observaciones: ${c.observaciones ?? ''}`);
+    lineas.push(`Correo: ${c.correo ?? ''}`);
+
+    return lineas.join('\n\n');
   });
 
   // Hora real para el título: la del slot elegido (sin la aclaración del paréntesis),
@@ -101,23 +122,41 @@ export class ContactPanelComponent {
   }
 
   // Texto "Pacientes" auto-generado desde la lista estructurada de mascotas.
-  // Ej: "1 gato (roberto), 2 perros (marcelo, luna)". Si no hay lista, usa el texto de la IA.
+  // Ej: "1 gato (roberto)", "2 perros (marcelo, luna)", "1 perro de 2 años" (sin nombre).
+  // Si no hay lista, usa el texto libre de la IA.
   pacientesAuto(): string {
-    const ms = (this.cita()?.mascotas ?? []).filter(m => m.nombre?.trim());
+    // Una mascota puede venir sin nombre ("mi perro de 2 años"): basta con la especie.
+    const ms = (this.cita()?.mascotas ?? []).filter(m => m.nombre?.trim() || m.especie?.trim());
     if (ms.length === 0) return this.cita()?.pacientes?.trim() ?? '';
-    const grupos = new Map<string, string[]>();
+
+    const grupos = new Map<string, MascotaCita[]>();
     for (const m of ms) {
       const esp = (m.especie?.trim() || 'mascota').toLowerCase();
       if (!grupos.has(esp)) grupos.set(esp, []);
-      grupos.get(esp)!.push(m.nombre!.trim());
+      grupos.get(esp)!.push(m);
     }
+
     const partes: string[] = [];
-    for (const [esp, nombres] of grupos) {
-      const n = nombres.length;
+    for (const [esp, lista] of grupos) {
+      const n = lista.length;
       const label = n === 1 ? esp : esp + 's';
-      partes.push(`${n} ${label} (${nombres.join(', ')})`);
+      const hayNombres = lista.some(m => m.nombre?.trim());
+      const detalles = lista.map(m => this.detalleMascota(m)).filter(d => d);
+
+      if (detalles.length === 0) partes.push(`${n} ${label}`);
+      // Con nombre van entre paréntesis ("1 gato (roberto)"); si solo hay edad,
+      // se lee mejor corrido ("1 perro de 2 años").
+      else if (hayNombres) partes.push(`${n} ${label} (${detalles.join(', ')})`);
+      else partes.push(`${n} ${label} ${detalles.join(', ')}`);
     }
     return partes.join(', ');
+  }
+
+  private detalleMascota(m: MascotaCita): string {
+    const nombre = m.nombre?.trim() ?? '';
+    const anios = Number(m.edadAnios?.trim());
+    const edad = anios > 0 ? `de ${anios} ${anios === 1 ? 'año' : 'años'}` : '';
+    return [nombre, edad].filter(x => x).join(' ');
   }
 
   // Estado de una mascota de la cita: 'registrada' (coincide exacto con una del cliente) o 'nueva'.
@@ -242,6 +281,7 @@ export class ContactPanelComponent {
         this.fechaCita.set('');
         this.slotCita.set(null);
         this.creandoCita.set(false);
+        this.tituloManual.set(null);
       } else {
         this.etiquetasContacto.set([]);
         this.contacto.set(null);
@@ -420,6 +460,38 @@ export class ContactPanelComponent {
 
   // ── Asignación de veterinario ─────────────────────────────────────
 
+  /** Id del veterinario asignado a la conversación abierta (null = sin asignar). */
+  vetAsignadoId = computed(() => this.state.selectedConversation()?.usuarioAsignadoId ?? null);
+
+  /** Un veterinario puede quitarse a sí mismo, pero nunca asignar a otro. */
+  puedeDesasignarse = computed(() =>
+    !this.puedeAsignar && this.vetAsignadoId() !== null && this.vetAsignadoId() === this.auth.getUserId());
+
+  desasignarme() {
+    const conv = this.state.selectedConversation();
+    if (!conv) return;
+
+    Swal.fire({
+      icon: 'question',
+      title: 'Desasignarme',
+      text: '¿Quitarte esta conversación? Dejará de aparecer en tu buzón.',
+      showCancelButton: true,
+      confirmButtonText: 'Desasignarme',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#235347'
+    }).then(res => {
+      if (!res.isConfirmed) return;
+      this.conversacionService.asignarUsuario(conv.id, null).subscribe({
+        next: actualizada => {
+          this.state.setAssignedVet(conv.id, actualizada.usuarioAsignadoId ?? null, actualizada.usuarioAsignado);
+        },
+        error: () => {
+          Swal.fire({ icon: 'error', title: 'No se pudo desasignar', confirmButtonColor: '#235347' });
+        }
+      });
+    });
+  }
+
   asignarVeterinario(event: Event) {
     const conv = this.state.selectedConversation();
     if (!conv) return;
@@ -557,6 +629,30 @@ export class ContactPanelComponent {
   abrirFoto(url: string) { this.lightboxFotoUrl.set(url); }
   cerrarFoto() { this.lightboxFotoUrl.set(null); }
 
+  // ── Teléfono principal ────────────────────────────────────────────
+
+  telefonoCopiado = signal(false);
+
+  /**
+   * Los contactos de Messenger/Instagram guardan el PSID en `Telefono` con
+   * prefijo `FB:`/`IG:`. A esos NO se les antepone `+`, no son teléfonos.
+   */
+  telefonoMostrado = computed(() => {
+    const tel = this.state.selectedConversation()?.telefono ?? '';
+    if (!tel) return '';
+    const esRedSocial = tel.startsWith('FB:') || tel.startsWith('IG:');
+    return esRedSocial ? tel : `+${tel}`;
+  });
+
+  copiarTelefono() {
+    const tel = this.telefonoMostrado();
+    if (!tel) return;
+    navigator.clipboard.writeText(tel).then(() => {
+      this.telefonoCopiado.set(true);
+      setTimeout(() => this.telefonoCopiado.set(false), 1500);
+    });
+  }
+
   // ── Agendar cita (IA) ─────────────────────────────────────────────
 
   extraerCitaIa() {
@@ -572,7 +668,10 @@ export class ContactPanelComponent {
         // Se muestran todas las mascotas detectadas por la IA; cada fila se marca
         // como "nueva" o "ya registrada" (las registradas no se duplican al crear).
         this.cita.set(c);
+        this.tituloManual.set(null);
         if (c.slotSugerido !== null && c.slotSugerido !== undefined) this.slotCita.set(c.slotSugerido);
+        // La IA resuelve "mañana" contra la fecha de hoy: precarga el date picker.
+        if (c.fechaSugerida?.trim()) this.fechaCita.set(c.fechaSugerida.trim());
         this.cargandoCita.set(false);
         this.loader.hide();
       },
@@ -636,7 +735,9 @@ export class ContactPanelComponent {
       tituloEvento: this.tituloPreview(),
       descripcionEvento: this.descripcionPreview(),
       ubicacion: c.ubicacionGps?.trim() || c.direccion?.trim() || undefined,
-      mascotas: (c.mascotas ?? []).filter(m => m.nombre?.trim()),
+      // Una mascota sin nombre es válida ("mi perro de 2 años"): el backend la
+      // guarda como "Sin nombre". Solo se descartan las filas totalmente vacías.
+      mascotas: (c.mascotas ?? []).filter(m => m.nombre?.trim() || m.especie?.trim() || m.edadAnios?.trim()),
       nombreCliente: c.nombreCliente?.trim() || undefined,
       direccion: c.direccion?.trim() || undefined,
       referenciasDireccion: c.referenciasDireccion?.trim() || undefined,
@@ -648,6 +749,16 @@ export class ContactPanelComponent {
       next: r => {
         this.creandoCita.set(false);
         this.cita.set(null);
+
+        // El backend pudo crear mascotas y completar campos vacíos del perfil.
+        // Sin esto el panel sigue mostrando los datos viejos hasta cambiar de
+        // conversación y volver. El nombre además vive en la lista del buzón.
+        this.contactoService.getById(conv.contactoId).subscribe(c => {
+          this.contacto.set(c);
+          this.state.setNombreContacto(conv.id, c.nombre, c.apellido ?? undefined);
+        });
+        this.cargarMascotas(conv.contactoId);
+
         const cuando = new Date(r.inicio).toLocaleString('es-CL');
         Swal.fire({
           icon: 'success',

@@ -48,6 +48,9 @@
   height: 100%;
   object-fit: contain;
   display: block;
+  // El SVG trae sus colores: se aclara con un filtro para que destaque sobre
+  // el verde del sidebar, sin tener que editar el archivo.
+  filter: brightness(1.5);
 }
 
 .right-toolbar {

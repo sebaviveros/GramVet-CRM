@@ -103,17 +103,17 @@ namespace GramVetCRM.Service
             var vistas = new HashSet<string>();
             foreach (var m in dto.Mascotas ?? new List<MascotaCitaDto>())
             {
+                // El cliente puede mencionar la mascota sin nombrarla ("mi perro de 2 años").
+                // `Mascota.Nombre` es NOT NULL, así que se guarda con un placeholder que el
+                // secretario puede editar después. El dedup por nombre sigue funcionando.
                 var nombre = m.Nombre?.Trim();
-                if (string.IsNullOrEmpty(nombre)) continue;
+                if (string.IsNullOrEmpty(nombre)) nombre = "Sin nombre";
 
                 var clave = nombre.ToLowerInvariant();
                 if (nombresExistentes.Contains(clave) || !vistas.Add(clave))
                     continue; // ya existe en el cliente, o repetida en este request
 
-                DateTime? fechaNac = null;
-                if (!string.IsNullOrWhiteSpace(m.FechaNacimiento) &&
-                    DateTime.TryParse(m.FechaNacimiento, out var fn))
-                    fechaNac = fn;
+                var fechaNac = ResolverFechaNacimiento(m);
 
                 await _mascotaRepo.Add(new Mascota
                 {
@@ -258,6 +258,23 @@ namespace GramVetCRM.Service
             return dto;
         }
 
+        /// <summary>
+        /// Fecha de nacimiento de una mascota nueva. Si viene una fecha explícita se usa;
+        /// si solo se sabe la edad ("2 años"), se guarda hoy − N años. Es una fecha
+        /// aproximada, pero envejece sola y respeta el esquema (no hay columna de edad).
+        /// </summary>
+        private static DateTime? ResolverFechaNacimiento(MascotaCitaDto m)
+        {
+            if (!string.IsNullOrWhiteSpace(m.FechaNacimiento) &&
+                DateTime.TryParse(m.FechaNacimiento, out var fn))
+                return fn;
+
+            if (int.TryParse(m.EdadAnios?.Trim(), out var anios) && anios > 0 && anios <= 40)
+                return DateTime.Today.AddYears(-anios);
+
+            return null;
+        }
+
         // ── Armado del título y descripción en el formato del cliente ────────────
         private static void ArmarTituloYDescripcion(CitaExtraidaDto dto)
         {
@@ -273,16 +290,29 @@ namespace GramVetCRM.Service
 
             dto.TituloEvento = string.Join(" ", partesTitulo.Concat(resto)).Trim();
 
-            // Descripción: secciones fijas, en orden
-            var sb = new StringBuilder();
-            sb.AppendLine($"Paciente(s): {dto.Pacientes}");
-            sb.AppendLine($"Cliente solicitó: {dto.ClienteSolicito}");
-            sb.AppendLine($"Se cobró: {dto.Cobros}");
-            sb.AppendLine($"Total mínimo a cobrar: {dto.TotalMinimo}");
-            sb.AppendLine($"Referencias para encontrar el domicilio: {dto.ReferenciasDireccion}");
-            sb.AppendLine($"Observaciones: {dto.Observaciones}");
-            sb.Append($"Correo: {dto.Correo}");
-            dto.DescripcionEvento = sb.ToString();
+            // Descripción: secciones fijas en orden, separadas por una línea en blanco.
+            // Las secciones fijas van siempre (aunque estén vacías): es el formato que la
+            // veterinaria lee. Las opcionales solo aparecen cuando hay algo que decir.
+            // Mantener alineado con `descripcionPreview` del contact-panel (front).
+            var lineas = new List<string>
+            {
+                $"Paciente(s): {dto.Pacientes}",
+                $"Cliente solicitó: {dto.ClienteSolicito}",
+                $"Desglose de lo cobrado: {dto.Cobros}",
+                $"Total mínimo a cobrar: {dto.TotalMinimo}",
+                $"Referencias para encontrar el domicilio: {dto.ReferenciasDireccion}"
+            };
+
+            if (!string.IsNullOrWhiteSpace(dto.IndicacionesEstacionamiento))
+                lineas.Add($"Indicaciones de estacionamiento: {dto.IndicacionesEstacionamiento.Trim()}");
+
+            if (dto.SeguroMascota)
+                lineas.Add("Seguro de mascota: Sí");
+
+            lineas.Add($"Observaciones: {dto.Observaciones}");
+            lineas.Add($"Correo: {dto.Correo}");
+
+            dto.DescripcionEvento = string.Join("\n\n", lineas);
         }
 
         private static string FormatearTelefono(string telefono)
@@ -295,6 +325,14 @@ namespace GramVetCRM.Service
         private static string ConstruirTranscript(Contacto? contacto, List<Mascota> mascotas, List<Mensaje> mensajes)
         {
             var sb = new StringBuilder();
+
+            // La IA no sabe qué día es hoy: sin esto no puede resolver "mañana"
+            // ni un día de la semana a una fecha concreta.
+            var hoy = DateTime.Now;
+            var diaSemana = hoy.ToString("dddd", new System.Globalization.CultureInfo("es-CL"));
+            sb.AppendLine($"HOY ES: {diaSemana} {hoy:yyyy-MM-dd}");
+            sb.AppendLine();
+
             sb.AppendLine("DATOS DEL CONTACTO:");
             sb.AppendLine($"- Nombre: {contacto?.Nombre} {contacto?.Apellido}".TrimEnd());
             sb.AppendLine($"- Teléfono: {contacto?.Telefono}");
@@ -322,15 +360,35 @@ namespace GramVetCRM.Service
             "Eres un asistente de una veterinaria a domicilio en Chile. A partir de la conversación " +
             "con un cliente, extrae los datos para agendar una visita. Completa cada campo solo con " +
             "información presente en la conversación o en los datos del contacto. Si un dato no aparece, " +
-            "déjalo como string vacío (o false en los booleanos, o lista vacía); NO inventes datos. " +
-            "Para 'fechaHoraSugerida' usa el rango horario o día que el cliente haya mencionado " +
-            "(ej. '1 - 3', 'viernes en la tarde'). Para 'cobros' y 'totalMinimo' usa montos en pesos " +
-            "chilenos si se mencionan. Para 'mascotas' lista cada mascota mencionada con su nombre y " +
-            "especie ('perro' o 'gato'); si no se menciona el nombre o la especie, deja ese campo vacío. " +
+            "déjalo como string vacío (o false en los booleanos, o lista vacía); NO inventes datos.\n\n" +
+
+            "'clienteSolicito' es el SERVICIO que el cliente pidió, NUNCA su nombre. " +
+            "Ej: 'Vacunación: Vacuna Séxtuple + Vacuna Antirrábica', 'Consulta médica', 'Eutanasia'. " +
+            "Si no queda claro qué servicio pidió, déjalo vacío.\n\n" +
+
+            "'observaciones' es SOLO para notas especiales que no entren en ningún otro campo " +
+            "(ej. 'el perro es agresivo', 'tocar el timbre del depto 3', 'el cliente pidió boleta'). " +
+            "NO repitas acá el servicio contratado (eso va en 'clienteSolicito'), ni las referencias " +
+            "de la dirección, ni las indicaciones de estacionamiento. Si no hay una nota especial, " +
+            "deja 'observaciones' VACÍO. Es normal y esperable que quede vacío.\n\n" +
+
+            "'fechaHoraSugerida' es el rango horario que el cliente aceptó (ej. '4 - 6', '1 - 3'). " +
+            "'fechaSugerida' es el DÍA de la visita en formato YYYY-MM-DD, resuelto contra la fecha de " +
+            "hoy que aparece al inicio del mensaje. Si el cliente dice 'mañana', suma un día a hoy; si " +
+            "dice un día de la semana, usa la próxima ocurrencia futura de ese día. Si no se acordó un " +
+            "día, deja 'fechaSugerida' vacío.\n\n" +
+
+            "Para 'cobros' y 'totalMinimo' usa montos en pesos chilenos si se mencionan. " +
+            "Para 'mascotas' lista cada mascota mencionada con su nombre, especie ('perro' o 'gato') y " +
+            "edad. Si no se menciona el nombre, la especie o la edad, deja ESE campo vacío (una mascota " +
+            "sin nombre es válida). 'edadAnios' es la edad en años como número entero en texto " +
+            "(ej. un perro de 2 años -> '2'); si el cliente da meses o no la menciona, déjalo vacío.\n\n" +
+
             "'ubicacionGps' es un link de Google Maps o coordenadas si el cliente compartió ubicación. " +
             "'seguroMascota' = true solo si menciona que la atención involucra un seguro de mascota. " +
-            "'estacionamientoVisita' = true solo si menciona que vive en condominio con estacionamiento " +
-            "de visita. Responde en español.";
+            "'indicacionesEstacionamiento' es lo que el cliente diga sobre dónde estacionar " +
+            "(ej. 'se puede estacionar en la acera', 'condominio con estacionamiento de visita'); " +
+            "vacío si no lo menciona. Responde en español.";
 
         // Schema de salida: los campos que la IA debe devolver.
         // additionalProperties:false y required en todos (requisito de structured outputs).
@@ -351,9 +409,10 @@ namespace GramVetCRM.Service
                 totalMinimo = new { type = "string" },
                 observaciones = new { type = "string" },
                 fechaHoraSugerida = new { type = "string" },
+                fechaSugerida = new { type = "string" },
                 ubicacionGps = new { type = "string" },
                 seguroMascota = new { type = "boolean" },
-                estacionamientoVisita = new { type = "boolean" },
+                indicacionesEstacionamiento = new { type = "string" },
                 mascotas = new
                 {
                     type = "array",
@@ -363,9 +422,10 @@ namespace GramVetCRM.Service
                         properties = new
                         {
                             nombre = new { type = "string" },
-                            especie = new { type = "string" }
+                            especie = new { type = "string" },
+                            edadAnios = new { type = "string" }
                         },
-                        required = new[] { "nombre", "especie" },
+                        required = new[] { "nombre", "especie", "edadAnios" },
                         additionalProperties = false
                     }
                 }
@@ -374,8 +434,8 @@ namespace GramVetCRM.Service
             {
                 "nombreCliente", "telefono", "direccion", "comunaSector", "referenciasDireccion",
                 "correo", "pacientes", "clienteSolicito", "cobros", "totalMinimo",
-                "observaciones", "fechaHoraSugerida", "ubicacionGps", "seguroMascota",
-                "estacionamientoVisita", "mascotas"
+                "observaciones", "fechaHoraSugerida", "fechaSugerida", "ubicacionGps",
+                "seguroMascota", "indicacionesEstacionamiento", "mascotas"
             },
             additionalProperties = false
         };

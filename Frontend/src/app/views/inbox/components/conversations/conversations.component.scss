@@ -1,7 +1,10 @@
 :host {
   display: block;
   height: 100%;
-  overflow-x: hidden;
+  // Sin overflow: el card ocupa el 100% del host, y su box-shadow se dibuja
+  // FUERA del card. Cualquier recorte acá se come la sombra y deja la esquina
+  // redondeada contra el fondo, sin el halo que la suaviza. El card ya recorta
+  // su propio contenido.
 }
 
 .card {

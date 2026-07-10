@@ -17,11 +17,8 @@ body {
 }
 
 .sidebar {
-  background: linear-gradient(
-    180deg,
-    #051F20,
-    #0B2B26
-  ) !important;
+  // Plano, igual que el header y el fondo del buzón (antes: degradado desde #051F20)
+  background: #0B2B26 !important;
 }
 
 .sidebar .nav-link {
@@ -64,6 +61,7 @@ body {
   background: #2B2B2B !important;
 }
 
+
 @media (max-width: 992px) {
   .body {
     padding: 0 !important;
@@ -91,7 +89,9 @@ body {
 .header {
   border-bottom: none !important;
   box-shadow: none !important;
-  background: linear-gradient(90deg, #051F20, #0B2B26) !important;
+  // Plano y no degradado: el degradado arrancaba en #051F20 y hacía que el
+  // header se viera más oscuro que el fondo del buzón y el menú lateral.
+  background: #0B2B26 !important;
 }
 
 .header::after {

@@ -20,17 +20,19 @@
     <!-- FORM NUEVA -->
     <p class="section-label">Nueva respuesta</p>
     <div class="macro-form">
-      <div class="form-row">
+      <div class="form-row form-row--stacked">
         <div class="macro-input">
           <span class="prefix">/</span>
           <input placeholder="comando"
             [value]="newComando()"
             (input)="newComando.set($any($event.target).value)" />
         </div>
-        <input class="form-control" placeholder="Texto de respuesta"
+        <!-- textarea y no input: un <input> no admite saltos de línea y los
+             descarta al pegar, aplastando las respuestas de varios párrafos. -->
+        <textarea class="form-control macro-textarea" placeholder="Texto de respuesta"
+          rows="4"
           [value]="newTexto()"
-          (input)="newTexto.set($any($event.target).value)"
-          (keyup.enter)="crear()" />
+          (input)="newTexto.set($any($event.target).value)"></textarea>
       </div>
       <div class="form-row vets-row">
         <span class="vets-label">Veterinarios que la ven</span>
@@ -98,10 +100,10 @@
                     </div>
                   </td>
                   <td>
-                    <input class="form-control" [value]="editTexto()"
+                    <textarea class="form-control macro-textarea" [value]="editTexto()"
+                      rows="4"
                       (input)="editTexto.set($any($event.target).value)"
-                      (keyup.enter)="guardarEdit(r.id)"
-                      (keyup.escape)="cancelEdit()" />
+                      (keyup.escape)="cancelEdit()"></textarea>
                   </td>
                   <td class="td-actions">
                     <button class="icon-btn icon-btn--success" title="Guardar" (click)="guardarEdit(r.id)">✓</button>

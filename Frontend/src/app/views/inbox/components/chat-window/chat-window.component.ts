@@ -63,7 +63,18 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
       r.comando.toLowerCase().includes(filtro)
     );
   });
-  mostrarSugerencias = computed(() => this.sugerencias().length > 0);
+  // El panel se abre apenas se escribe `/x`, aunque no haya coincidencias:
+  // así se muestra el empty-state en vez de no pasar nada.
+  mostrarSugerencias = computed(() => {
+    const input = this.messageInput();
+    return input.startsWith('/') && input.length >= 2;
+  });
+
+  /** Recorte para la lista de sugerencias: una línea, máximo 90 caracteres. */
+  previewRespuesta(texto: string): string {
+    const unaLinea = texto.replace(/\s+/g, ' ').trim();
+    return unaLinea.length > 90 ? unaLinea.slice(0, 90).trimEnd() + '…' : unaLinea;
+  }
 
   // Las reacciones por API solo están disponibles en WhatsApp
   esWhatsApp = computed(() =>
@@ -162,6 +173,47 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
 
   seleccionarRespuesta(r: RespuestaRapidaDto) {
     this.messageInput.set(r.texto);
+    this.#programarAjusteComposer();
+  }
+
+  // ── Composer (textarea con auto-resize) ──────────────────────────
+
+  @ViewChild('composer')
+  composerRef?: ElementRef<HTMLTextAreaElement>;
+
+  /** Alto máximo del composer antes de que scrollee por dentro (px). */
+  readonly #maxAltoComposer = 140;
+
+  onComposerInput(event: Event) {
+    this.messageInput.set((event.target as HTMLTextAreaElement).value);
+    // Al tipear el textarea ya tiene el valor nuevo: se puede medir en el acto.
+    this.#ajustarAltoComposer();
+  }
+
+  /**
+   * Cuando el texto cambia por código (respuesta rápida, emoji, limpiar al
+   * enviar), el binding `[value]` recién se aplica en el próximo ciclo de
+   * detección de cambios. Medir antes leería el valor VIEJO: por eso el
+   * composer no crecía al elegir una respuesta larga y quedaba grande al enviar.
+   */
+  #programarAjusteComposer() {
+    setTimeout(() => this.#ajustarAltoComposer());
+  }
+
+  /** Enter envía. Shift+Enter inserta un salto de línea. */
+  onComposerEnter(event: Event) {
+    const e = event as KeyboardEvent;
+    if (e.shiftKey) return;
+    e.preventDefault();
+    this.sendMessage();
+  }
+
+  #ajustarAltoComposer() {
+    const el = this.composerRef?.nativeElement;
+    if (!el) return;
+    // Se resetea antes de medir: si no, scrollHeight nunca decrece al borrar texto.
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, this.#maxAltoComposer) + 'px';
   }
 
   // ── Emojis ───────────────────────────────────────────────────────
@@ -173,6 +225,7 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
   agregarEmoji(emoji: string) {
     // No se cierra al elegir (como WhatsApp): se pueden agregar varios
     this.messageInput.update(t => t + emoji);
+    this.#programarAjusteComposer();
   }
 
   // Cierra el panel de emojis al hacer click fuera de él.
@@ -271,6 +324,7 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
           }).subscribe({
             next: () => {
               this.messageInput.set('');
+              this.#programarAjusteComposer();
               this.cancelarImagen();
               this.enviando.set(false);
             },
@@ -299,6 +353,7 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
     }).subscribe({
       next: () => {
         this.messageInput.set('');
+        this.#programarAjusteComposer();
         this.enviando.set(false);
       },
       error: (err) => {
