@@ -556,7 +556,7 @@ $amber-text:    #633806;
 // RESPONSIVE
 // =============================================
 
-@media (max-width: 576px) {
+@media (max-width: 575.98px) {
   .form-grid {
     grid-template-columns: 1fr;
   }
@@ -564,5 +564,135 @@ $amber-text:    #633806;
   .card-header-custom {
     flex-wrap: wrap;
     gap: 10px;
+  }
+
+  // Cabecera del listado + buscador que envuelven
+  .list-header {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .search-wrap,
+  .search-input {
+    width: 100%;
+  }
+
+  // Tamaños táctiles en el formulario
+  .field-input,
+  .btn-create,
+  .btn-cancel,
+  .btn-foto {
+    min-height: 44px;
+  }
+
+  // En móvil scrollea TODO el cuerpo como una sola pieza (antes la lista tenía
+  // un mini-scroll interno diminuto porque el formulario ocupaba casi todo).
+  .card-body-custom {
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  // ===== Tabla → tarjetas =====
+  .table-container {
+    overflow: visible;
+    flex: none;
+    min-height: 0;
+    background: transparent;
+    padding: 0;
+  }
+
+  .user-table thead {
+    display: none;
+  }
+
+  .user-table,
+  .user-table tbody,
+  .user-table tr,
+  .user-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .user-table tr {
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+  }
+
+  // El invertido morado del hover de escritorio no aplica al tocar
+  .user-table tbody tr:hover td {
+    background: transparent;
+    color: var(--cui-body-color);
+  }
+  .user-table tbody tr:hover .mono-text {
+    color: var(--cui-secondary-color, #6c757d);
+  }
+  .user-table tbody tr:hover .action-btn {
+    border-color: var(--cui-border-color, #dee2e6);
+    svg { stroke: var(--cui-secondary-color, #6c757d); }
+  }
+
+  .user-table td {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    text-align: right;
+  }
+  .user-table tr td:last-child {
+    border-bottom: none;
+  }
+
+  // Etiqueta de cada campo, tomada del data-label del <td>
+  .user-table td[data-label]::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #999;
+  }
+
+  // Primera celda (nombre + avatar) como título de la tarjeta
+  .user-table td:first-child {
+    justify-content: flex-start;
+    padding-top: 2px;
+  }
+  .name-cell {
+    gap: 12px;
+  }
+  .name-cell .avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
+  }
+  .name-text {
+    font-size: 15px;
+  }
+
+  // Acciones: fila de botones grandes
+  .td-actions-cell {
+    justify-content: flex-start;
+  }
+  .td-actions-cell .actions-cell {
+    justify-content: flex-start;
+    gap: 10px;
+  }
+  .action-btn {
+    width: 40px;
+    height: 40px;
+    svg { width: 16px; height: 16px; }
+  }
+
+  // Inputs de la fila en edición: ocupan el espacio restante junto a la etiqueta
+  .user-table td .field-input {
+    flex: 1;
+    min-width: 0;
   }
 }

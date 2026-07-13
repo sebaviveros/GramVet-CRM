@@ -144,12 +144,12 @@
                       (input)="editApellido.set($any($event.target).value)" placeholder="Apellido" />
                   </div>
                 </td>
-                <td><span class="mono-text">{{ u.username }}</span></td>
-                <td>
+                <td data-label="Usuario"><span class="mono-text">{{ u.username }}</span></td>
+                <td data-label="Correo">
                   <input class="field-input" [value]="editEmail()"
                     (input)="editEmail.set($any($event.target).value)" placeholder="Correo" />
                 </td>
-                <td>
+                <td data-label="Rol">
                   <select class="field-input field-select"
                     (change)="editRolId.set($any($event.target).value ? +$any($event.target).value : null)">
                     @for (rol of roles(); track rol.id) {
@@ -157,7 +157,7 @@
                     }
                   </select>
                 </td>
-                <td>
+                <td class="td-actions-cell">
                   <div class="actions-cell">
                     <button class="action-btn" title="Guardar" (click)="guardarEdit(u.id)">✓</button>
                     <button class="action-btn" title="Cancelar" (click)="cancelEdit()">✕</button>
@@ -190,10 +190,10 @@
                     <span class="name-text">{{ u.nombre }} {{ u.apellido }}</span>
                   </div>
                 </td>
-                <td><span class="mono-text">{{ u.username }}</span></td>
-                <td><span class="mono-text">{{ u.email }}</span></td>
-                <td><span class="role-pill role-admin">{{ u.rolNombre }}</span></td>
-                <td>
+                <td data-label="Usuario"><span class="mono-text">{{ u.username }}</span></td>
+                <td data-label="Correo"><span class="mono-text">{{ u.email }}</span></td>
+                <td data-label="Rol"><span class="role-pill role-admin">{{ u.rolNombre }}</span></td>
+                <td class="td-actions-cell">
                   <div class="actions-cell">
                     <button class="action-btn" title="Editar" (click)="startEdit(u)">
                       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

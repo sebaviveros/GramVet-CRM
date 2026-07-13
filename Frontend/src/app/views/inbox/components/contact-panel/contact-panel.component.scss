@@ -20,6 +20,28 @@ c-card {
   font-size: 14px;
   cursor: pointer;
   font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* ===== MÓVIL — panel a pantalla completa, botón atrás cómodo ===== */
+@media (max-width: 991.98px) {
+  c-card {
+    border-radius: 0 !important;
+    border: none !important;
+  }
+
+  .back-button {
+    font-size: 16px;
+    padding: 6px 4px;
+    margin: 8px 12px 0;
+  }
 }
 
 .contact-body {

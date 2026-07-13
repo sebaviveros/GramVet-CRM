@@ -9,7 +9,13 @@
     <div class="chat-header-container">
 
       <div class="chat-user">
-        <button class="back-button d-lg-none" (click)="goBackToConversations($event)">←</button>
+        <button class="back-button d-lg-none" (click)="goBackToConversations($event)" aria-label="Volver">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="19" y1="12" x2="5" y2="12"/>
+            <polyline points="12 19 5 12 12 5"/>
+          </svg>
+        </button>
         <div class="avatar-wrap">
           <div class="avatar">{{ state.selectedConversation()?.nombreContacto?.charAt(0) }}</div>
           <span class="channel-badge">
@@ -247,8 +253,13 @@
         (keydown.enter)="onComposerEnter($event)"
         [disabled]="!!imagenSeleccionada()"></textarea>
 
-      <button class="btn btn-primary" (click)="sendMessage()" [disabled]="enviando()">
-        {{ enviando() ? 'Enviando...' : 'Enviar' }}
+      <button class="btn btn-primary btn-send" (click)="sendMessage()" [disabled]="enviando()">
+        <span class="btn-send-label">{{ enviando() ? 'Enviando...' : 'Enviar' }}</span>
+        <svg class="btn-send-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
       </button>
 
     </div>

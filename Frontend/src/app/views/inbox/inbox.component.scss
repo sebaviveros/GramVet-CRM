@@ -66,11 +66,15 @@ app-right-toolbar {
 }
 
 /* ===== MOBILE ===== */
-@media (max-width: 992px) {
+@media (max-width: 991.98px) {
   .inbox-container {
-    padding-bottom: 70px;
-    width: 100vw;
-    margin-left: -12px;
+    // Reserva el alto de la barra inferior fija (56px) + safe-area de iOS.
+    // Necesita !important: el estilo base de .inbox-container tiene
+    // `padding: 0 !important`, que si no lo anularía y el composer quedaría
+    // tapado por la barra fija.
+    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px)) !important;
+    width: 100%;
+    margin-left: 0;
     background: #0B2B26;
   }
 }
@@ -78,16 +82,17 @@ app-right-toolbar {
 .mobile-views {
   position: relative;
   width: 100%;
-  height: 100%;
+  // flex:1 rellena SOLO el área de contenido del inbox-container (por encima del
+  // padding-bottom reservado para la barra). Con height:100% el panel resolvía
+  // contra el alto total y el footer del chat quedaba tapado por la barra fija.
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 
 .mobile-view {
   position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
+  inset: 0;
   transition: transform 0.3s ease;
 }
 

@@ -215,4 +215,19 @@
     min-height: 180px;
     order: -1;
   }
+
+  .login-panel {
+    padding: 36px 24px calc(36px + env(safe-area-inset-bottom, 0px));
+  }
+
+  // Áreas táctiles más cómodas en teléfono
+  .dark-input {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .login-btn {
+    padding-top: 15px !important;
+    padding-bottom: 15px !important;
+  }
 }
