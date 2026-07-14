@@ -869,6 +869,12 @@ export class ContactPanelComponent {
   }
 
   goBackToChat() {
-    this.state.setMobileView('chat');
+    // Teléfono (<768px): vuelve a la vista de chat de una columna.
+    // Tablet (≥768px): el contacto es un overlay sobre el chat, así que se cierra.
+    if (window.innerWidth < 768) {
+      this.state.setMobileView('chat');
+    } else {
+      this.state.closeRightPanel();
+    }
   }
 }

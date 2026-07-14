@@ -436,13 +436,15 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
   }
 
   openContactPanel() {
-    // Mobile: siempre navega a la vista de contacto
-    if (window.innerWidth <= 992) {
+    // Solo teléfono (<768px): navega a la vista de contacto de una columna.
+    // Tablet (≥768px) y escritorio usan el mismo layout de 2 columnas, así que
+    // alternan (pliegan/despliegan) el panel de contacto como en escritorio.
+    if (window.innerWidth < 768) {
       this.state.openRightPanel('contact');
       this.state.setMobileView('contact');
       return;
     }
-    // Desktop: alterna (pliega/despliega) el panel de contacto
+    // Tablet + escritorio: alterna (pliega/despliega) el panel de contacto
     this.state.setRightPanel('contact');
   }
 }

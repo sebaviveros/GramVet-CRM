@@ -202,7 +202,16 @@
   border-radius: 3px;
 }
 
-/* ── Responsivo ── */
+/* ── Tablet: la tarjeta fija de 860px se sale en pantallas medianas.
+     Solo afecta al rango tablet (681–991); escritorio (≥992) y móvil (≤680) intactos. ── */
+@media (min-width: 681px) and (max-width: 991.98px) {
+  .login-wrapper {
+    width: 92%;
+    max-width: 860px;
+  }
+}
+
+/* ── Responsivo (móvil / teléfono) ── */
 @media (max-width: 680px) {
   .login-wrapper {
     flex-direction: column;
@@ -211,12 +220,18 @@
     border-radius: 0;
   }
 
+  // La imagen es vertical con el logo en la franja superior-media: la encuadramos
+  // para que el logo quede centrado y bien visible en la tira superior.
   .image-panel {
-    min-height: 180px;
+    min-height: 210px;
     order: -1;
+    background-size: cover;
+    background-position: center 38%;
   }
 
+  // Panel del formulario en verde, como el fondo del login (antes: negro).
   .login-panel {
+    background-color: #0B2B26;
     padding: 36px 24px calc(36px + env(safe-area-inset-bottom, 0px));
   }
 

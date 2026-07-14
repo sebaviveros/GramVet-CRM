@@ -31,6 +31,35 @@
   flex-direction: column;
 }
 
+/* ===== TABLET (768–991px) — layout de escritorio, con la lista de conversaciones
+   más ancha y el panel de contacto SUPERPUESTO sobre el chat (para que no robe
+   ancho ni se vaya abajo en pantallas medianas). ===== */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .inbox-row {
+    padding: 10px;
+    position: relative;   // ancla del overlay del panel de contacto
+    flex-wrap: nowrap;    // el contacto no debe empujar columnas a una fila nueva
+  }
+
+  // Columna de conversaciones (primera): de 25% a ~34%
+  .inbox-row > .col-3:first-child {
+    flex: 0 0 auto;
+    width: 34%;
+  }
+
+  // Panel de contacto: cajón superpuesto sobre el chat, entra desde la derecha
+  .inbox-row > .contact-panel-anim {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    bottom: 10px;
+    width: 66%;
+    max-width: 480px;
+    z-index: 20;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+  }
+}
+
 app-inbox-sidebar,
 app-conversations,
 app-chat-window,
@@ -65,8 +94,8 @@ app-right-toolbar {
   to   { transform: translateX(20px); opacity: 0; }
 }
 
-/* ===== MOBILE ===== */
-@media (max-width: 991.98px) {
+/* ===== MÓVIL / TELÉFONO (≤767px) ===== */
+@media (max-width: 767.98px) {
   .inbox-container {
     // Reserva el alto de la barra inferior fija (56px) + safe-area de iOS.
     // Necesita !important: el estilo base de .inbox-container tiene

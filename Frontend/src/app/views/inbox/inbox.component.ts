@@ -33,10 +33,19 @@ export class InboxComponent implements OnInit, OnDestroy {
   isClosingPanel = false;
 
   ngOnInit(): void {
-    this.isMobile = window.matchMedia('(max-width: 992px)').matches;
+    // Solo teléfonos usan la vista móvil de una columna; tablets (≥768px) usan el
+    // layout de escritorio (2 columnas), igual que ordenador.
+    this.isMobile = window.matchMedia('(max-width: 767.98px)').matches;
 
     if (this.isMobile) {
       this.state.setMobileView('conversations');
+    }
+
+    // En tablet/teléfono (<992px) el panel de contacto arranca cerrado: en tablet
+    // se superpone sobre el chat, así que abrirlo por defecto taparía el chat.
+    // En escritorio (≥992px) se conserva el comportamiento por defecto.
+    if (window.innerWidth < 992) {
+      this.state.closeRightPanel();
     }
 
     this.cargarConversaciones();

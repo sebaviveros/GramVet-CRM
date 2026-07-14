@@ -1,7 +1,7 @@
 <div class="container-fluid inbox-container">
 
-  <!-- ================= DESKTOP ================= -->
-  <div class="row inbox-row d-none d-lg-flex">
+  <!-- ================= ESCRITORIO + TABLET (≥768px) ================= -->
+  <div class="row inbox-row d-none d-md-flex">
 
     <!-- conversations -->
     <div class="col-3">
@@ -38,8 +38,8 @@
 
   </div>
 
-  <!-- ================= MOBILE ================= -->
-  <div class="mobile-views d-lg-none">
+  <!-- ================= MÓVIL / TELÉFONO (≤767px) ================= -->
+  <div class="mobile-views d-md-none">
 
     <div class="mobile-view conversations"
          [class.active]="state.mobileView() === 'conversations'">

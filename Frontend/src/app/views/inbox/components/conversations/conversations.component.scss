@@ -320,8 +320,8 @@
   max-width: 100%;
 }
 
-/* ===== MÓVIL — filas más cómodas al dedo, estilo WhatsApp ===== */
-@media (max-width: 991.98px) {
+/* ===== MÓVIL / TELÉFONO — filas más cómodas al dedo, estilo WhatsApp ===== */
+@media (max-width: 767.98px) {
   .card {
     // A pantalla completa: sin bordes redondeados ni borde lateral
     border-radius: 0 !important;
