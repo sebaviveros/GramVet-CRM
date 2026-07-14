@@ -146,6 +146,10 @@ $amber-text:    #633806;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;              // ahora el círculo también abre el selector
+  transition: filter 0.15s;
+
+  &:hover { filter: brightness(0.95); }
 
   img {
     width: 100%;

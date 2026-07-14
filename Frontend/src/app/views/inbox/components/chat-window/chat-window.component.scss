@@ -221,9 +221,9 @@ c-card {
   justify-content: center;
   align-self: stretch;
   margin: 6px 0;
-  position: sticky;
-  top: 0;
-  z-index: 3;
+  // Sin `position: sticky`: todos los separadores comparten el mismo contenedor
+  // de scroll, así que al fijarse arriba se apilaban unos sobre otros cuando
+  // había pocos mensajes entre fechas. Inline nunca se superponen.
 }
 
 .date-separator-chip {

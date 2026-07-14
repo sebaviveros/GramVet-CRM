@@ -136,6 +136,19 @@ body {
   color: #fff !important;
 }
 
+/* En celular el pill se muestra igual que en PC, pero acotado para que el
+   nombre largo no empuje el avatar: se recorta con "…". */
+@media (max-width: 576px) {
+  .header .user-identity {
+    margin-right: 8px;
+    padding: 5px 12px;
+    font-size: 12px;
+    max-width: 46vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
 .header .user-identity .user-identity-sep {
   margin: 0 2px;
   color: rgba(255,255,255,0.55) !important;
