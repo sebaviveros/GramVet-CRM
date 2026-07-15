@@ -6,19 +6,21 @@
     <form cForm (ngSubmit)="onSubmit()">
       <div class="field-group">
         <label class="field-label">USUARIO</label>
-        <input
-          [(ngModel)]="username"
-          name="username"
-          autoComplete="username"
-          cFormControl
-          placeholder="Usuario"
-          class="dark-input"
-        />
+        <div class="input-wrap">
+          <input
+            [(ngModel)]="username"
+            name="username"
+            autoComplete="username"
+            cFormControl
+            placeholder="Usuario"
+            class="dark-input"
+          />
+        </div>
       </div>
 
       <div class="field-group">
         <label class="field-label">CONTRASEÑA</label>
-        <div class="password-wrap">
+        <div class="password-wrap input-wrap">
           <input
             [(ngModel)]="password"
             name="password"
@@ -68,7 +70,13 @@
   </div>
 
   <div class="image-panel">
-    
+
     <div class="fern-overlay"></div>
+
+    <!-- Ola de transición imagen → formulario (solo teléfono; oculta en escritorio).
+         El relleno coincide con el inicio del degradado de la sección oscura. -->
+    <svg class="login-wave" viewBox="0 0 340 40" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0,40 L0,18 Q170,-14 340,18 L340,40 Z" fill="#0c2e1a"></path>
+    </svg>
   </div>
 </div>

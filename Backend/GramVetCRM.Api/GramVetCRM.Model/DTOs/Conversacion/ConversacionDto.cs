@@ -17,6 +17,13 @@ namespace GramVetCRM.Model.DTOs.Conversacion
         public int? UsuarioAsignadoId { get; set; }
         public string Canal { get; set; }
         public bool EsNuevo { get; set; }
+
+        // Ventana de atención de WhatsApp (24h desde el último mensaje del cliente).
+        // Es el momento en que EXPIRA = último inbound + 24h. Null si el cliente
+        // nunca escribió. El frontend calcula "abierta = ahora < esta fecha" y solo
+        // la aplica al canal WhatsApp.
+        public DateTime? VentanaExpiraEn { get; set; }
+
         public List<EtiquetaDto> Etiquetas { get; set; } = new();
     }
 

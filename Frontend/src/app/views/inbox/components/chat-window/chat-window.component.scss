@@ -215,6 +215,39 @@ c-card {
   justify-content: center;
 }
 
+/* ===== BANNER DE VENTANA DE 24H (WhatsApp) ===== */
+.ventana-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.35;
+  padding: 8px 12px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+
+  svg { flex-shrink: 0; }
+}
+
+.ventana-banner--cerrada {
+  background: rgba(220, 53, 69, 0.12);
+  border: 1px solid rgba(220, 53, 69, 0.35);
+  color: #ffb3b3;
+}
+
+.ventana-banner--aviso {
+  background: rgba(255, 193, 7, 0.12);
+  border: 1px solid rgba(255, 193, 7, 0.30);
+  color: #ffd479;
+}
+
+/* Botones del composer deshabilitados por ventana cerrada */
+.btn-outline-secondary.disabled,
+.btn-outline-secondary:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
 /* ===== SEPARADOR DE FECHA (Hoy / Ayer / Martes / 2/7/2026) ===== */
 .date-separator {
   display: flex;

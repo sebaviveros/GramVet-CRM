@@ -22,6 +22,7 @@ export interface ConversacionDto {
   usuarioAsignado?: string;
   usuarioAsignadoId?: number | null;
   canal: string;
+  ventanaExpiraEn?: string;   // WhatsApp: último inbound + 24h. Null si el cliente nunca escribió.
   etiquetas?: EtiquetaResumen[];
 }
 
