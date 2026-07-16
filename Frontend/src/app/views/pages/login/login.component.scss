@@ -104,6 +104,20 @@
   }
 }
 
+/* Autocompletado del navegador: por defecto pinta un fondo claro que rompe el
+   diseño oscuro. Se fuerza a mantener el fondo del panel (escritorio: #0d0d0d).
+   El box-shadow inset es el único truco que gana al estilo interno de Chrome. */
+.dark-input:-webkit-autofill,
+.dark-input:-webkit-autofill:hover,
+.dark-input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #0d0d0d inset !important;
+  -webkit-text-fill-color: #ccc !important;
+  caret-color: #ccc;
+  // Retrasa el color de fondo del autofill "para siempre" (Chrome no permite
+  // sobrescribirlo directamente).
+  transition: background-color 9999s ease-in-out 0s;
+}
+
 /* Captcha de Cloudflare Turnstile */
 .captcha-wrap {
   display: flex;
@@ -178,6 +192,11 @@
   }
 }
 
+/* La ola de transición es solo del diseño móvil: en escritorio no se muestra */
+.login-wave {
+  display: none;
+}
+
 /* ── Panel derecho (imagen) ── */
 .image-panel {
   flex: 1;
@@ -202,17 +221,145 @@
   border-radius: 3px;
 }
 
-/* ── Responsivo ── */
+/* ── Tablet: la tarjeta fija de 860px se sale en pantallas medianas.
+     Solo afecta al rango tablet (681–991); escritorio (≥992) y móvil (≤680) intactos. ── */
+@media (min-width: 681px) and (max-width: 991.98px) {
+  .login-wrapper {
+    width: 92%;
+    max-width: 860px;
+  }
+}
+
+/* ── Responsivo (móvil / teléfono) ──
+   Diseño distinto SOLO en teléfono (elegido por el cliente): franja superior con
+   la imagen (logo GramVet entero) y borde inferior curvo, y debajo una sección
+   oscura con inputs tipo caja. Escritorio y tablet quedan intactos. ── */
 @media (max-width: 680px) {
   .login-wrapper {
     flex-direction: column;
     width: 100%;
     min-height: 100vh;
+    min-height: 100dvh;
     border-radius: 0;
+    box-shadow: none;
+    background: #04120a;
   }
 
+  // Franja de imagen: ancho completo + poca altura → cover NO recorta el logo
+  // (el recorte cae en el cielo/pasto, no en el GramVet). La curva la pone la
+  // ola SVG anclada abajo.
   .image-panel {
-    min-height: 180px;
     order: -1;
+    position: relative;
+    z-index: 1;
+    height: 250px;
+    min-height: 0;
+    flex: none;
+    background-position: center 42%;
+  }
+
+  // Ola suave de transición, anclada al borde inferior de la imagen
+  .login-wave {
+    display: block;
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 100%;
+    height: 40px;
+  }
+
+  // Sección del formulario: arranca a ras (la ola cubre el empalme) y ocupa el
+  // resto de la altura. Degradado verde como en escritorio.
+  .login-panel {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 24px 26px calc(30px + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(180deg, #0c2e1a 0%, #081f10 46%, #04120a 100%);
+
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+  }
+
+  .subtitle {
+    color: rgba(255, 255, 255, 0.55);
+    margin-bottom: 28px;
+  }
+
+  .field-group { margin-bottom: 22px; }
+
+  .field-label { color: #6ECFAB; }
+
+  // Inputs tipo caja con punto verde a la izquierda (antes: subrayado).
+  // Fondo SÓLIDO (no translúcido) para que el autofill del navegador matchee
+  // el mismo color y no se vea un recuadro claro.
+  .input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #16281d;
+    border: 1px solid #24402e;
+    border-radius: 13px;
+    padding: 2px 14px;
+    transition: border-color 0.15s;
+
+    &:focus-within { border-color: #6ECFAB; }
+
+    // Punto verde indicador
+    &::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #6ECFAB;
+      flex-shrink: 0;
+    }
+  }
+
+  .dark-input {
+    flex: 1;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 12px 0 !important;
+    color: #fff !important;
+
+    &::placeholder { color: rgba(255, 255, 255, 0.4); }
+    &:focus { border: none !important; }
+  }
+
+  // Autofill: acá el fondo de la caja es #16281d, así que el inset lo iguala
+  .dark-input:-webkit-autofill,
+  .dark-input:-webkit-autofill:hover,
+  .dark-input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #16281d inset !important;
+    -webkit-text-fill-color: #fff !important;
+    caret-color: #fff;
+  }
+
+  // El ojo pasa a ser un ítem más de la caja (ya no absoluto)
+  .password-wrap {
+    .dark-input { padding-right: 0 !important; }
+
+    .password-toggle {
+      position: static;
+      transform: none;
+      color: rgba(255, 255, 255, 0.55);
+
+      &:hover,
+      &:focus-visible { color: #6ECFAB; }
+    }
+  }
+
+  .login-btn {
+    margin-top: 6px;
+    padding: 15px !important;
+    border-radius: 12px !important;
+    font-size: 13px !important;
   }
 }

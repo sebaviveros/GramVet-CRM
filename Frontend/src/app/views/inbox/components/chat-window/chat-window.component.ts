@@ -81,6 +81,50 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
   esWhatsApp = computed(() =>
     (this.state.selectedConversation()?.canal ?? '').toLowerCase().includes('whatsapp'));
 
+  // ── Ventana de atención de WhatsApp (24h) ────────────────────────
+  // WhatsApp solo deja mandar texto libre dentro de las 24h desde el último
+  // mensaje DEL CLIENTE. Fuera de eso, Meta rechaza el mensaje. Acá se detecta
+  // para avisar y bloquear el composer (solo WhatsApp; otros canales sin cambio).
+
+  // Reloj que avanza cada 60s para que la ventana se recalcule al pasar el tiempo.
+  #ahora = signal(Date.now());
+  #relojId = setInterval(() => this.#ahora.set(Date.now()), 60_000);
+
+  /** Momento en que expira la ventana (último inbound conocido + 24h), o null. */
+  ventanaExpiraEn = computed<number | null>(() => {
+    // Del backend: cubre el caso en que el último inbound no está en la página cargada.
+    const hint = this.state.selectedConversation()?.ventanaExpiraEn;
+    let expira = hint ? new Date(hint).getTime() : null;
+
+    // De los mensajes cargados: cubre lo que llega en tiempo real por SignalR.
+    for (const m of this.state.selectedMessages()) {
+      if (m.direccion !== 'inbound') continue;
+      const t = new Date(m.fechaEnvio).getTime() + 24 * 60 * 60 * 1000;
+      if (expira === null || t > expira) expira = t;
+    }
+    return expira;
+  });
+
+  /** La ventana solo aplica a WhatsApp. Cerrada = no se puede mandar texto libre. */
+  ventanaCerrada = computed(() => {
+    if (!this.esWhatsApp()) return false;      // otros canales: sin restricción
+    const expira = this.ventanaExpiraEn();
+    if (expira === null) return true;          // el cliente nunca escribió
+    return this.#ahora() >= expira;
+  });
+
+  /** Aviso discreto cuando la ventana está por cerrarse (menos de 2h). */
+  ventanaPorCerrar = computed(() => {
+    if (this.ventanaCerrada() || !this.esWhatsApp()) return null;
+    const expira = this.ventanaExpiraEn();
+    if (expira === null) return null;
+    const restanteMin = Math.floor((expira - this.#ahora()) / 60000);
+    if (restanteMin > 120) return null;        // solo avisar en las últimas 2h
+    const h = Math.floor(restanteMin / 60);
+    const m = restanteMin % 60;
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  });
+
 
   @ViewChild('scrollContainer')
   scrollContainer?: ElementRef<HTMLDivElement>;
@@ -130,7 +174,9 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
     }
   }
 
-  ngOnDestroy() {}
+  ngOnDestroy() {
+    clearInterval(this.#relojId);
+  }
 
   // ── Scroll infinito ──────────────────────────────────────────────
 
@@ -315,6 +361,10 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
     // Evita envíos duplicados: si ya hay un envío en curso, ignorar
     if (this.enviando()) return;
 
+    // Red de seguridad: fuera de la ventana de 24h WhatsApp rechaza el mensaje.
+    // El composer ya está deshabilitado, pero esto cubre atajos de teclado.
+    if (this.ventanaCerrada()) return;
+
     if (this.imagenSeleccionada()) {
       this.enviando.set(true);
       this.conversacionService.subirImagen(this.imagenSeleccionada()!).subscribe({
@@ -436,13 +486,15 @@ export class ChatWindowComponent implements AfterViewChecked, OnDestroy {
   }
 
   openContactPanel() {
-    // Mobile: siempre navega a la vista de contacto
-    if (window.innerWidth <= 992) {
+    // Solo teléfono (<768px): navega a la vista de contacto de una columna.
+    // Tablet (≥768px) y escritorio usan el mismo layout de 2 columnas, así que
+    // alternan (pliegan/despliegan) el panel de contacto como en escritorio.
+    if (window.innerWidth < 768) {
       this.state.openRightPanel('contact');
       this.state.setMobileView('contact');
       return;
     }
-    // Desktop: alterna (pliega/despliega) el panel de contacto
+    // Tablet + escritorio: alterna (pliega/despliega) el panel de contacto
     this.state.setRightPanel('contact');
   }
 }

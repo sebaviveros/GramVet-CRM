@@ -12,6 +12,21 @@ import { LoaderService } from '../../../../services/loader/loader.service';
 import { colorEtiquetaTexto } from '../../../../shared/color.util';
 import Swal from 'sweetalert2';
 
+// Plantilla que precarga cada anotación nueva de bitácora, para guiar al
+// veterinario sobre qué registrar. Es editable y borrable.
+const PLANTILLA_BITACORA =
+  'Motivo de consulta:\n\n' +
+  'Examen clínico:\n\n' +
+  'Hallazgos relevantes:\n\n' +
+  'Prediagnóstico:\n\n' +
+  'Peso:\n\n' +
+  'Tratamiento administrado:\n\n' +
+  'Tratamiento recetado:\n\n' +
+  'Exámenes solicitados:\n\n' +
+  'Indicaciones al tutor:\n\n' +
+  'Recomendaciones y cuidados:\n\n' +
+  'Observaciones:\n';
+
 @Component({
   selector: 'app-contact-panel',
   standalone: true,
@@ -543,7 +558,7 @@ export class ContactPanelComponent {
       return;
     }
     this.bitacoraAbiertaMascotaId.set(mascotaId);
-    this.nuevaBitacora.set('');
+    this.nuevaBitacora.set(PLANTILLA_BITACORA);   // precarga la guía
     this.nuevasFotos.set([]);
     this.cancelEditBitacora();
     this.cargandoBitacora.set(true);
@@ -582,7 +597,7 @@ export class ContactPanelComponent {
     // La anotación se crea primero: las fotos necesitan su id para colgar de ella.
     this.contactoService.crearBitacora({ mascotaId, contenido }).subscribe({
       next: entrada => {
-        this.nuevaBitacora.set('');
+        this.nuevaBitacora.set(PLANTILLA_BITACORA);   // lista para la próxima
         this.nuevasFotos.set([]);
 
         if (archivos.length === 0) {
@@ -869,6 +884,12 @@ export class ContactPanelComponent {
   }
 
   goBackToChat() {
-    this.state.setMobileView('chat');
+    // Teléfono (<768px): vuelve a la vista de chat de una columna.
+    // Tablet (≥768px): el contacto es un overlay sobre el chat, así que se cierra.
+    if (window.innerWidth < 768) {
+      this.state.setMobileView('chat');
+    } else {
+      this.state.closeRightPanel();
+    }
   }
 }

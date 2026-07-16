@@ -99,7 +99,7 @@
                         (keyup.escape)="cancelEdit()" />
                     </div>
                   </td>
-                  <td>
+                  <td data-label="Respuesta">
                     <textarea class="form-control macro-textarea" [value]="editTexto()"
                       rows="4"
                       (input)="editTexto.set($any($event.target).value)"
@@ -130,7 +130,9 @@
               } @else {
                 <tr>
                   <td><span class="macro-tag">/{{ r.comando }}</span></td>
-                  <td class="td-text">{{ r.texto }}</td>
+                  <!-- title: tooltip nativo con el texto completo al pasar el mouse
+                       (la celda se recorta a 2 líneas). -->
+                  <td class="td-text" data-label="Respuesta" [title]="r.texto">{{ r.texto }}</td>
                   <td class="td-actions">
                     <button class="icon-btn" title="Editar" (click)="startEdit(r)">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

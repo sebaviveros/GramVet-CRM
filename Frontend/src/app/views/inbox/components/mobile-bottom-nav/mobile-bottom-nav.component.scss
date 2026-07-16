@@ -1,43 +1,66 @@
+// Barra de navegación inferior — SOLO móvil.
+// Oculta por defecto; se muestra dentro del @media. Así nunca afecta a escritorio/tablet grande.
 .mobile-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 62px;
-  background: #ffffff;
-  border-top: 1px solid rgba(0,0,0,0.08);
   display: none;
-  justify-content: space-around;
-  align-items: center;
-  z-index: 1000;
-  box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
 }
 
-.mobile-nav button {
-  border: none;
-  background: transparent;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  font-size: 11px;
-  color: #6c8a7a;
-  padding: 6px 14px;
-  border-radius: 10px;
-  transition: all 0.15s ease;
-}
-
-.mobile-nav button.active {
-  color: #235347;
-  font-weight: 600;
-}
-
-.mobile-nav button span {
-  font-size: 11px;
-}
-
-@media (max-width: 992px) {
+@media (max-width: 767.98px) {
   .mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+
     display: flex;
+    justify-content: space-around;
+    align-items: stretch;
+
+    // Tema oscuro coherente con el header/sidebar/buzón
+    background: #0B2B26;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 -2px 14px rgba(0, 0, 0, 0.35);
+
+    // Respeta la barra de gestos / notch inferior de iOS
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .mobile-nav-btn {
+    flex: 1;
+    min-height: 56px;
+    border: none;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 8px 4px;
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.55);
+    cursor: pointer;
+    transition: color 0.15s ease;
+
+    svg {
+      width: 23px;
+      height: 23px;
+    }
+
+    span {
+      line-height: 1;
+    }
+
+    &.active {
+      color: #6ECFAB;
+      font-weight: 600;
+    }
+
+    // Chat / Contacto sin conversación seleccionada
+    &.disabled,
+    &:disabled {
+      color: rgba(255, 255, 255, 0.22);
+      cursor: default;
+    }
   }
 }

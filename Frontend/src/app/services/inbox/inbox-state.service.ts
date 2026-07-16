@@ -13,6 +13,7 @@ export interface Conversation {
   usuarioAsignado?: string;
   usuarioAsignadoId?: number | null;
   canal: string;
+  ventanaExpiraEn?: string;   // WhatsApp: último inbound + 24h (ventana de atención)
   etiquetas?: { id: number; nombre: string; color?: string }[];
 }
 

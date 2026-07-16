@@ -30,7 +30,8 @@
 
       <!-- Imagen opcional -->
       <div class="foto-field">
-        <div class="foto-preview">
+        <!-- El círculo y el texto apuntan al mismo input (for/id): ambos abren el selector -->
+        <label class="foto-preview" for="newFotoInput" title="Elegir imagen">
           @if (newFotoPreview()) {
             <img [src]="newFotoPreview()" alt="preview" />
           } @else {
@@ -39,16 +40,16 @@
               <circle cx="12" cy="13" r="4"/>
             </svg>
           }
-        </div>
+        </label>
         <div class="foto-actions">
-          <label class="btn-foto">
+          <label class="btn-foto" for="newFotoInput">
             {{ newFotoPreview() ? 'Cambiar imagen' : 'Elegir imagen (opcional)' }}
-            <input type="file" accept="image/*" hidden (change)="onNewFotoSelected($event)" />
           </label>
           @if (newFotoPreview()) {
             <button type="button" class="btn-foto-quitar" (click)="quitarNewFoto()">Quitar</button>
           }
         </div>
+        <input id="newFotoInput" type="file" accept="image/*" hidden (change)="onNewFotoSelected($event)" />
       </div>
 
       <div class="form-grid">
@@ -144,12 +145,12 @@
                       (input)="editApellido.set($any($event.target).value)" placeholder="Apellido" />
                   </div>
                 </td>
-                <td><span class="mono-text">{{ u.username }}</span></td>
-                <td>
+                <td data-label="Usuario"><span class="mono-text">{{ u.username }}</span></td>
+                <td data-label="Correo">
                   <input class="field-input" [value]="editEmail()"
                     (input)="editEmail.set($any($event.target).value)" placeholder="Correo" />
                 </td>
-                <td>
+                <td data-label="Rol">
                   <select class="field-input field-select"
                     (change)="editRolId.set($any($event.target).value ? +$any($event.target).value : null)">
                     @for (rol of roles(); track rol.id) {
@@ -157,7 +158,7 @@
                     }
                   </select>
                 </td>
-                <td>
+                <td class="td-actions-cell">
                   <div class="actions-cell">
                     <button class="action-btn" title="Guardar" (click)="guardarEdit(u.id)">✓</button>
                     <button class="action-btn" title="Cancelar" (click)="cancelEdit()">✕</button>
@@ -190,10 +191,10 @@
                     <span class="name-text">{{ u.nombre }} {{ u.apellido }}</span>
                   </div>
                 </td>
-                <td><span class="mono-text">{{ u.username }}</span></td>
-                <td><span class="mono-text">{{ u.email }}</span></td>
-                <td><span class="role-pill role-admin">{{ u.rolNombre }}</span></td>
-                <td>
+                <td data-label="Usuario"><span class="mono-text">{{ u.username }}</span></td>
+                <td data-label="Correo"><span class="mono-text">{{ u.email }}</span></td>
+                <td data-label="Rol"><span class="role-pill role-admin">{{ u.rolNombre }}</span></td>
+                <td class="td-actions-cell">
                   <div class="actions-cell">
                     <button class="action-btn" title="Editar" (click)="startEdit(u)">
                       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

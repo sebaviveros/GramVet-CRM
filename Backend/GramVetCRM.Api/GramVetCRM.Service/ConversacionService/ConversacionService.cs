@@ -60,6 +60,13 @@ namespace GramVetCRM.Service
                         dto.Etiquetas = lista;
             }
 
+            // Ventana de 24h: último mensaje entrante por conversación (en lote).
+            var convIds = conversaciones.Select(c => c.Id).ToList();
+            var ultimoEntrante = await _mensajeRepo.GetUltimoEntrantePorConversaciones(convIds);
+            foreach (var dto in dtos)
+                if (ultimoEntrante.TryGetValue(dto.Id, out var fecha))
+                    dto.VentanaExpiraEn = fecha.AddHours(24);
+
             return dtos;
         }
 

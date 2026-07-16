@@ -116,8 +116,8 @@
                         {{ tag.nombre }}
                       </span>
                     </td>
-                    <td class="td-desc">{{ tag.descripcion || '—' }}</td>
-                    <td>
+                    <td class="td-desc" data-label="Descripción">{{ tag.descripcion || '—' }}</td>
+                    <td data-label="Color">
                       <span class="color-badge" [style.background]="tag.color ?? '#235347'"></span>
                     </td>
                     <td class="td-actions">
@@ -142,14 +142,14 @@
                 <!-- FILA EN EDICIÓN -->
                 @if (editandoId() === tag.id) {
                   <tr class="editing-row">
-                    <td>
+                    <td data-label="Nombre">
                       <input class="form-control form-control-sm edit-input"
                              [value]="editNombre()"
                              (input)="editNombre.set($any($event.target).value)"
                              (keyup.enter)="guardarEdicion(tag.id)"
                              (keyup.escape)="cancelarEdicion()" />
                     </td>
-                    <td>
+                    <td data-label="Descripción">
                       <input class="form-control form-control-sm edit-input"
                              placeholder="Descripción"
                              [value]="editDesc()"
@@ -157,7 +157,7 @@
                              (keyup.enter)="guardarEdicion(tag.id)"
                              (keyup.escape)="cancelarEdicion()" />
                     </td>
-                    <td>
+                    <td data-label="Color">
                       <div class="color-picker-wrap">
                         <div class="color-preview color-preview--sm" [style.background]="editColor()">
                           <input type="color" [value]="editColor()"

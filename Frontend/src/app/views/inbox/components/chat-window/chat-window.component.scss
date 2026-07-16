@@ -114,9 +114,21 @@ c-card {
 .back-button {
   border: none;
   background: transparent;
-  font-size: 18px;
   cursor: pointer;
   color: #6ECFAB;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 50%;
+  transition: background 0.15s;
+
+  svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  &:active { background: rgba(110, 207, 171, 0.15); }
 }
 
 .category-badge {
@@ -203,15 +215,48 @@ c-card {
   justify-content: center;
 }
 
+/* ===== BANNER DE VENTANA DE 24H (WhatsApp) ===== */
+.ventana-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.35;
+  padding: 8px 12px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+
+  svg { flex-shrink: 0; }
+}
+
+.ventana-banner--cerrada {
+  background: rgba(220, 53, 69, 0.12);
+  border: 1px solid rgba(220, 53, 69, 0.35);
+  color: #ffb3b3;
+}
+
+.ventana-banner--aviso {
+  background: rgba(255, 193, 7, 0.12);
+  border: 1px solid rgba(255, 193, 7, 0.30);
+  color: #ffd479;
+}
+
+/* Botones del composer deshabilitados por ventana cerrada */
+.btn-outline-secondary.disabled,
+.btn-outline-secondary:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
 /* ===== SEPARADOR DE FECHA (Hoy / Ayer / Martes / 2/7/2026) ===== */
 .date-separator {
   display: flex;
   justify-content: center;
   align-self: stretch;
   margin: 6px 0;
-  position: sticky;
-  top: 0;
-  z-index: 3;
+  // Sin `position: sticky`: todos los separadores comparten el mismo contenedor
+  // de scroll, así que al fijarse arriba se apilaban unos sobre otros cuando
+  // había pocos mensajes entre fechas. Inline nunca se superponen.
 }
 
 .date-separator-chip {
@@ -502,6 +547,9 @@ video {
 
 .btn-primary:hover { opacity: 0.88; }
 
+/* El ícono de enviar solo se usa en móvil; en escritorio va el texto "Enviar". */
+.btn-send-icon { display: none; }
+
 .chat-header.clickable {
   cursor: pointer;
   transition: background 0.15s;
@@ -667,9 +715,64 @@ video {
   }
 }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 992px) {
+/* ===== RESPONSIVE (móvil / teléfono ≤767px) ===== */
+@media (max-width: 767.98px) {
   .message { max-width: 85%; }
+
+  // Pantalla completa: sin bordes redondeados ni borde
+  c-card {
+    border-radius: 0 !important;
+    border: none !important;
+  }
+
+  // Botón atrás con área táctil circular cómoda
+  .back-button {
+    width: 38px;
+    height: 38px;
+    margin-right: 2px;
+    margin-left: -6px;
+
+    svg { width: 24px; height: 24px; }
+  }
+
+  /* ---- Composer compacto ---- */
+  c-card-footer {
+    padding: 10px 12px !important;
+    // Que el teclado del teléfono no tape el input
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  // Botones de acción (adjuntar / ubicación / emojis): compactos pero táctiles
+  .btn-outline-secondary {
+    padding: 8px !important;
+    min-width: 40px;
+    min-height: 40px;
+    justify-content: center;
+  }
+
+  // Botón enviar → círculo con ícono (estilo WhatsApp)
+  .btn-send {
+    min-width: 44px;
+    width: 44px;
+    height: 44px;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    .btn-send-label { display: none; }
+    .btn-send-icon {
+      display: block;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .composer-input {
+    font-size: 15px; // ≥16px evita el zoom automático de iOS; 15 es buen equilibrio
+  }
 }
 
 @media (max-width: 768px) {
