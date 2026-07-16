@@ -447,7 +447,7 @@
           @if (bitacoraAbiertaMascotaId() === m.id) {
             <div class="bitacora-panel">
               <div class="bitacora-add">
-                <textarea class="bitacora-textarea" rows="3"
+                <textarea class="bitacora-textarea" rows="14"
                   placeholder="Escribir una anotación (atención, tip, observación)..."
                   [value]="nuevaBitacora()" (input)="nuevaBitacora.set($any($event.target).value)"></textarea>
 
