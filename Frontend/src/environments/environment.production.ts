@@ -1,8 +1,7 @@
 // Configuración de PRODUCCIÓN. Reemplaza a environment.ts en el build
 // de producción (fileReplacements en angular.json).
-// TODO: apuntar backendUrl al dominio real cuando exista el hosting.
 
-const backendUrl = 'https://localhost:7101';
+const backendUrl = 'https://api.gramvet.cl';
 
 export const environment = {
   production: true,

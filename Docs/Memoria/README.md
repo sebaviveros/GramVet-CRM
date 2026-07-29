@@ -28,4 +28,4 @@ las dos. Ante una contradicción, gana el código.
 ## Pendientes
 
 El TODO vivo es [../TODO_2026-07-09.md](../TODO_2026-07-09.md). El traspaso más
-completo es [../TRASPASO_2026-07-09.md](../TRASPASO_2026-07-09.md).
+completo es [../TODO_2026-07-09.md](../TODO_2026-07-09.md).

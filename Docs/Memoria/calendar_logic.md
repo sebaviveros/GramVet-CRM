@@ -7,7 +7,7 @@ metadata:
   originSessionId: e8228c74-aed6-4e22-be35-f7d2ebf5651d
 ---
 
-Lógica del Google Calendar "gramvet" (el **calendario madre**) para agendar citas — **confirmada por el cliente (Gonzalo) el 2026-06-29**. Es la base de la Fase 2 de la automatización IA. Ver también [[project-context]] y `Docs/TRASPASO_2026-06-28.md`.
+Lógica del Google Calendar "gramvet" (el **calendario madre**) para agendar citas — **confirmada por el cliente (Gonzalo) el 2026-06-29**. Es la base de la Fase 2 de la automatización IA. Ver también [[project-context]] y `Docs/TODO_2026-07-09.md`.
 
 **Idea central:** la **hora real** de la cita va en el **TÍTULO**; el evento se **posiciona** en un bloque horario CODIFICADO según el móvil. Así separan visualmente Móvil 1 (franja AM) de Móvil 2 (franja PM) en el mismo calendario.
 

@@ -5,9 +5,44 @@ metadata:
   node_type: memory
   type: project
   originSessionId: cc531dcf-7d56-497f-bed8-d0db644bf307
+  modified: 2026-07-27T01:00:17.987Z
 ---
 
 CRM veterinario tipo respond.io (~60-70% completado) para una clínica veterinaria cliente.
+
+## 🔴🔴 PUNTO EXACTO AL 2026-07-26 — MONTANDO EL VPS DE PRODUCCIÓN (leer esto primero)
+El desarrollo de refinamiento está CERRADO. Ahora se está **montando el servidor de producción desde cero**, y de ahí siguen los pendientes que requerían el sitio en prod (App Review de Meta, plantillas WhatsApp H2, etc.).
+
+**VPS YA CONTRATADO Y ACTIVO — V2Networks.cl (Cloud-3):**
+- Windows Server 2025, 4 vCPU, 12GB RAM, 100GB NVMe, IP dedicada, datacenter Chile. SLA 99.982%.
+- **Modalidad MENSUAL** ($29.900+IVA = $35.581/mes) para probar; Sebastian confirmó con Diego (contacto V2) que puede pasar al ANUAL después ($251.160+IVA, 30% off). ✅ Windows CONFIRMADO incluido también en mensual.
+- Respaldos INCLUIDOS son SEMANALES (no diarios) → el respaldo diario de la BD se hace aparte con tarea programada (F1). No hace falta el add-on de $5.990.
+- Acceso: RDP a la IP con usuario `Administrador` (o `Administrator`/`.\Administrador` si falla). **Sebastian YA ENTRÓ por RDP.** Recomendado cambiar la pass del Administrador (Ctrl+Alt+Fin dentro del RDP).
+- Datos facturación: Gramvet SPA. Admin: Sebastian.
+
+**ESTADO EXACTO DEL MONTAJE: entró al VPS y NO instaló NADA todavía.** Windows viene pelado (IIS no está — por eso la búsqueda no lo encuentra; es normal). El próximo paso es instalar IIS.
+
+**Camino a producción (dar de a UN paso, esperar confirmación de Sebastian entre cada uno):**
+1. ⬜ Instalar **IIS** (Administrador del servidor → Agregar roles → "Servidor web (IIS)").
+2. ⬜ Instalar el **.NET 8 Hosting Bundle** (para que IIS corra la API).
+3. ⬜ Instalar **SQL Server Express** en el mismo VPS.
+4. ⬜ Crear la base: correr `Database/Scripts/01`–`16` + `Datos/01_insert_into_Canal.sql` + `Datos/02_insert_into_Usuario.sql` → cambiar pass admin. (Sebastian corre los scripts él mismo.)
+5. ⬜ Publicar la **API** (IIS) y el **Angular** (`ng build --configuration production`, sitio estático en IIS).
+6. ⬜ Config de prod: `appsettings.json` (connection string local, key Anthropic, `CalendarId` REAL, subir JSON del SA de Google); **CORS en `Program.cs`** (hoy solo `http://localhost:4200` → agregar dominio real); `environment.production.ts` → dominio real; **Turnstile: agregar el dominio real a los hostnames** del widget.
+7. ⬜ **Dominio: subdominio `crm.gramvet.cl`** (gratis, no se compra nada). Crearlo en **cPanel de gramvet.cl → Zone Editor → botón "+ A Record"** (nombre `crm`, valor = IP del VPS `216.185.51.116`... CONFIRMAR IP real con Sebastian). NO usar "Subdominios". NO tocar registros existentes de la web WordPress. El cliente tiene acceso al cPanel.
+8. ⬜ HTTPS: **Let's Encrypt gratis con win-acme** en IIS (NO comprar certificado).
+9. ⬜ `noindex` (robots.txt + `X-Robots-Tag` en IIS) para que el CRM no salga en Google. Opcional: Cloudflare Access (5 correos).
+10. ⬜ Reconfigurar webhooks de Meta a `https://crm.gramvet.cl/api/WhatsApp/webhook` y `/api/Meta/webhook` (fijos, adiós ngrok).
+11. ⬜ Respaldo diario de la BD (tarea programada Windows + `sqlcmd BACKUP DATABASE`).
+12. ⬜ Rotar la API key de Anthropic.
+Después: **App Review + Go Live de Meta** → destraba Instagram y las plantillas WhatsApp (H2).
+
+**Gotchas del montaje:** el VPS es Windows en español (usuario puede ser `Administrador` o `Administrator`). Al conectar por RDP el aviso de certificado es normal (dar "Sí"). SQL Server NO viene instalado (es aparte). IIS necesita el Hosting Bundle para .NET, no solo el rol.
+
+**Idea de negocio (a futuro, NO ahora):** el cliente (amigo de Sebastian) quiere hacer negocios. El CRM podría venderse a otras veterinarias (SaaS multi-tenant) — pero eso es un salto grande de arquitectura (aislar data por clínica, suscripciones). Se puede montar OTRA app en el mismo VPS sin problema (varios sitios en IIS + subdominios), mientras sean chicas. Conversación aparte.
+
+---
+
 
 **Restricción crítica: nunca interrumpir el WhatsApp Business real del cliente. Pruebas siempre con número de prueba (+56 9 2172 4181), nunca tocar configuración productiva.**
 
@@ -128,12 +163,37 @@ Las 4 features que requerían BD quedaron implementadas end-to-end (backend C# +
 ### Quick wins frontend completados (sesión 2026-06-23 parte 1)
 Filtro por estado removido del buzón; "Filtros:" en el header; rótulos en contact-panel; ícono de adjuntos SVG; modal confirmación al asignar/desasignar vet; indicador de vet asignado (badge inferior derecha del chat).
 
-## ⏩ PUNTO ACTUAL (2026-07-09) — Feature IA COMPLETA + tanda visual — ver `Docs/TRASPASO_2026-07-09.md`
-**Traspaso más reciente y completo: `Docs/TRASPASO_2026-07-09.md`** (leerlo primero; lo de abajo es historial).
+## ⏩⏩ PUNTO ACTUAL (2026-07-16) — Refinamiento CERRADO, entrando a PRODUCCIÓN
+**Leer primero:** `Docs/TODO_2026-07-09.md` (pendientes vivos, con grupo H y camino a prod). Lo de abajo (2026-07-09) es historial.
+
+**Estado:** el desarrollo de refinamiento está terminado. La **versión móvil/tablet la hizo Vicente Fernandez** (su única tarea, ver [[mobile-vicente]]). Se está pasando a producción.
+
+**Hecho desde el 2026-07-09 (todo commiteado salvo el último commit pendiente):**
+- **Ventana de atención de WhatsApp 24h (H1) — HECHO.** Backend: `ConversacionDto.VentanaExpiraEn` = último inbound + 24h (batch en `GetAll`, `IMensajeRepository.GetUltimoEntrantePorConversaciones`). Frontend `chat-window`: computed `ventanaCerrada` (solo WhatsApp), si está cerrada bloquea el composer + banner rojo; aviso amarillo en las últimas 2h; reloj interno cada 60s. **NO es bug de WhatsApp** — Sebastian lo confirmó probando (mensaje no sale tras 24h sin respuesta del cliente).
+- **Login móvil rediseñado** (solo teléfono, escritorio intacto): franja de imagen arriba con el logo GramVet entero + **ola SVG** (`.login-wave`, oculta en escritorio) de transición, sección oscura con degradado verde e inputs tipo caja con punto verde. Autofill de Chrome forzado a fondo oscuro (`-webkit-box-shadow inset`). El glassmorphism a pantalla completa se PROBÓ y DESCARTÓ.
+- **Limpieza de páginas demo del template CoreUI**: se borraron 128 archivos (base, buttons, charts, forms, icons demo, notifications, theme, register, showcase de widgets). **Dashboard CONSERVADO oculto** (por pedido de Sebastian, uso futuro); `widgets-brand`/`widgets-dropdown` se quedan porque el dashboard los importa. Rutas demo quitadas de `app.routes.ts`.
+- **Plantilla clínica en bitácora**: al crear una anotación se precarga `PLANTILLA_BITACORA` (motivo consulta, examen clínico, hallazgos, prediagnóstico, peso, tratamientos, exámenes, indicaciones, recomendaciones, observaciones). Editable/borrable.
+
+**Commit PENDIENTE (Sebastian pushea, NO subir `appsettings.json`):** `SVN: plantilla clínica en bitácora y limpieza de páginas de ejemplo del template`.
+
+**⏭️ DECISIÓN DE PRODUCCIÓN (2026-07-16, actualizada):** Opción A = **VPS Windows con IIS + SQL Server Express** (todo en una máquina).
+- **Proveedor elegido (provisional): V2Networks.cl** (chileno, datacenter Chile, ~10 años, Trustpilot ok). Plan **Cloud-3: 4 vCPU / 12GB RAM / 100GB NVMe, Windows Server 2025 INCLUIDO a $0 → $29.900+IVA/mes ($35.581 con IVA)**. Anual con 30% off (~$251.160). Backup diario opcional $5.990/mes (cubre en parte F1). Sebastian pidió **cotización formal, esperando**. Plan: arrancar MENSUAL 1-2 meses para probar, después pasar a anual. Confirmar precio de renovación por escrito y acceso RDP.
+- **Por qué V2 y no HostingPlus:** HostingPlus cobra la licencia de Windows APARTE (~$41.900/mes) → quedaba en ~$128.000/mes. V2 incluye Windows a $0 → mucho más barato, más RAM, factura en pesos. Descartados: HostingPlus/PowerHost/HN.cl (Windows caro), Lightsail/Vultr/Azure (factura USD exterior).
+- ⚠️ El SSL NO se compra (usar Let's Encrypt/win-acme gratis). Antivirus opcional (Windows Defender basta).
+- **DOMINIO: RESUELTO — no se compra nada.** El cliente ya tiene `gramvet.cl` (registrado en NIC, hosting WordPress vía agencia amigopyme.cl, nameservers `recorridos3d.cl`). Se usa un **subdominio gratis** `crm.gramvet.cl`. Se crea desde **cPanel de gramvet.cl → Zone Editor → botón "+ A Record"** (nombre `crm`, IP del VPS). **NO usar la herramienta "Subdominios"** (esa apunta al mismo hosting WP). El cliente tiene acceso al cPanel. Falta solo la IP del VPS. NO tocar los registros existentes de la web.
+- **Seguridad del CRM:** login + captcha Turnstile (ya) + `noindex` (pendiente) + Cloudflare Access opcional (5 correos). El subdominio es igual de seguro que un dominio propio (el CRM va en su propio servidor, sesión = JWT en localStorage por origen, no cookie compartida). Un nombre "secreto" no aporta seguridad real (los certs se publican en Certificate Transparency).
+- **La titularidad de VPS/dominio/cuentas debería ir a nombre del cliente/veterinaria.**
+
+**Camino a producción pendiente (en `Docs/TODO_2026-07-09.md`):** comprar dominio → montar VPS (IIS + .NET 8 Hosting Bundle + SQL Express) → correr scripts `01`–`16` + `Datos/` + cambiar pass admin → publicar API y Angular (`ng build --configuration production`) → config prod (connection string, key Anthropic, `CalendarId` real, JSON del SA de Google, **CORS: agregar dominio real** — hoy solo `localhost:4200`, `environment.production.ts` al dominio real, **dominio real en hostnames de Turnstile**) → reconfigurar webhooks Meta a la URL fija → **App Review + Go Live de Meta** → respaldo diario (F1). Y las plantillas de WhatsApp (H2) siguen bloqueadas por el App Review + decisión respond.io.
+
+---
+
+## ⏩ PUNTO ACTUAL (2026-07-09) — Feature IA COMPLETA + tanda visual — ver `Docs/TODO_2026-07-09.md`
+**Traspaso más reciente y completo: `Docs/TODO_2026-07-09.md`** (leerlo primero; lo de abajo es historial).
 
 **Estado 2026-07-09:** La feature "Agendar cita (IA)" (Fase 1 + Fase 2) está **terminada y funcionando con datos reales**: Anthropic (`claude-haiku-4-5`) y Google Calendar CONFIGURADOS y andando. Google apunta al **calendario de PRUEBA** `gramvetmovil3@gmail.com` (Service Account `gramvet-agenda@gramvet-crm-calendar-test.iam.gserviceaccount.com`, JSON key en `Backend/GramVetCRM.Api/gramvet-crm-calendar-test-b49a9cfabeab.json`, ya gitignored). Falta pasarlo al calendario real cuando terminen las pruebas (cambiar `CalendarId` + compartir con el SA). ⚠️ La API key de Anthropic se expuso en el chat → recomendado rotarla.
 - **Además de Fase 1/2 IA:** dedup de mascotas, título/descripción en vivo (computed), "Pacientes" auto desde la lista de mascotas, badges "se creará"/"ya registrada" + aviso de nombre parecido (Levenshtein), autocompletado de campos VACÍOS del perfil del cliente al confirmar (con badge "se guardará en el perfil").
-> **Leer primero:** `Docs/TODO_2026-07-09.md` (pendientes vivos) y `Docs/TRASPASO_2026-07-09.md` (contexto).
+> **Leer primero:** `Docs/TODO_2026-07-09.md` (pendientes vivos) y `Docs/TODO_2026-07-09.md` (contexto).
 
 ## ⏩ Sesión 2026-07-09 parte 3 — TODO grande ejecutado (ver `Docs/TODO_2026-07-09.md`)
 Tras probar con una conversación real, Sebastian levantó ~24 pendientes. Se cerraron 21. **El TODO vivo es `Docs/TODO_2026-07-09.md`** (tiene causa raíz de cada bug y las decisiones cerradas).
@@ -153,13 +213,13 @@ Tras probar con una conversación real, Sebastian levantó ~24 pendientes. Se ce
 
 ---
 
-**Sesión 2026-07-09 parte 2 (ya commiteada):** rediseño gris `#2B2B2B` + verde acento en los 3 paneles del buzón; separadores de fecha Hoy/Ayer/día/fecha en el chat; foto del vet en el chip de asignado; burbuja morada nombre/rol en el header; **captcha Cloudflare Turnstile en el login** (site key `<TURNSTILE_SITE_KEY — ver environment.ts>`, secret en appsettings, modo Managed, hostname `localhost`); **environments centralizados** en `src/environments/` (ya no hay URLs hardcodeadas); **sesión persistente para vets en celular**: token a `localStorage`, `exp` validado en el guard, `unauthorized.interceptor.ts` (401 → logout), `ExpireMinutes` 480→600. Deuda: refresh token. Detalle en `Docs/TRASPASO_2026-07-09.md` sección 2.J.
+**Sesión 2026-07-09 parte 2 (ya commiteada):** rediseño gris `#2B2B2B` + verde acento en los 3 paneles del buzón; separadores de fecha Hoy/Ayer/día/fecha en el chat; foto del vet en el chip de asignado; burbuja morada nombre/rol en el header; **captcha Cloudflare Turnstile en el login** (site key `<TURNSTILE_SITE_KEY — ver environment.ts>`, secret en appsettings, modo Managed, hostname `localhost`); **environments centralizados** en `src/environments/` (ya no hay URLs hardcodeadas); **sesión persistente para vets en celular**: token a `localStorage`, `exp` validado en el guard, `unauthorized.interceptor.ts` (401 → logout), `ExpireMinutes` 480→600. Deuda: refresh token. Detalle en `Docs/TODO_2026-07-09.md` sección 2.J.
 
 - **Tanda visual (ya pusheada en `13435d8`):** fotos de usuarios (opcional al crear + editable en la lista, endpoint `POST /api/Usuario/{id}/foto`); scroll en listas de gestión; hover de filas morado sólido `#55456F` + texto blanco (Usuarios/Tags/Macros); colores del chat (burbuja mía `#608439`, del contacto `#EAEAEA`, fondo `#2B2B2B`); menú lateral activo morado `#55456F`; se quitó la columna de filtros del buzón (`app-inbox-sidebar`, NO el ítem del menú); empty-state del chat con wallpaper `assets/images/vet_chat_wallpaper_wide.png` + "Seleccione una conversación" (oculta header y composer sin conversación). Último commit pusheado: `cd2f1dd`.
 
 ---
 ### Historial (2026-06-29)
-Documento de traspaso previo en `Docs/TRASPASO_2026-06-28.md`. **Fase 1 de la automatización IA implementada (2026-06-29):** extracción de cita con Claude + panel inline editable.
+Documento de traspaso previo en `Docs/TODO_2026-07-09.md`. **Fase 1 de la automatización IA implementada (2026-06-29):** extracción de cita con Claude + panel inline editable.
 
 **Lo construido (Fase 1):**
 - DTO `CitaExtraidaDto` (`GramVetCRM.Model/DTOs/Cita/`).

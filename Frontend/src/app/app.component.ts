@@ -15,7 +15,7 @@ import { LoaderComponent } from './shared/loader/loader.component';
     imports: [RouterOutlet, LoaderComponent]
 })
 export class AppComponent implements OnInit {
-  title = 'CoreUI Angular Admin Template';
+  title = 'GramVet CRM';
 
   readonly #destroyRef: DestroyRef = inject(DestroyRef);
   readonly #activatedRoute: ActivatedRoute = inject(ActivatedRoute);
